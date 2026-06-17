@@ -1,0 +1,641 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-soft: #f4f8fc;
+  --surface-blue: #e8f2fb;
+  --foreground: #10233f;
+  --heading: #061b38;
+  --muted: #536b87;
+  --muted-strong: #335372;
+  --border: #c9dcf1;
+  --border-strong: #8fb4dc;
+  --accent: #10558c;
+  --accent-strong: #0c416d;
+  --accent-soft: #e7f1fb;
+  --accent-wash: #f2f7fc;
+  --signal: #f59e0b;
+  --navy-panel: #071f3a;
+  --navy-panel-soft: #0a3158;
+  --navy-panel-light: #0d416d;
+  --navy-panel-light-border: rgba(147, 197, 253, 0.36);
+  --section-tint: #eef5fb;
+  --shadow-blue: rgba(7, 34, 70, 0.14);
+  --shadow-deep: rgba(3, 16, 38, 0.28);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+.hero-section,
+.feature-section {
+  background: var(--surface);
+}
+
+.app-nav {
+  border-bottom: 1px solid rgba(201, 220, 241, 0.74);
+  padding-bottom: 1rem;
+}
+
+.brand-link {
+  align-items: center;
+  color: var(--heading);
+  display: inline-flex;
+}
+
+.architecture-section {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(13, 65, 109, 0.88), rgba(7, 31, 58, 0.98)),
+    var(--navy-panel);
+}
+
+.button {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  font-size: 0.95rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button-primary {
+  background: linear-gradient(180deg, #105c96, var(--accent-strong));
+  box-shadow: 0 16px 34px rgba(16, 85, 140, 0.24);
+  color: white;
+}
+
+.button-primary:hover {
+  background: linear-gradient(180deg, #1268a8, #0b3a61);
+  box-shadow: 0 20px 42px rgba(16, 85, 140, 0.32);
+}
+
+.button-secondary {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border);
+  color: var(--accent-strong);
+}
+
+.button-secondary:hover {
+  background: var(--accent-wash);
+  border-color: var(--border-strong);
+  color: #082f7a;
+}
+
+.social-links {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.75rem;
+}
+
+.social-link {
+  align-items: center;
+  background:
+    linear-gradient(180deg, rgba(13, 54, 117, 0.96), rgba(6, 22, 45, 0.98)),
+    var(--navy-panel);
+  border: 1px solid rgba(147, 197, 253, 0.34);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(3, 16, 38, 0.18);
+  color: #f8fbff;
+  display: inline-flex;
+  height: 2.75rem;
+  justify-content: center;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+  width: 2.75rem;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+  border-color: rgba(125, 211, 252, 0.78);
+  color: #93c5fd;
+  box-shadow: 0 16px 36px rgba(3, 16, 38, 0.26);
+  transform: translateY(-1px);
+}
+
+.social-link:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.social-link svg {
+  fill: none;
+  height: 1.25rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 1.25rem;
+}
+
+.status-panel {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(20, 79, 164, 0.88), rgba(6, 22, 45, 0.98)),
+    var(--navy-panel);
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  border-radius: 8px;
+  box-shadow: 0 28px 78px var(--shadow-deep);
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem;
+}
+
+.status-panel > div {
+  border-bottom: 1px solid rgba(147, 197, 253, 0.18);
+  padding-bottom: 0.85rem;
+}
+
+.status-panel > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.panel-label {
+  color: #93c5fd;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.panel-value {
+  color: #f8fbff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.section-heading {
+  max-width: 46rem;
+}
+
+.section-heading h2 {
+  color: var(--heading);
+  font-size: 2rem;
+  font-weight: 780;
+  line-height: 1.15;
+}
+
+.section-heading p {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.75;
+  margin-top: 0.75rem;
+}
+
+.workflow-number {
+  align-items: center;
+  background: linear-gradient(180deg, #ffffff, var(--accent-soft));
+  border: 1px solid rgba(143, 180, 220, 0.48);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 800;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.workflow-arrow {
+  color: var(--signal);
+  font-size: 1.25rem;
+}
+
+.agent-architecture-layout {
+  display: block;
+  margin-top: 2rem;
+}
+
+.flow-chart {
+  align-items: center;
+  display: grid;
+  gap: 0.875rem;
+  grid-template-columns: minmax(132px, 1fr) auto minmax(132px, 1fr) auto minmax(180px, 1.2fr) auto minmax(132px, 1fr) auto minmax(132px, 1fr);
+  min-height: 35rem;
+  position: relative;
+}
+
+.flow-node {
+  align-items: flex-start;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.96)),
+    var(--surface);
+  border: 1px solid rgba(201, 220, 241, 0.92);
+  border-radius: 8px;
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  height: 7.5rem;
+  justify-content: center;
+  outline: none;
+  padding: 1rem;
+  position: relative;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.flow-node:hover,
+.flow-node:focus-visible {
+  border-color: rgba(21, 94, 239, 0.5);
+  box-shadow: 0 18px 46px var(--shadow-blue);
+  transform: translateY(-2px);
+  z-index: 2;
+}
+
+.flow-node-index {
+  align-items: center;
+  background: linear-gradient(180deg, #ffffff, var(--accent-soft));
+  border: 1px solid rgba(21, 94, 239, 0.12);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 850;
+  height: 1.6rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  width: 1.6rem;
+}
+
+.flow-node h3 {
+  font-size: 0.96rem;
+  font-weight: 780;
+  line-height: 1.35;
+}
+
+.flow-node-manager {
+  background:
+    linear-gradient(180deg, rgba(37, 99, 235, 0.12), transparent 70%),
+    var(--surface);
+}
+
+.flow-node-user-request {
+  grid-column: 1;
+}
+
+.flow-node-manager-intake {
+  grid-column: 3;
+}
+
+.spawn-stack {
+  display: grid;
+  gap: 0.75rem;
+  grid-column: 5;
+}
+
+.flow-node-manager-review {
+  grid-column: 7;
+}
+
+.flow-node-final-response {
+  grid-column: 9;
+}
+
+.flow-connector {
+  color: var(--signal);
+  font-size: 1.35rem;
+  font-weight: 850;
+  justify-self: center;
+  white-space: nowrap;
+}
+
+.flow-connector-intake {
+  grid-column: 2;
+}
+
+.flow-connector-spawn {
+  background: rgba(239, 246, 255, 0.9);
+  border: 1px solid rgba(143, 180, 220, 0.6);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  grid-column: 4;
+  padding: 0.35rem 0.6rem;
+  text-transform: uppercase;
+}
+
+.flow-connector-review {
+  grid-column: 6;
+}
+
+.flow-connector-final {
+  grid-column: 8;
+}
+
+.purpose-panel {
+  background:
+    linear-gradient(180deg, rgba(56, 189, 248, 0.16), transparent 72%),
+    var(--navy-panel-light);
+  border: 1px solid var(--navy-panel-light-border);
+  border-radius: 8px;
+  box-shadow: 0 22px 56px rgba(3, 16, 38, 0.32);
+  min-height: 12.5rem;
+  opacity: 0;
+  padding: 1.25rem;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: opacity 160ms ease;
+  width: min(23.5rem, 34%);
+}
+
+.purpose-copy {
+  display: none;
+  margin-top: 0.85rem;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.purpose-copy h3 {
+  color: #f8fbff;
+  font-size: 1.05rem;
+  font-weight: 780;
+  line-height: 1.35;
+}
+
+.purpose-copy p {
+  color: #dbeafe;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-top: 0.75rem;
+}
+
+.agent-architecture-layout:has(.flow-node-manager-intake:hover) .purpose-manager-intake,
+.agent-architecture-layout:has(.flow-node-manager-intake:focus-visible) .purpose-manager-intake,
+.agent-architecture-layout:has(.flow-node-master-data:hover) .purpose-master-data,
+.agent-architecture-layout:has(.flow-node-master-data:focus-visible) .purpose-master-data,
+.agent-architecture-layout:has(.flow-node-defect-elimination:hover) .purpose-defect-elimination,
+.agent-architecture-layout:has(.flow-node-defect-elimination:focus-visible) .purpose-defect-elimination,
+.agent-architecture-layout:has(.flow-node-strategy:hover) .purpose-strategy,
+.agent-architecture-layout:has(.flow-node-strategy:focus-visible) .purpose-strategy,
+.agent-architecture-layout:has(.flow-node-improvement:hover) .purpose-improvement,
+.agent-architecture-layout:has(.flow-node-improvement:focus-visible) .purpose-improvement,
+.agent-architecture-layout:has(.flow-node-manager-review:hover) .purpose-manager-review,
+.agent-architecture-layout:has(.flow-node-manager-review:focus-visible) .purpose-manager-review {
+  display: block;
+  opacity: 1;
+}
+
+.agent-architecture-layout:has(.flow-node-manager-intake:hover) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-manager-intake:focus-visible) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-master-data:hover) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-master-data:focus-visible) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-defect-elimination:hover) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-defect-elimination:focus-visible) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-strategy:hover) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-strategy:focus-visible) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-improvement:hover) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-improvement:focus-visible) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-manager-review:hover) .purpose-panel,
+.agent-architecture-layout:has(.flow-node-manager-review:focus-visible) .purpose-panel {
+  opacity: 1;
+}
+
+.feature-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 2rem;
+}
+
+.feature-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.92)),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  min-height: 13rem;
+  padding: 1.25rem;
+  position: relative;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.feature-card::before {
+  background: linear-gradient(90deg, #155eef, #38bdf8);
+  border-radius: 999px;
+  content: "";
+  height: 0.2rem;
+  left: 1.25rem;
+  position: absolute;
+  right: 1.25rem;
+  top: 1.25rem;
+}
+
+.feature-card:hover {
+  border-color: rgba(21, 94, 239, 0.4);
+  box-shadow: 0 18px 46px var(--shadow-blue);
+  transform: translateY(-2px);
+}
+
+.feature-card-title {
+  color: var(--heading);
+  font-size: 1.05rem;
+  font-weight: 780;
+  margin-top: 1.1rem;
+}
+
+.feature-card-description {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin-top: 0.75rem;
+}
+
+.back-link {
+  color: var(--accent);
+  display: inline-flex;
+  font-weight: 750;
+  margin-bottom: 2rem;
+}
+
+.back-link:hover {
+  color: var(--accent-strong);
+}
+
+.placeholder-page {
+  background:
+    linear-gradient(rgba(21, 94, 239, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 94, 239, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 18rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.96));
+  background-size:
+    40px 40px,
+    40px 40px,
+    auto,
+    auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px var(--shadow-blue);
+  padding: 2rem;
+}
+
+.placeholder-page h1 {
+  color: var(--heading);
+  font-size: 2.75rem;
+  font-weight: 780;
+  line-height: 1.1;
+  margin-top: 0.75rem;
+}
+
+.placeholder-page p {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  margin-top: 1rem;
+}
+
+.placeholder-note {
+  background: linear-gradient(180deg, #ffffff, var(--accent-wash));
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent-strong);
+  font-weight: 700;
+  line-height: 1.6;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.architecture-section .section-heading h2 {
+  color: #f8fbff;
+}
+
+.architecture-section .section-heading p {
+  color: #dbeafe;
+}
+
+.architecture-section .flow-node {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(219, 234, 254, 0.98)),
+    #eaf3ff;
+  border-color: rgba(191, 219, 254, 0.82);
+  box-shadow: 0 16px 42px rgba(3, 16, 38, 0.22);
+}
+
+.architecture-section .flow-node:hover,
+.architecture-section .flow-node:focus-visible {
+  border-color: rgba(125, 211, 252, 0.76);
+  box-shadow: 0 20px 52px rgba(3, 16, 38, 0.34);
+}
+
+.architecture-section .flow-node-manager {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(219, 234, 254, 0.98)),
+    #eaf3ff;
+  border-color: rgba(147, 197, 253, 0.9);
+}
+
+.architecture-section .flow-connector {
+  color: #7dd3fc;
+}
+
+.architecture-section .flow-connector-spawn {
+  background: rgba(239, 246, 255, 0.96);
+  color: var(--accent-strong);
+}
+
+@media (max-width: 640px) {
+  body {
+    background-size:
+      32px 32px,
+      32px 32px,
+      auto,
+      auto;
+  }
+
+  .app-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .flow-chart {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+
+  .flow-node-user-request,
+  .flow-node-manager-intake,
+  .spawn-stack,
+  .flow-node-manager-review,
+  .flow-node-final-response,
+  .flow-connector-intake,
+  .flow-connector-spawn,
+  .flow-connector-review,
+  .flow-connector-final {
+    grid-column: auto;
+  }
+
+  .flow-connector {
+    transform: rotate(90deg);
+  }
+
+  .flow-connector-spawn {
+    justify-self: start;
+    transform: none;
+  }
+
+  .flow-node,
+  .flow-node:hover,
+  .flow-node:focus-visible {
+    height: 6.75rem;
+  }
+
+  .purpose-panel {
+    display: none;
+  }
+
+  .placeholder-page {
+    padding: 1.25rem;
+  }
+
+  .placeholder-page h1 {
+    font-size: 2.15rem;
+  }
+}

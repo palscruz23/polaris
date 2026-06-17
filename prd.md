@@ -20,495 +20,191 @@ Vector DB: pgvector
 
 For local development, include everything in Docker compose.
 
-# Updated Core Product Pillars
+# Agent Architecture
 
-## Pillar 1: Work Order Intelligence
+## Reliability Agent (Orchestrator)
 
-Understand what happened.
+### Purpose
 
-Inputs:
+Act as the Reliability Agent.
 
-* Work Orders
-* Notifications
-* Downtime
-* Costs
-* Failure Codes
+The Reliability Agent receives user requests, determines which specialist agents are required, delegates work, executes shared analysis tools, consolidates findings, and generates the final recommendation.
 
-Outputs:
-
-* Bad Actors
-* Failure Trends
-* Repeat Failures
+The Reliability Agent is the only agent visible to the user.
 
 ---
 
-## Pillar 2: Strategy Intelligence
+# Specialist Agents
 
-Understand what maintenance exists.
+## 1. Master Data Agent
 
-Inputs:
+### Purpose
 
-* PM Tasks
-* Strategies
-* Maintenance Plans
+Prepare, clean, validate, and standardize uploaded data.
 
-Outputs:
+### Tools
 
-* Strategy Optimization
-* PM Effectiveness
-* Maintenance Gaps
+* File type detection
+* Dataset type detection
+* Data preview
+* Column mapping suggestion
+* Column mapping validation
+* Date normalization
+* Numeric field cleaning
+* Duplicate record detection
+* Equipment ID validation
+* Work order linking
+* Strategy linking
+* Failure mode classification
+* Data quality scoring
+* Import validation
+* Mapping template management
 
----
+### Outputs
 
-## Pillar 3: Reliability Knowledge Intelligence
-
-Understand what engineers know.
-
-Inputs:
-
-* FMEA
-* RCA Reports
-* OEM Manuals
-* Maintenance Standards
-* Inspection Standards
-* Lubrication Standards
-* Failure Reports
-* Shutdown Reports
-* Reliability Standards
-
-Outputs:
-
-* Failure Mode Intelligence
-* Best Practices
-* Lessons Learned
-* Recommended Actions
+* Clean work orders
+* Clean equipment master
+* Clean strategy data
+* Data quality report
+* Data readiness score
 
 ---
 
-# New Feature 7: Reliability Knowledge Base
+## 2. Defect Elimination Agent
 
-## Objective
+### Purpose
 
-Provide a searchable engineering knowledge repository that augments reliability analysis.
+Convert reliability issues into structured investigations.
 
-The Knowledge Base allows the AI agents to use engineering documentation in addition to work order history.
+### Tools
 
----
+* Equipment profile builder
+* Known failure modes retrieval
+* WO history summariser
+* Repeat failure detection
+* MTBF calculation
+* MTTR calculation
+* 5 Whys generator
+* RCA template builder
+* Failure mode clustering
+* Similar WO search
+* Previous RCA search
+* Corrective action tracker
+* Defect elimination charter generator
 
-# Supported Documents
+### Outputs
 
-## Reliability Documents
-
-* FMEA
-* RCM Analysis
-* Criticality Assessments
-* Failure Mode Libraries
-
-## Maintenance Documents
-
-* Maintenance Strategies
-* PM Procedures
-* Lubrication Procedures
-* Inspection Procedures
-
-## OEM Documents
-
-* OEM Manuals
-* Technical Bulletins
-* Service Bulletins
-
-## Investigation Documents
-
-* RCA Reports
-* Defect Elimination Reports
-* Incident Investigations
-
-## Site Standards
-
-* Reliability Standards
-* Asset Management Standards
-* Maintenance Standards
+* Defect elimination charter
+* Problem statement
+* Failure hypotheses
+* Required evidence
+* Root cause investigation plan
+* Recommended corrective actions
 
 ---
 
-# User Workflow
-
-Step 1
-
-Upload documents
-
-Step 2
-
-Documents indexed
-
-Step 3
-
-Embeddings created
-
-Step 4
-
-Knowledge linked to equipment
-
-Step 5
-
-Agents use knowledge during analysis
-
----
-
-# Knowledge Base Architecture
-
-## Local Deployment
-
-Storage
-
-```text
-uploads/knowledge/
-```
-
-Database
-
-```text
-Postgres
-```
-
-Vector Extension
-
-```text
-pgvector
-```
-
-Postgres stores both document metadata and vector embeddings. The pgvector
-extension provides similarity search for document chunks.
-
-Docker Compose will be added after the initial frontend and backend scaffolds
-are developed, so the Compose setup can reflect the actual application services.
-
----
-
-# Knowledge Base Data Model
-
-## Documents
-
-* document_id
-* title
-* document_type
-* equipment_type
-* upload_date
-
-## Chunks
-
-* chunk_id
-* document_id
-* content
-* embedding
-
-## Equipment Links
-
-* equipment_id
-* document_id
-
----
-
-# MCP Server Additions
-
-## Tool: search_knowledge_base
-
-Search reliability knowledge.
-
-Inputs
-
-* query
-
-Outputs
-
-* relevant documents
-
----
-
-## Tool: retrieve_failure_modes
-
-Retrieve known failure modes.
-
-Inputs
-
-* equipment type
-
-Outputs
-
-* failure mode library
-
----
-
-## Tool: retrieve_best_practices
-
-Retrieve engineering best practices.
-
-Inputs
-
-* equipment type
-
-Outputs
-
-* recommendations
-
----
-
-## Tool: retrieve_rca_history
-
-Retrieve previous investigations.
-
-Inputs
-
-* equipment
-
-Outputs
-
-* related RCAs
-
----
-
-## Tool: build_failure_mode_library
-
-Generate failure mode catalogue.
-
-Outputs
-
-* failure modes
-* causes
-* controls
-
----
-
-# Agent Enhancements
-
-## Bad Actor Engineer
-
-Previously:
-
-Used only work orders.
-
-Now:
-
-Uses
-
-* Work Orders
-* Knowledge Base
-
-Can explain WHY failures occur.
-
----
-
-## Defect Elimination Engineer
-
-Previously:
-
-Used only failure history.
-
-Now:
-
-Uses
-
-* Failure history
-* RCA reports
-* FMEA
+## 3. Strategy Agent
+
+### Purpose
+
+Review and optimize maintenance strategies.
+
+### Tools
+
+* PM frequency analysis
+* PM effectiveness check
+* Corrective vs preventive ratio
+* Over-maintenance detection
+* Missing PM detection
+* Strategy summariser
+* Spares and cost analysis
+* Condition monitoring recommendations
+* FMEA control review
 * OEM recommendations
+* Strategy gap analysis
+* Failure mode coverage analysis
 
-Generates stronger investigations.
+### Outputs
 
----
-
-## Strategy Engineer
-
-Previously:
-
-Used only PM data.
-
-Now:
-
-Uses
-
-* PM strategy
-* OEM manuals
-* Existing standards
-
-Provides evidence-backed recommendations.
+* Keep PM tasks
+* Modify PM tasks
+* Delete PM tasks
+* Recommended frequencies
+* Missing PM recommendations
+* Condition monitoring opportunities
+* Strategy gaps
 
 ---
 
-## Equipment Intelligence Engineer
+## 4. Reliability Improvement Agent
 
-Previously:
+### Purpose
 
-Equipment profile.
+Convert engineering findings into business actions.
 
-Now:
+### Tools
 
-Equipment digital twin.
+* Agent findings consolidator
+* Opportunity value estimator
+* Cost-benefit analysis
+* Risk scoring
+* Opportunity ranking
+* Action plan builder
+* Opportunity pipeline builder
+* Monthly report generator
+* Reliability roadmap generator
+* Executive summary generator
 
-Includes:
+### Outputs
 
-* Work order history
-* Strategy
-* Known failure modes
-* OEM recommendations
-* Previous investigations
-* Best practices
-
----
-
-## Reliability Improvement Manager
-
-Previously:
-
-Aggregated findings.
-
-Now:
-
-Builds reliability improvement roadmap using:
-
-* Work Orders
-* Strategies
-* Knowledge Base
+* Monthly reliability report
+* Opportunity pipeline
+* Estimated value
+* Prioritized action plan
+* Reliability roadmap
+* Executive summary
 
 ---
 
-# New Feature: Equipment Intelligence 2.0
-
-Equipment Intelligence becomes the flagship feature.
-
-For any asset:
-
-Example:
+# Updated Workflow
 
 ```text
-Cyclone Feed Pump P-101
+User
+  ↓
+Reliability Agent
+  ↓
+Master Data Agent
+  ↓
+Reliability Agent
+  ↓
+Specialist Agents:
+  - Defect Elimination Agent
+  - Strategy Agent
+  - Reliability Improvement Agent
+  ↓
+Reliability Agent
+  ↓
+Final response/report
 ```
 
-The system automatically generates:
-
-## Asset Summary
-
-Description
-
-Criticality
-
-Strategy Summary
-
-## Failure History
-
-Top Failures
-
-Cost
-
-Downtime
-
-MTBF
-
-## Known Failure Modes
-
-From:
-
-* FMEA
-* OEM manuals
-* RCA reports
-
-## Existing Controls
-
-Current PMs
-
-Inspections
-
-Monitoring
-
-## Improvement Opportunities
-
-Defect Elimination
-
-Strategy Changes
-
-Condition Monitoring
-
-## Reliability Score
-
-0–100 score
-
 ---
 
-# Future Feature: Reliability Knowledge Graph
+# Agent Structure
 
-## Objective
+Reliability Agent
+│
+├── Master Data Agent
+│   └── data mapping + validation tools
+│
+├── Defect Elimination Agent
+│   └── RCA + repeat failure tools
+│
+├── Strategy Agent
+│   └── PM review tools
+│
+└── Reliability Improvement Agent
+    └── value/risk/report tools
 
-Connect relationships between:
 
-Equipment
-
-Failure Modes
-
-Strategies
-
-RCA Reports
-
-Work Orders
-
-Recommendations
-
-Example
-
-```text
-Cyclone Feed Pump
-
-→ Mechanical Seal Failure
-
-→ Appears in 35 Work Orders
-
-→ Referenced in 2 RCAs
-
-→ Covered by PM-001
-
-→ OEM Bulletin 2024-05
 ```
-
-This becomes the foundation for future autonomous reliability agents.
-
----
-
-# Updated MVP Scope
-
-Included
-
-* Data Mapping Wizard
-* Work Order Analysis
-* Strategy Analysis
-* Bad Actor Analysis
-* Equipment Intelligence
-* Reliability Knowledge Base
-* Defect Elimination
-* Reliability Recommendations
-* MCP Server
-* Multi-Agent System
-* OpenAI Support
-* DeepSeek Support
-
-Excluded
-
-* SAP Direct Integration
-* Maximo Integration
-* Multi-user Collaboration
-* Stripe Billing
-* Cloud Hosting
-
----
-
-# Product Moat
-
-Most AI maintenance tools only analyze work orders.
-
-Open Reliability Copilot combines:
-
-1. Work Orders
-2. Maintenance Strategies
-3. Engineering Knowledge
-
-This allows the AI to think more like a reliability engineer rather than a reporting tool.
-
-The long-term vision is to create a digital reliability engineering team capable of analyzing plant history, understanding engineering standards, and recommending reliability improvements with supporting evidence.
+```
