@@ -15,13 +15,13 @@ const specialistAgents = [
   },
   {
     id: "strategy",
-    title: "Strategy Agent",
+    title: "Maintenance Strategy Agent",
     purpose:
       "Reviews and optimizes maintenance strategies by checking PM effectiveness, failure mode coverage, OEM guidance, and strategy gaps.",
   },
   {
     id: "improvement",
-    title: "Improvement Agent",
+    title: "Reliability Improvement Agent",
     purpose:
       "Converts engineering findings into business actions, including ranked opportunities, cost-benefit context, action plans, and reliability roadmaps.",
   },
@@ -178,7 +178,7 @@ export default function Home() {
                   Start Workflow
                 </Link>
                 <Link className="button button-secondary" href="/features/reliability-agent-team">
-                  View Agent Team
+                  Chat with Reliability Team
                 </Link>
               </div>
             </div>

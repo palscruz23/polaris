@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AgentWorkflowChat from "./AgentWorkflowChat";
 
 const featurePages: Record<
   string,
@@ -50,6 +51,10 @@ export default async function FeaturePage({
 
   if (!feature) {
     notFound();
+  }
+
+  if (slug === "reliability-agent-team") {
+    return <AgentWorkflowChat />;
   }
 
   return (
