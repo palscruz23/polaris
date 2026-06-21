@@ -118,39 +118,116 @@ Memory updates must:
 
 ## Context Selection Policy
 
-The current user message is persisted before context is assembled. Message
-counts include both user and assistant messages.
+The current user message is persisted before context is assembled. Context is
+selected by tokens rather than a fixed number of messages because message length
+varies significantly.
 
-### Up to 10 messages
-
-Send:
-
-```text
-System prompt
-+ memory.md
-+ complete ordered message history
-```
-
-The complete history includes the current user message.
-
-### More than 10 messages
-
-Send:
+For every request, send:
 
 ```text
 System prompt
-+ memory.md
-+ latest 10 ordered messages
++ bounded memory.md
++ newest complete conversation turns that fit
++ current user message
++ reserved output capacity
++ safety margin
 ```
 
-The latest 10 messages include the current user message. Selection is based on
-`sequence_number`, not timestamps, so ordering remains deterministic.
+### Token Budget
+
+Each provider adapter declares the selected model's context window and provides
+a token-counting implementation.
+
+The initial allocation is:
+
+| Context component | Budget |
+| --- | --- |
+| `memory.md` | Maximum 10% of the context window |
+| Model response | 25% of the context window, capped at 8,000 tokens |
+| Safety margin | 5% of the context window |
+| System prompt | Its actual token count |
+| Conversation history | All remaining available tokens |
+
+The history budget is calculated as:
+
+```python
+history_budget = (
+    context_window
+    - system_prompt_tokens
+    - memory_tokens
+    - reserved_response_tokens
+    - safety_margin_tokens
+    - current_user_message_tokens
+)
+```
+
+The current user message must always fit before historical turns are selected.
+If the system prompt, memory, and current message exceed their combined budget,
+the request must compact memory or reject the oversized input rather than
+silently truncating engineering information.
+
+### Historical Turn Selection
+
+History is grouped into complete user-assistant turns. The context builder:
+
+1. Starts with the newest completed turn.
+2. Works backwards through older turns.
+3. Adds a complete turn only when the whole turn fits.
+4. Stops when the next complete turn would exceed the history budget.
+5. Returns selected turns in chronological order.
+
+This avoids including an assistant response without the user question that
+prompted it. Selection uses `sequence_number`, not timestamps, so ordering is
+deterministic.
+
+When the full conversation fits within the token budget, all message history is
+included alongside `memory.md`.
+
+### Token Counting
+
+Provider adapters expose:
+
+```python
+class ChatProvider:
+    @property
+    def context_window(self) -> int:
+        ...
+
+    def count_tokens(self, messages: list[ChatMessage]) -> int:
+        ...
+```
+
+Use the provider's tokenizer when one is available. When accurate tokenization
+is unavailable, use the conservative estimate:
+
+```python
+estimated_tokens = ceil(len(text) / 3)
+```
+
+The fallback intentionally estimates more tokens than the common four-character
+approximation.
+
+### Memory Compaction
+
+If `memory.md` exceeds 10% of the context window, regenerate a tighter memory
+before assembling provider context. Compaction must preserve:
+
+- Equipment and work-order identifiers
+- Exact measurements and dates
+- Confirmed facts
+- Assumptions
+- Decisions
+- Recommended and completed actions
+- Open questions
+
+The compacted memory is saved as a new revision.
 
 ### Exact historical questions
 
-The initial implementation still follows the 10-message rule. A later retrieval
-feature may add relevant original messages when the user asks for exact older
-details, such as a previous measurement, date, work-order number, or decision.
+The initial implementation uses memory plus the newest complete turns that fit.
+A later retrieval feature may add relevant original messages when the user asks
+for exact older details, such as a previous measurement, date, work-order
+number, or decision.
 
 ## Request Lifecycle
 
@@ -166,12 +243,17 @@ PostgreSQL stores the user message and sequence number
                     v
 Context builder loads memory_markdown and message_count
                     |
-          +---------+----------+
-          |                    |
-    count <= 10          count > 10
-          |                    |
-  load all messages      load latest 10
-          +---------+----------+
+                    v
+Provider adapter supplies context limit and token counter
+                    |
+                    v
+Context builder reserves output and safety budgets
+                    |
+                    v
+Memory is compacted if it exceeds its budget
+                    |
+                    v
+Newest complete turns are selected until the history budget is full
                     |
                     v
 Model-agnostic message list is sent to the configured provider
@@ -264,9 +346,9 @@ The first implementation will include:
 
 - PostgreSQL conversation and message persistence
 - One Markdown memory per conversation stored in `memory_markdown`
-- The fixed 10-message context policy
+- The model-agnostic token-budget context policy
 - Memory revision history
 - A model-agnostic context builder and provider interface
 
-Semantic retrieval, token-budget selection, and automatic long-term fact
-extraction are future enhancements.
+Semantic retrieval and automatic long-term fact extraction are future
+enhancements.
