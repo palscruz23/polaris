@@ -20,6 +20,10 @@ Vector DB: pgvector
 
 For local development, include everything in Docker compose.
 
+Conversation sessions, PostgreSQL message persistence, model-agnostic context
+selection using provider token budgets, and per-session `memory.md` behavior are defined in
+[`conversation-memory.md`](conversation-memory.md).
+
 # Agent Architecture
 
 ## Reliability Agent (Orchestrator)

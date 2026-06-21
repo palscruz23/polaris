@@ -6,15 +6,31 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Message = {
-  id: number;
+  id: string;
   role: "user" | "assistant";
   content: string;
 };
 
-type ChatApiResponse = {
-  message: string;
-  response: string;
+type ApiMessage = Message & {
+  conversation_id: string;
+  sequence_number: number;
+  provider: string | null;
+  model: string | null;
+  created_at: string;
 };
+
+type ConversationApiResponse = {
+  id: string;
+  messages: ApiMessage[];
+};
+
+type MessageExchangeApiResponse = {
+  user_message: ApiMessage;
+  assistant_message: ApiMessage;
+  memory_update_status: string;
+};
+
+const CONVERSATION_STORAGE_KEY = "open-reliability-conversation-id";
 
 const starterPrompts = [
   {
@@ -160,11 +176,58 @@ export default function AgentWorkflowChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [attachment, setAttachment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController>(null);
   const latestMessageId = messages[messages.length - 1]?.id;
+
+  useEffect(() => {
+    const savedConversationId = window.localStorage.getItem(
+      CONVERSATION_STORAGE_KEY,
+    );
+
+    if (!savedConversationId) {
+      return;
+    }
+
+    const requestController = new AbortController();
+
+    async function loadConversation() {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/conversations/${savedConversationId}`,
+          {
+            signal: requestController.signal,
+          },
+        );
+
+        if (!response.ok) {
+          window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+          return;
+        }
+
+        const conversation: ConversationApiResponse = await response.json();
+        setConversationId(conversation.id);
+        setMessages(
+          conversation.messages.map((message) => ({
+            id: message.id,
+            role: message.role,
+            content: message.content,
+          })),
+        );
+      } catch {
+        if (!requestController.signal.aborted) {
+          window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+        }
+      }
+    }
+
+    loadConversation();
+
+    return () => requestController.abort();
+  }, []);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -190,10 +253,12 @@ export default function AgentWorkflowChat() {
       return;
     }
 
+    const temporaryMessageId = `temporary-${messages.length + 1}`;
+
     setMessages((currentMessages) => [
       ...currentMessages,
       {
-        id: Date.now(),
+        id: temporaryMessageId,
         role: "user",
         content: trimmedMessage,
       },
@@ -208,36 +273,50 @@ export default function AgentWorkflowChat() {
     requestControllerRef.current = requestController;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const activeConversationId =
+        conversationId ??
+        (await createConversation(requestController.signal));
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/conversations/${activeConversationId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: trimmedMessage,
+          }),
+          signal: requestController.signal,
         },
-        body: JSON.stringify({
-          message: trimmedMessage,
-        }),
-        signal: requestController.signal,
-      });
+      );
 
       if (!response.ok) {
         throw new Error("The Reliability Agent request failed.");
       }
 
-      const data: ChatApiResponse = await response.json();
+      const data: MessageExchangeApiResponse = await response.json();
 
       setMessages((currentMessages) => [
-        ...currentMessages,
+        ...currentMessages.map((message) =>
+          message.id === temporaryMessageId
+            ? {
+                id: data.user_message.id,
+                role: data.user_message.role,
+                content: data.user_message.content,
+              }
+            : message,
+        ),
         {
-          id: Date.now(),
-          role: "assistant",
-          content: data.response,
+          id: data.assistant_message.id,
+          role: data.assistant_message.role,
+          content: data.assistant_message.content,
         },
       ]);
     } catch {
       setMessages((currentMessages) => [
         ...currentMessages,
         {
-          id: Date.now(),
+          id: `${temporaryMessageId}-error`,
           role: "assistant",
           content: requestController.signal.aborted
             ? "Response stopped."
@@ -248,6 +327,33 @@ export default function AgentWorkflowChat() {
       requestControllerRef.current = null;
       setIsLoading(false);
     }
+  }
+
+  async function createConversation(signal: AbortSignal): Promise<string> {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/conversations`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+        signal,
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("The conversation could not be created.");
+    }
+
+    const conversation: ConversationApiResponse = await response.json();
+    setConversationId(conversation.id);
+    window.localStorage.setItem(
+      CONVERSATION_STORAGE_KEY,
+      conversation.id,
+    );
+
+    return conversation.id;
   }
 
   function stopResponse() {
