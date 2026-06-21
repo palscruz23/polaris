@@ -19,6 +19,36 @@ from app.services.context_builder import ContextBuilder
 from app.services.memory_service import MemoryService
 
 
+TITLE_STOP_WORDS = {
+    "a",
+    "about",
+    "an",
+    "and",
+    "are",
+    "can",
+    "could",
+    "do",
+    "for",
+    "from",
+    "help",
+    "how",
+    "i",
+    "in",
+    "is",
+    "me",
+    "my",
+    "of",
+    "on",
+    "please",
+    "should",
+    "the",
+    "to",
+    "what",
+    "with",
+    "you",
+}
+
+
 class ConversationChatService:
     def __init__(
         self,
@@ -59,6 +89,12 @@ class ConversationChatService:
             role="user",
             content=content,
         )
+
+        if conversation.title is None:
+            self.conversations.set_title(
+                conversation=conversation,
+                title=self._title_from_message(content),
+            )
 
         history_records = self.messages.list_for_conversation(
             conversation.id,
@@ -130,6 +166,35 @@ class ConversationChatService:
         )
 
         return user_message, assistant_message, memory_status
+
+    @staticmethod
+    def _title_from_message(content: str) -> str:
+        cleaned_words = [
+            word.strip(".,!?;:()[]{}\"'")
+            for word in content.split()
+        ]
+        words = [word for word in cleaned_words if word]
+        summary_words = [
+            word
+            for word in words
+            if word.lower() not in TITLE_STOP_WORDS
+        ]
+
+        if len(summary_words) < 3:
+            summary_words = words[:6]
+        else:
+            summary_words = summary_words[:7]
+
+        title = " ".join(
+            word if word.isupper() or any(char.isdigit() for char in word)
+            else word.capitalize()
+            for word in summary_words
+        )
+
+        if len(title) <= 60:
+            return title or "New Reliability Chat"
+
+        return f"{title[:57].rstrip()}..."
 
     def _clear_processing(
         self,

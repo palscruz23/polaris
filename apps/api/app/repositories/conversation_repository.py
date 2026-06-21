@@ -33,6 +33,15 @@ class ConversationRepository:
 
         return self.session.scalar(statement)
 
+    def list_recent(self, limit: int = 30) -> list[Conversation]:
+        statement = (
+            select(Conversation)
+            .order_by(Conversation.updated_at.desc())
+            .limit(limit)
+        )
+
+        return list(self.session.scalars(statement).all())
+
     def get_for_update(
         self,
         conversation_id: uuid.UUID,
@@ -75,6 +84,14 @@ class ConversationRepository:
     ) -> None:
         conversation.is_processing = True
         conversation.processing_started_at = datetime.now(UTC)
+        self.session.commit()
+
+    def set_title(
+        self,
+        conversation: Conversation,
+        title: str,
+    ) -> None:
+        conversation.title = title
         self.session.commit()
 
     def end_processing(

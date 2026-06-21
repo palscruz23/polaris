@@ -31,3 +31,14 @@ class ConversationResponse(BaseModel):
     is_processing: bool
     processing_started_at: datetime | None
     messages: list[MessageResponse] = Field(default_factory=list)
+
+
+class ConversationSummaryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str | None
+    message_count: int
+    created_at: datetime
+    updated_at: datetime
+    is_processing: bool

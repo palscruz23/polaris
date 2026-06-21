@@ -14,7 +14,11 @@ from app.exceptions import (
 from app.providers.base import ChatProvider
 from app.providers.factory import get_chat_provider
 from app.repositories.conversation_repository import ConversationRepository
-from app.schemas.conversation import ConversationCreate, ConversationResponse
+from app.schemas.conversation import (
+    ConversationCreate,
+    ConversationResponse,
+    ConversationSummaryResponse,
+)
 from app.schemas.message import MessageCreate, MessageExchangeResponse
 from app.services.conversation_chat_service import ConversationChatService
 
@@ -46,6 +50,18 @@ def create_conversation(
     repository = ConversationRepository(session)
 
     return repository.create(title=request.title)
+
+
+@router.get(
+    "",
+    response_model=list[ConversationSummaryResponse],
+)
+def list_conversations(
+    session: DatabaseSession,
+) -> list[ConversationSummaryResponse]:
+    repository = ConversationRepository(session)
+
+    return repository.list_recent()
 
 
 @router.get(

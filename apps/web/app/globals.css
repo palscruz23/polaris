@@ -582,6 +582,14 @@ a {
   padding: 5.25rem 0 11.5rem;
 }
 
+.agent-chat-shell.history-is-open .agent-chat-content {
+  padding-left: 22.5rem;
+}
+
+.agent-chat-shell.history-is-open .agent-composer-dock {
+  padding-left: 22.5rem;
+}
+
 .agent-chat-header {
   align-items: center;
   background: linear-gradient(90deg, #071f3a, #0a3158 54%, #071f3a);
@@ -651,6 +659,186 @@ a {
   box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
   height: 0.55rem;
   width: 0.55rem;
+}
+
+.agent-history-tab {
+  align-items: center;
+  background: linear-gradient(180deg, #105c96, #0c416d);
+  border: 1px solid rgba(147, 197, 253, 0.36);
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 18px 42px rgba(3, 16, 38, 0.2);
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 780;
+  gap: 0.45rem;
+  min-height: 3rem;
+  padding: 0.75rem 0.85rem;
+  position: fixed;
+  left: 0;
+  top: 6.25rem;
+  transition:
+    left 180ms ease,
+    transform 180ms ease;
+  writing-mode: vertical-rl;
+  z-index: 25;
+}
+
+.agent-history-tab:hover,
+.agent-history-tab:focus-visible {
+  outline: none;
+  transform: translateX(2px);
+}
+
+.agent-chat-shell.history-is-open .agent-history-tab {
+  left: 20rem;
+}
+
+.agent-history-tab svg {
+  fill: none;
+  height: 1.05rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+  width: 1.05rem;
+}
+
+.agent-history-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 247, 252, 0.98)),
+    var(--surface);
+  border-left: 1px solid rgba(143, 180, 220, 0.72);
+  border-right: 1px solid rgba(143, 180, 220, 0.72);
+  bottom: 0;
+  box-shadow: 22px 0 55px rgba(7, 34, 70, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+  padding: 1.25rem 1rem 1rem;
+  position: fixed;
+  left: 0;
+  top: 5.25rem;
+  transform: translateX(-100%);
+  transition: transform 180ms ease;
+  width: 20rem;
+  z-index: 22;
+}
+
+.agent-chat-shell.history-is-open .agent-history-panel {
+  transform: translateX(0);
+}
+
+.agent-history-panel-header {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.agent-history-panel-header p {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.agent-history-panel-header h2 {
+  color: var(--heading);
+  font-size: 1.35rem;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+  margin-top: 0.2rem;
+}
+
+.agent-history-new-chat {
+  align-items: center;
+  background: var(--heading);
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 730;
+  gap: 0.5rem;
+  justify-content: center;
+  min-height: 2.65rem;
+  padding: 0 0.9rem;
+}
+
+.agent-history-new-chat svg {
+  fill: none;
+  height: 1rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  width: 1rem;
+}
+
+.agent-history-error,
+.agent-history-empty {
+  background: var(--accent-wash);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted-strong);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  padding: 0.85rem;
+}
+
+.agent-history-list {
+  display: grid;
+  gap: 0.45rem;
+  margin-right: -0.25rem;
+  overflow-y: auto;
+  padding: 0 0.25rem 1rem 0;
+}
+
+.agent-history-item {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--foreground);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.35rem;
+  padding: 0.85rem;
+  text-align: left;
+}
+
+.agent-history-item:hover,
+.agent-history-item:focus-visible,
+.agent-history-item[aria-current="page"] {
+  background: #ffffff;
+  border-color: var(--border);
+  box-shadow: 0 10px 24px rgba(7, 34, 70, 0.08);
+  outline: none;
+}
+
+.agent-history-item[aria-current="page"] {
+  background: var(--accent-soft);
+}
+
+.agent-history-title {
+  color: var(--heading);
+  font-size: 0.92rem;
+  font-weight: 720;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-history-meta {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.4;
 }
 
 .agent-chat-content {
@@ -1145,6 +1333,11 @@ a {
     padding-bottom: 12.5rem;
   }
 
+  .agent-chat-shell.history-is-open .agent-chat-content,
+  .agent-chat-shell.history-is-open .agent-composer-dock {
+    padding-left: 1rem;
+  }
+
   .agent-chat-header {
     grid-template-columns: 1fr auto;
     height: 4.5rem;
@@ -1171,6 +1364,21 @@ a {
   .agent-chat-content {
     min-height: calc(100dvh - 17rem);
     padding: 2rem 1rem;
+  }
+
+  .agent-history-tab {
+    bottom: 9.5rem;
+    left: 0;
+    top: auto;
+  }
+
+  .agent-chat-shell.history-is-open .agent-history-tab {
+    left: min(18rem, calc(100vw - 3.5rem));
+  }
+
+  .agent-history-panel {
+    top: 4.5rem;
+    width: min(18rem, calc(100vw - 3.5rem));
   }
 
   .agent-mark {
