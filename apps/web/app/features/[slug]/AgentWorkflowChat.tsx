@@ -21,7 +21,21 @@ type ApiMessage = Message & {
 
 type ConversationApiResponse = {
   id: string;
+  title: string | null;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+  is_processing: boolean;
   messages: ApiMessage[];
+};
+
+type ConversationSummary = {
+  id: string;
+  title: string | null;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+  is_processing: boolean;
 };
 
 type MessageExchangeApiResponse = {
@@ -31,6 +45,34 @@ type MessageExchangeApiResponse = {
 };
 
 const CONVERSATION_STORAGE_KEY = "open-reliability-conversation-id";
+const TITLE_STOP_WORDS = new Set([
+  "a",
+  "about",
+  "an",
+  "and",
+  "are",
+  "can",
+  "could",
+  "do",
+  "for",
+  "from",
+  "help",
+  "how",
+  "i",
+  "in",
+  "is",
+  "me",
+  "my",
+  "of",
+  "on",
+  "please",
+  "should",
+  "the",
+  "to",
+  "what",
+  "with",
+  "you",
+]);
 
 const starterPrompts = [
   {
@@ -94,6 +136,14 @@ function StopIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <rect height="10" rx="1.5" width="10" x="7" y="7" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14" />
     </svg>
   );
 }
@@ -171,12 +221,59 @@ function AssistantMessage({ content }: { content: string }) {
   );
 }
 
+function conversationTitle(conversation: ConversationSummary) {
+  return conversation.title ?? "Untitled reliability chat";
+}
+
+function conversationTimestamp(conversation: ConversationSummary) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(conversation.updated_at));
+}
+
+function titleCaseWord(word: string) {
+  if (word === word.toUpperCase() || /\d/.test(word)) {
+    return word;
+  }
+
+  return `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`;
+}
+
+function titleFromMessage(content: string) {
+  const words = content
+    .split(/\s+/)
+    .map((word) => word.replace(/^[.,!?;:()[\]{}"']+|[.,!?;:()[\]{}"']+$/g, ""))
+    .filter(Boolean);
+  const summaryWords = words.filter(
+    (word) => !TITLE_STOP_WORDS.has(word.toLowerCase()),
+  );
+  const titleWords =
+    summaryWords.length < 3 ? words.slice(0, 6) : summaryWords.slice(0, 7);
+  const title = titleWords.map(titleCaseWord).join(" ");
+
+  if (!title) {
+    return "New Reliability Chat";
+  }
+
+  if (title.length <= 60) {
+    return title;
+  }
+
+  return `${title.slice(0, 57).trimEnd()}...`;
+}
+
 export default function AgentWorkflowChat() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [attachment, setAttachment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [historyIsOpen, setHistoryIsOpen] = useState(true);
+  const [historyError, setHistoryError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -184,47 +281,16 @@ export default function AgentWorkflowChat() {
   const latestMessageId = messages[messages.length - 1]?.id;
 
   useEffect(() => {
+    const requestController = new AbortController();
     const savedConversationId = window.localStorage.getItem(
       CONVERSATION_STORAGE_KEY,
     );
 
-    if (!savedConversationId) {
-      return;
+    refreshConversations(requestController.signal);
+
+    if (savedConversationId) {
+      loadConversation(savedConversationId, requestController.signal);
     }
-
-    const requestController = new AbortController();
-
-    async function loadConversation() {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/conversations/${savedConversationId}`,
-          {
-            signal: requestController.signal,
-          },
-        );
-
-        if (!response.ok) {
-          window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
-          return;
-        }
-
-        const conversation: ConversationApiResponse = await response.json();
-        setConversationId(conversation.id);
-        setMessages(
-          conversation.messages.map((message) => ({
-            id: message.id,
-            role: message.role,
-            content: message.content,
-          })),
-        );
-      } catch {
-        if (!requestController.signal.aborted) {
-          window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
-        }
-      }
-    }
-
-    loadConversation();
 
     return () => requestController.abort();
   }, []);
@@ -275,7 +341,7 @@ export default function AgentWorkflowChat() {
     try {
       const activeConversationId =
         conversationId ??
-        (await createConversation(requestController.signal));
+        (await createConversation(requestController.signal, trimmedMessage));
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/conversations/${activeConversationId}/messages`,
         {
@@ -312,6 +378,7 @@ export default function AgentWorkflowChat() {
           content: data.assistant_message.content,
         },
       ]);
+      refreshConversations();
     } catch {
       setMessages((currentMessages) => [
         ...currentMessages,
@@ -329,7 +396,11 @@ export default function AgentWorkflowChat() {
     }
   }
 
-  async function createConversation(signal: AbortSignal): Promise<string> {
+  async function createConversation(
+    signal: AbortSignal,
+    firstMessage: string,
+  ): Promise<string> {
+    const title = titleFromMessage(firstMessage);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/conversations`,
       {
@@ -337,7 +408,7 @@ export default function AgentWorkflowChat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ title }),
         signal,
       },
     );
@@ -352,8 +423,80 @@ export default function AgentWorkflowChat() {
       CONVERSATION_STORAGE_KEY,
       conversation.id,
     );
+    setConversations((currentConversations) => [
+      {
+        id: conversation.id,
+        title: conversation.title,
+        message_count: conversation.message_count,
+        created_at: conversation.created_at,
+        updated_at: conversation.updated_at,
+        is_processing: conversation.is_processing,
+      },
+      ...currentConversations.filter((item) => item.id !== conversation.id),
+    ]);
 
     return conversation.id;
+  }
+
+  async function refreshConversations(signal?: AbortSignal) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/conversations`,
+        { signal },
+      );
+
+      if (!response.ok) {
+        throw new Error("Conversation history could not be loaded.");
+      }
+
+      const conversationHistory: ConversationSummary[] = await response.json();
+      setConversations(conversationHistory);
+      setHistoryError("");
+    } catch {
+      if (!signal?.aborted) {
+        setHistoryError("History unavailable while the API is offline.");
+      }
+    }
+  }
+
+  async function loadConversation(id: string, signal?: AbortSignal) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/conversations/${id}`,
+        { signal },
+      );
+
+      if (!response.ok) {
+        window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+        return;
+      }
+
+      const conversation: ConversationApiResponse = await response.json();
+      setConversationId(conversation.id);
+      setMessages(
+        conversation.messages.map((message) => ({
+          id: message.id,
+          role: message.role,
+          content: message.content,
+        })),
+      );
+      window.localStorage.setItem(CONVERSATION_STORAGE_KEY, conversation.id);
+    } catch {
+      if (!signal?.aborted) {
+        window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+      }
+    }
+  }
+
+  function startNewConversation() {
+    requestControllerRef.current?.abort();
+    setConversationId(null);
+    setMessages([]);
+    setDraft("");
+    setAttachment("");
+    setIsLoading(false);
+    window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+    composerInputRef.current?.focus();
   }
 
   function stopResponse() {
@@ -367,7 +510,9 @@ export default function AgentWorkflowChat() {
   }
 
   return (
-    <main className="agent-chat-shell">
+    <main
+      className={`agent-chat-shell ${historyIsOpen ? "history-is-open" : ""}`}
+    >
       <header className="agent-chat-header">
         <Link className="agent-chat-back" href="/">
           <ArrowLeftIcon />
@@ -382,6 +527,72 @@ export default function AgentWorkflowChat() {
           Agent online
         </div>
       </header>
+
+      <button
+        aria-controls="agent-conversation-history"
+        aria-expanded={historyIsOpen}
+        className="agent-history-tab"
+        onClick={() => setHistoryIsOpen((isOpen) => !isOpen)}
+        type="button"
+      >
+        <ChatIcon />
+        <span>History</span>
+      </button>
+
+      <aside
+        aria-label="Conversation history"
+        className="agent-history-panel"
+        id="agent-conversation-history"
+      >
+        <div className="agent-history-panel-header">
+          <div>
+            <p>Conversation history</p>
+            <h2>Recent chats</h2>
+          </div>
+          <button
+            className="agent-history-new-chat"
+            onClick={startNewConversation}
+            type="button"
+          >
+            <PlusIcon />
+            New chat
+          </button>
+        </div>
+        {historyError ? (
+          <p className="agent-history-error">{historyError}</p>
+        ) : null}
+        <div className="agent-history-list">
+          {conversations.length === 0 ? (
+            <p className="agent-history-empty">
+              Your reliability conversations will appear here once you start
+              chatting.
+            </p>
+          ) : (
+            conversations.map((conversation) => (
+              <button
+                aria-current={
+                  conversation.id === conversationId ? "page" : undefined
+                }
+                className="agent-history-item"
+                key={conversation.id}
+                onClick={() => loadConversation(conversation.id)}
+                type="button"
+              >
+                <span className="agent-history-title">
+                  {conversationTitle(conversation)}
+                </span>
+                <span className="agent-history-meta">
+                  {conversationTimestamp(conversation)}
+                  {conversation.message_count > 0
+                    ? ` · ${conversation.message_count} messages`
+                    : ""}
+                  {conversation.is_processing ? " · responding" : ""}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+      </aside>
 
       <section
         className={`agent-chat-content ${messages.length ? "has-messages" : ""}`}

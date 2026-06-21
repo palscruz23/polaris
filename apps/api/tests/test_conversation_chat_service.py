@@ -104,3 +104,31 @@ def test_conversation_service_persists_follow_up_context_and_memory() -> None:
         session.close()
         transaction.rollback()
         connection.close()
+
+
+def test_conversation_service_sets_summary_title_from_first_message() -> None:
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(
+        bind=connection,
+        join_transaction_mode="create_savepoint",
+    )
+
+    try:
+        provider = RecordingProvider()
+        conversation = ConversationRepository(session).create()
+        service = ConversationChatService(session, provider)
+
+        service.respond(
+            conversation.id,
+            "Can you help me troubleshoot repeated failures on pump P-101?",
+        )
+
+        reloaded = ConversationRepository(session).get_by_id(conversation.id)
+
+        assert reloaded is not None
+        assert reloaded.title == "Troubleshoot Repeated Failures Pump P-101"
+    finally:
+        session.close()
+        transaction.rollback()
+        connection.close()
