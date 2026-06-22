@@ -49,36 +49,50 @@ Specialists:
 
 ## Workflow and Tooling
 
-The Reliability Agent coordinates specialists through deterministic tools:
+The Reliability Agent coordinates specialists through deterministic tools.
+Available tools by agent:
 
-### Master Data tools
-- Equipment search by keyword, asset tags, and facility filters.
-- Paginated results with match-count summaries.
+### Reliability Agent tools
 
-### Defect Elimination tools
-- Bad actor ranking by failure count and downtime hours.
-- Repeat failure detection across time windows.
-- Reliability summary metrics (asset-level and system-level).
-- MTBF calculation from work order history.
-- 5 Whys generation for failure mode investigation.
-- RCA template construction with evidence planning.
-- Defect elimination charter generation.
-- Prioritised recommendations with supporting evidence.
+- `SpecialistRouter` — Selects the right specialist for the request.
+- `BoundedSpecialistLoop` — Runs up to five sequential specialist calls.
+- `DuplicateCallSuppressor` — Blocks repeated specialist calls.
+- `ProgressStreamer` — Streams coordination status to the UI.
+- `MemoryUpdater` — Saves useful context for follow-up questions.
 
-### Maintenance Strategy tools
-- Maintenance task profile review by equipment context.
-- Maintenance mix breakdown (PM, PdM, CBM, corrective, run-to-failure).
-- Failure-mode coverage analysis against known failure modes.
-- Frequency risk assessment for scheduled maintenance tasks.
-- Strategy gap identification and condition-monitoring opportunity review.
-- Evidence-backed strategy recommendations.
+### Master Data Agent tools
 
-### Orchestration
-- The Reliability Agent selects and calls specialist agents through a
-  bounded multi-call loop (up to five calls per request).
-- Duplicate-call suppression prevents redundant specialist invocations.
-- Live natural-language progress is streamed to the frontend during
-  coordination.
+- `EquipmentSearch` — Finds equipment by keyword and asset filters.
+- `PaginatedMatchSummaries` — Pages large equipment result sets.
+
+### Defect Elimination Agent tools
+
+- `ReliabilityMetricsTool` — Summarises failures, downtime, and cost.
+- `BadActorAnalysisTool` — Ranks assets by reliability impact.
+- `RepeatFailureDetectionTool` — Finds recurring asset/failure-mode pairs.
+- `MTBFCalculator` — Estimates mean time between failures.
+- `RCAEvidencePlanningTool` — Lists evidence needed for RCA.
+- `FiveWhysGeneratorTool` — Drafts 5 Whys prompts.
+- `RCATemplateBuilderTool` — Builds RCA worksheets.
+- `DefectEliminationCharterGeneratorTool` — Creates defect elimination charters.
+- `PrioritisedRecommendations` — Recommends evidence-backed next actions.
+
+### Maintenance Strategy Agent tools
+
+- `TaskProfileReviewer` — Summarises planned maintenance tasks.
+- `MaintenanceMixBreakdown` — Groups tasks by maintenance type.
+- `FailureModeCoverageAnalyzer` — Shows covered and uncovered risks.
+- `FrequencyRiskAssessor` — Flags interval risk.
+- `StrategyGapIdentifier` — Finds missing or duplicated controls.
+- `ConditionMonitoringReviewer` — Identifies PdM/CBM opportunities.
+- `StrategyRecommendationEngine` — Recommends strategy changes.
+
+### Reliability Improvement Agent tools
+
+- `ValueWorkflow` — Quantifies expected opportunity value.
+- `ActionPlanWorkflow` — Converts opportunities into delivery plans.
+- `ReportingWorkflow` — Tracks benefits and reliability outcomes.
+- `RoadmapWorkflow` — Sequences improvement initiatives.
 
 ## Agent Naming
 
