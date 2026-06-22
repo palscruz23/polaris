@@ -1,4 +1,16 @@
-# PRD UPDATE: RELIABILITY KNOWLEDGE BASE
+# PRD: Open Reliability Product Vision
+
+## Current Implementation State
+
+The current product includes the user-facing Reliability Agent chat, FastAPI
+conversation endpoints, PostgreSQL-backed conversation and message persistence,
+provider-backed assistant responses, deterministic conversation titles, and
+per-conversation memory updates.
+
+The multi-agent workflows below describe the product direction. Master Data,
+Defect Elimination, Strategy, Reliability Improvement, knowledge-base, and
+pgvector-backed retrieval capabilities are planned unless explicitly marked as
+implemented elsewhere.
 
 ## New Product Positioning
 
@@ -12,10 +24,11 @@ to create a digital team of reliability engineers.
 
 ---
 
-## Architecture:
-Frontend: Next.js 
-Backend: FastAPI 
-Database: Postgres 
+## Target Architecture
+
+Frontend: Next.js
+Backend: FastAPI
+Database: Postgres
 Vector DB: pgvector
 
 For local development, include everything in Docker compose.
@@ -208,7 +221,3 @@ Reliability Agent
 │
 └── Reliability Improvement Agent
     └── value/risk/report tools
-
-
-```
-```

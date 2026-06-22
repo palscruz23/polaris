@@ -15,7 +15,7 @@ const specialistAgents = [
   },
   {
     id: "strategy",
-    title: "Maintenance Strategy Agent",
+    title: "Strategy Agent",
     purpose:
       "Reviews and optimizes maintenance strategies by checking PM effectiveness, failure mode coverage, OEM guidance, and strategy gaps.",
   },
@@ -32,25 +32,25 @@ const flowNodes = {
     id: "user-request",
     title: "User request",
     purpose:
-      "A reliability question, uploaded dataset, or improvement request starts the analysis.",
+      "A reliability question starts the current chat flow. Uploaded datasets and improvement workflows are planned next steps.",
   },
   managerIntake: {
     id: "manager-intake",
     title: "Reliability Agent",
     purpose:
-      "The only agent visible to the user. It interprets the request, chooses specialist agents, and delegates the work.",
+      "The only agent visible to the user. Today it answers reliability questions with conversation memory; planned versions will delegate to specialist agents.",
   },
   managerReview: {
     id: "manager-review",
     title: "Reliability Agent",
     purpose:
-      "Reviews specialist findings, resolves conflicts, consolidates evidence, and prepares the final answer.",
+      "Today it returns the assistant response. Planned versions will review specialist findings, resolve conflicts, and consolidate evidence.",
   },
   finalResponse: {
     id: "final-response",
     title: "Final response",
     purpose:
-      "A recommendation, report, roadmap, or next-step plan grounded in the agent team findings.",
+      "A reliability answer or next-step plan. Reports, roadmaps, and specialist-agent recommendations are planned outputs.",
   },
 };
 
@@ -64,39 +64,39 @@ const features = [
   {
     title: "Data Mapping Wizard",
     description:
-      "Guide uploaded work order, strategy, and equipment data into a consistent reliability model.",
+      "Planned workflow for guiding uploaded work order, strategy, and equipment data into a consistent reliability model.",
   },
   {
     title: "Work Order Intelligence",
     description:
-      "Surface bad actors, repeat failures, downtime patterns, and cost drivers from maintenance history.",
+      "Planned analysis for surfacing bad actors, repeat failures, downtime patterns, and cost drivers from maintenance history.",
   },
   {
     title: "Reliability Knowledge Base",
     description:
-      "Index FMEAs, RCA reports, OEM manuals, and site standards so agents can reason with engineering context.",
+      "Planned retrieval layer for indexing FMEAs, RCA reports, OEM manuals, and site standards.",
   },
   {
-    title: "Reliability Agent Team",
+    title: "Reliability Agent",
     description:
-      "Coordinate specialist agents for bad actors, strategy gaps, equipment intelligence, and defect elimination.",
+      "Available now for reliability chat with persistent conversations, message history, and memory updates.",
   },
   {
     title: "Equipment Intelligence",
     description:
-      "Create asset-level summaries that combine history, strategy, known failure modes, and improvement options.",
+      "Planned asset-level summaries that combine history, strategy, known failure modes, and improvement options.",
   },
   {
     title: "Actionable Recommendations",
     description:
-      "Turn analysis into prioritized reliability actions with supporting evidence and practical next steps.",
+      "Planned outputs for prioritized reliability actions with supporting evidence and practical next steps.",
   },
 ];
 
-const placeholderBackend = {
-  status: "Placeholder backend",
-  api: "FastAPI /health pending integration",
-  database: "Postgres + pgvector planned",
+const backendState = {
+  status: "Reliability Agent chat available",
+  api: "FastAPI /health + /conversations",
+  database: "Postgres conversations + memory",
 };
 
 const socialLinks = [
@@ -169,16 +169,17 @@ export default function Home() {
                 Open Reliability Copilot
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-                A reliability engineering workspace for transforming plant data,
-                maintenance strategies, and engineering knowledge into clear,
-                evidence-backed recommendations.
+                A reliability engineering workspace that currently supports
+                persistent Reliability Agent conversations, with specialist
+                data, strategy, knowledge, and improvement workflows planned as
+                incremental product capabilities.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link className="button button-primary" href="/features/data-mapping-wizard">
-                  Start Workflow
+                <Link className="button button-primary" href="/features/reliability-agent-team">
+                  Chat with Reliability Agent
                 </Link>
-                <Link className="button button-secondary" href="/features/reliability-agent-team">
-                  Chat with Reliability Team
+                <Link className="button button-secondary" href="#planned-workflows">
+                  View planned workflows
                 </Link>
               </div>
             </div>
@@ -186,29 +187,30 @@ export default function Home() {
             <div className="status-panel">
               <div>
                 <p className="panel-label">Backend</p>
-                <p className="panel-value">{placeholderBackend.status}</p>
+                <p className="panel-value">{backendState.status}</p>
               </div>
               <div>
                 <p className="panel-label">API</p>
-                <p className="panel-value">{placeholderBackend.api}</p>
+                <p className="panel-value">{backendState.api}</p>
               </div>
               <div>
                 <p className="panel-label">Storage</p>
-                <p className="panel-value">{placeholderBackend.database}</p>
+                <p className="panel-value">{backendState.database}</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="architecture-section">
+      <section className="architecture-section" id="planned-workflows">
         <div className="mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-12">
         <div className="section-heading">
-          <h2>Agent Workflow</h2>
+          <h2>Planned Agent Workflow</h2>
           <p>
-            Open Reliability Copilot follows this architecture: the
-            Reliability Agent is the only agent visible to the user, and
-            it coordinates specialist agents as required.
+            The current backend supports the Reliability Agent chat. The
+            planned architecture keeps the Reliability Agent as the only
+            user-visible agent while specialist agents handle data, defect
+            elimination, strategy, and improvement workflows behind it.
           </p>
         </div>
 
@@ -229,7 +231,7 @@ export default function Home() {
             </article>
 
             <span className="flow-connector flow-connector-spawn" aria-hidden="true">
-              can spawn
+              will coordinate
             </span>
 
             <div className="spawn-stack" aria-label="Specialist agents">

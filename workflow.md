@@ -1,20 +1,27 @@
-# Agent Architecture
+# Planned Agent Architecture
 
-## Reliability Manager Agent (Orchestrator)
+This workflow describes the planned multi-agent product architecture. The
+current backend supports the user-facing Reliability Agent chat with persistent
+conversations, message history, provider-backed responses, and conversation
+memory updates. Specialist agents and their tools are planned increments.
+
+## Reliability Agent (Orchestrator)
 
 ### Purpose
 
-Act as the Reliability Manager.
+Act as the Reliability Agent.
 
-The Reliability Manager Agent receives user requests, determines which specialist agents are required, delegates work, executes shared analysis tools, consolidates findings, and generates the final recommendation.
+The Reliability Agent receives user requests, determines which specialist
+agents are required, delegates work, executes shared analysis tools,
+consolidates findings, and generates the final recommendation.
 
-The Reliability Manager is the only agent visible to the user.
+The Reliability Agent is the only agent visible to the user.
 
 ---
 
 # Specialist Agents
 
-## 1. Master Data Wizard Engineer
+## 1. Master Data Agent
 
 ### Purpose
 
@@ -48,7 +55,7 @@ Prepare, clean, validate, and standardize uploaded data.
 
 ---
 
-## 2. Defect Elimination Engineer
+## 2. Defect Elimination Agent
 
 ### Purpose
 
@@ -81,7 +88,7 @@ Convert reliability issues into structured investigations.
 
 ---
 
-## 3. Strategy Engineer
+## 3. Strategy Agent
 
 ### Purpose
 
@@ -114,7 +121,7 @@ Review and optimize maintenance strategies.
 
 ---
 
-## 4. Reliability Improvement Engineer
+## 4. Reliability Improvement Agent
 
 ### Purpose
 
@@ -149,18 +156,18 @@ Convert engineering findings into business actions.
 ```text
 User
   ↓
-Reliability Manager Agent
+Reliability Agent
   ↓
-Master Data Wizard Agent
+Master Data Agent
   ↓
-Reliability Manager Agent
+Reliability Agent
   ↓
 Specialist Agents:
-  - Defect Elimination Engineer
-  - Strategy Engineer
-  - Reliability Improvement Engineer
+  - Defect Elimination Agent
+  - Strategy Agent
+  - Reliability Improvement Agent
   ↓
-Reliability Manager Agent
+Reliability Agent
   ↓
 Final response/report
 ```
@@ -169,20 +176,16 @@ Final response/report
 
 # Agent Structure
 
-Reliability Manager Agent
+Reliability Agent
 │
-├── Master Data Wizard Agent
+├── Master Data Agent
 │   └── data mapping + validation tools
 │
-├── Defect Elimination Engineer
+├── Defect Elimination Agent
 │   └── RCA + repeat failure tools
 │
-├── Strategy Engineer
+├── Strategy Agent
 │   └── PM review tools
 │
-└── Reliability Improvement Engineer
+└── Reliability Improvement Agent
     └── value/risk/report tools
-
-
-```
-```

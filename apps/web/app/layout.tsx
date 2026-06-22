@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Open Reliability Copilot",
   description:
-    "A reliability engineering platform for data mapping, knowledge search, agent analysis, and actionable recommendations.",
+    "A reliability engineering workspace with persistent Reliability Agent chat and planned data, strategy, knowledge, and improvement workflows.",
 };
 
 export default function RootLayout({
