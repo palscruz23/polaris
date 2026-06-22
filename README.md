@@ -4,12 +4,12 @@ Open Reliability is a reliability-engineering assistant workspace. The current
 app ships a Reliability Agent chat experience for asking maintenance, asset
 reliability, and defect-elimination questions, backed by persistent
 conversations, message history, model-provider access, and conversation memory
-updates.
+updates. The Reliability Agent can select and execute registered specialist
+capabilities through a bounded sequential multi-call loop.
 
-The broader product vision is a planned multi-agent reliability platform with
-Master Data, Defect Elimination, Strategy, and Reliability Improvement agents.
-Until those specialist workflows are implemented, they should be described as
-planned capability rather than live backend behavior.
+The Master Data, Defect Elimination, and Maintenance Strategy agents are
+implemented specialists in the broader multi-agent vision. Reliability
+Improvement remains planned.
 
 ## Apps
 
@@ -32,6 +32,10 @@ Current chat capabilities:
 - Summarised session titles generated from the first user message.
 - Returning to the latest active conversation via browser local storage.
 - Conversation memory updates so follow-up questions retain useful context.
+- Model-selected specialist execution with duplicate-call suppression and a
+  five-call limit before final response synthesis.
+- Live natural-language progress while the Reliability Agent coordinates
+  specialists and their deterministic analysis tools.
 
 Current backend capabilities:
 
@@ -41,14 +45,23 @@ Current backend capabilities:
 - `GET /conversations/{conversation_id}` conversation retrieval.
 - `POST /conversations/{conversation_id}/messages` user-message persistence,
   provider-backed assistant response generation, and memory updates.
+- `POST /conversations/{conversation_id}/messages/stream` emits NDJSON
+  orchestration progress followed by the persisted message exchange.
 - Reliability data model tables for equipment, work orders, maintenance
   strategies, failure modes, import batches, and validation results.
+- Master Data Agent equipment discovery with text search, asset filters,
+  pagination, and matching equipment summary counts.
 - Clean reliability seed loader for loading MVP-ready CSV data into the
   normalized reliability model.
-- Defect Elimination Agent foundation with deterministic tools for bad actor
+- Defect Elimination Agent with deterministic tools for bad actor
   analysis, repeat failure detection, reliability summary metrics, MTBF
   calculation, RCA evidence planning, 5 Whys generation, RCA template building,
   defect elimination charter generation, and recommendations.
+- Reliability Agent orchestration of Defect Elimination findings into the
+  user-facing chat response.
+- Maintenance Strategy Agent review of maintenance task profiles, maintenance
+  mix, observed failure-mode coverage, frequency risks, strategy gaps,
+  condition-monitoring opportunities, and evidence-backed recommendations.
 
 Current defect elimination endpoint:
 
@@ -57,46 +70,49 @@ Current defect elimination endpoint:
   prompts, RCA templates, defect elimination charters, and recommended next
   actions.
 
-## Clean reliability seed data
+## Workflow and Tooling
 
-The MVP assumes clean source data. To load the included sample reliability
-dataset, start Postgres, run migrations, then run the seed loader:
+The Reliability Agent coordinates specialists through deterministic tools:
 
-```bash
-docker compose up -d postgres
-cd apps/api
-./.venv/bin/alembic upgrade head
-./.venv/bin/python -m app.cli.seed_reliability_data sample_data/reliability
-```
+### Master Data tools
+- Equipment search by keyword, asset tags, and facility filters.
+- Paginated results with match-count summaries.
 
-The seed directory expects these CSV files:
+### Defect Elimination tools
+- Bad actor ranking by failure count and downtime hours.
+- Repeat failure detection across time windows.
+- Reliability summary metrics (asset-level and system-level).
+- MTBF calculation from work order history.
+- 5 Whys generation for failure mode investigation.
+- RCA template construction with evidence planning.
+- Defect elimination charter generation.
+- Prioritised recommendations with supporting evidence.
 
-```text
-equipment.csv
-failure_modes.csv
-maintenance_strategies.csv
-work_orders.csv
-work_order_failure_modes.csv
-```
+### Maintenance Strategy tools
+- Maintenance task profile review by equipment context.
+- Maintenance mix breakdown (PM, PdM, CBM, corrective, run-to-failure).
+- Failure-mode coverage analysis against known failure modes.
+- Frequency risk assessment for scheduled maintenance tasks.
+- Strategy gap identification and condition-monitoring opportunity review.
+- Evidence-backed strategy recommendations.
 
-The final failure-mode link file is optional, but the other four are required.
-Rows are treated as clean data: missing required references raise an error
-instead of being guessed or repaired.
-
-The included sample dataset contains 50 equipment records, 100 maintenance
-strategy tasks, 1,000 work orders across 2023-2025, and failure-mode links for
-corrective, emergency, and condition-monitoring work orders.
+### Orchestration
+- The Reliability Agent selects and calls specialist agents through a
+  bounded multi-call loop (up to five calls per request).
+- Duplicate-call suppression prevents redundant specialist invocations.
+- Live natural-language progress is streamed to the frontend during
+  coordination.
 
 ## Agent Naming
 
 Use this naming scheme across product copy, docs, and workflows:
 
-- `Reliability Agent` - the only user-visible chat agent and future
-  orchestrator.
-- `Master Data Agent` - planned upload, mapping, validation, and data-readiness
-  workflow.
-- `Defect Elimination Agent` - planned repeat-failure and RCA workflow.
-- `Strategy Agent` - planned PM strategy and failure-mode coverage workflow.
+- `Reliability Agent` - the only user-visible chat agent and orchestrator.
+- `Master Data Agent` - implemented equipment discovery; upload, mapping,
+  validation, and data-readiness workflows remain planned.
+- `Defect Elimination Agent` - implemented repeat-failure and RCA workflow.
+- `Maintenance Strategy Agent` - implemented maintenance strategy and
+  failure-mode coverage workflow.
 - `Reliability Improvement Agent` - planned value, action-plan, reporting, and
   roadmap workflow.
 
