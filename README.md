@@ -89,10 +89,10 @@ Available tools by agent:
 
 ### Reliability Improvement Agent tools
 
-- `ValueWorkflow` — Quantifies expected opportunity value.
-- `ActionPlanWorkflow` — Converts opportunities into delivery plans.
-- `ReportingWorkflow` — Tracks benefits and reliability outcomes.
-- `RoadmapWorkflow` — Sequences improvement initiatives.
+- `ValueWorkflow` — Planned value sizing.
+- `ActionPlanWorkflow` — Planned delivery planning.
+- `ReportingWorkflow` — Planned benefits tracking.
+- `RoadmapWorkflow` — Planned initiative sequencing.
 
 ## Agent Naming
 
