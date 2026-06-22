@@ -1,11 +1,18 @@
 import Link from "next/link";
 
-const specialistAgents = [
+type SpecialistAgent = {
+  id: string;
+  title: string;
+  purpose: string;
+  status?: "future";
+};
+
+const specialistAgents: readonly SpecialistAgent[] = [
   {
     id: "master-data",
     title: "Master Data Agent",
     purpose:
-      "Prepares, cleans, validates, and standardizes uploaded data so downstream reliability analysis starts from trusted inputs.",
+      "Searches and filters the stored equipment master so reliability workflows can identify assets and use trusted equipment context.",
   },
   {
     id: "defect-elimination",
@@ -15,15 +22,16 @@ const specialistAgents = [
   },
   {
     id: "strategy",
-    title: "Strategy Agent",
+    title: "Maintenance Strategy Agent",
     purpose:
       "Reviews and optimizes maintenance strategies by checking PM effectiveness, failure mode coverage, OEM guidance, and strategy gaps.",
   },
   {
     id: "improvement",
     title: "Reliability Improvement Agent",
+    status: "future",
     purpose:
-      "Converts engineering findings into business actions, including ranked opportunities, cost-benefit context, action plans, and reliability roadmaps.",
+      "Future workflow for converting engineering findings into ranked opportunities, cost-benefit context, action plans, and reliability roadmaps.",
   },
 ];
 
@@ -38,19 +46,19 @@ const flowNodes = {
     id: "manager-intake",
     title: "Reliability Agent",
     purpose:
-      "The only agent visible to the user. Today it answers reliability questions with conversation memory; planned versions will delegate to specialist agents.",
+      "The only agent visible to the user. It reviews each request, selects the required specialist agents, and coordinates their analysis.",
   },
   managerReview: {
     id: "manager-review",
     title: "Reliability Agent",
     purpose:
-      "Today it returns the assistant response. Planned versions will review specialist findings, resolve conflicts, and consolidate evidence.",
+      "Reviews structured specialist findings, consolidates the evidence, and produces one user-facing reliability recommendation.",
   },
   finalResponse: {
     id: "final-response",
     title: "Final response",
     purpose:
-      "A reliability answer or next-step plan. Reports, roadmaps, and specialist-agent recommendations are planned outputs.",
+      "A reliability answer or next-step plan grounded in the available conversation context and specialist findings.",
   },
 };
 
@@ -62,47 +70,61 @@ const purposeItems = [
 
 const features = [
   {
-    title: "Data Mapping Wizard",
+    title: "Reliability Agent",
     description:
-      "Planned workflow for guiding uploaded work order, strategy, and equipment data into a consistent reliability model.",
+      "Reliability chat with persistent conversations, message history, memory updates, and specialist orchestration.",
   },
   {
     title: "Work Order Intelligence",
     description:
-      "Planned analysis for surfacing bad actors, repeat failures, downtime patterns, and cost drivers from maintenance history.",
-  },
-  {
-    title: "Reliability Knowledge Base",
-    description:
-      "Planned retrieval layer for indexing FMEAs, RCA reports, OEM manuals, and site standards.",
-  },
-  {
-    title: "Reliability Agent",
-    description:
-      "Available now for reliability chat with persistent conversations, message history, and memory updates.",
+      "Analysis for surfacing bad actors, repeat failures, downtime patterns, and cost drivers from maintenance history.",
   },
   {
     title: "Equipment Intelligence",
     description:
-      "Planned asset-level summaries that combine history, strategy, known failure modes, and improvement options.",
+      "Asset-level summaries that combine history, strategy, known failure modes, and improvement options.",
   },
   {
     title: "Actionable Recommendations",
     description:
-      "Planned outputs for prioritized reliability actions with supporting evidence and practical next steps.",
+      "Outputs for prioritized reliability actions with supporting evidence and practical next steps.",
+  },
+  {
+    title: "Data Mapping Wizard",
+    status: "future" as const,
+    description:
+      "Planned workflow for guiding uploaded work order, strategy, and equipment data into a consistent reliability model.",
+  },
+  {
+    title: "Reliability Knowledge Base",
+    status: "future" as const,
+    description:
+      "Planned retrieval layer for indexing FMEAs, RCA reports, OEM manuals, and site standards.",
   },
 ];
 
-const backendState = {
-  status: "Reliability Agent chat available",
-  api: "FastAPI /health + /conversations",
-  database: "Postgres conversations + memory",
-};
+const heroBenefits = [
+  {
+    title: "Keep reliability context together",
+    description:
+      "Persistent conversations retain the engineering thread across follow-up questions and planning sessions.",
+  },
+  {
+    title: "Turn analysis into next actions",
+    description:
+      "Planned workflows connect data review, defect elimination, strategy checks, and improvement planning.",
+  },
+  {
+    title: "Grow capability in practical stages",
+    description:
+      "Each product capability can be designed, tested, and released without hiding what is available today.",
+  },
+];
 
 const socialLinks = [
   {
     label: "Gmail",
-    href: "https://mail.google.com/",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=poljohncruz@gmail.com",
     icon: (
       <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
         <path d="M4.75 6.25h14.5A1.75 1.75 0 0 1 21 8v8a1.75 1.75 0 0 1-1.75 1.75H4.75A1.75 1.75 0 0 1 3 16V8a1.75 1.75 0 0 1 1.75-1.75Z" />
@@ -114,7 +136,7 @@ const socialLinks = [
   },
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/",
+    href: "https://www.linkedin.com/in/poljohncruz/",
     icon: (
       <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
         <path d="M7.35 9.25v8.5" />
@@ -127,7 +149,7 @@ const socialLinks = [
   },
   {
     label: "GitHub",
-    href: "https://github.com/",
+    href: "https://github.com/palscruz23",
     icon: (
       <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
         <path d="M10 19.5c-4.6 1.4-4.6-2.3-6.5-2.8" />
@@ -141,76 +163,73 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <section className="hero-section border-b border-[var(--border)]">
-        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10 md:gap-10 md:px-8 md:py-14">
+        <div className="hero-container mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10 md:gap-10 md:px-8 md:py-14">
           <nav className="app-nav flex items-center justify-between gap-6">
             <Link href="/" className="brand-link text-lg font-semibold">
-              Open Reliability
+              <span>Open Reliability</span>
             </Link>
-            <div className="social-links" aria-label="Open Reliability social links">
-              {socialLinks.map((link) => (
-                <a
-                  aria-label={link.label}
-                  className="social-link inline-flex h-11 w-11 items-center justify-center rounded-lg border border-sky-200/35 bg-slate-950 text-white shadow-lg"
-                  href={link.href}
-                  key={link.label}
-                  rel="noreferrer"
-                  target="_blank"
-                  title={link.label}
-                >
-                  {link.icon}
-                </a>
-              ))}
+            <div className="contact-links">
+              <span className="contact-links-label">Contact for demo</span>
+              <div className="social-links" aria-label="Open Reliability contact links">
+                {socialLinks.map((link) => (
+                  <a
+                    aria-label={link.label}
+                    className="social-link inline-flex h-11 w-11 items-center justify-center rounded-lg border border-sky-200/35 bg-slate-950 text-white shadow-lg"
+                    href={link.href}
+                    key={link.label}
+                    rel="noreferrer"
+                    target="_blank"
+                    title={link.label}
+                  >
+                    {link.icon}
+                  </a>
+                ))}
+              </div>
             </div>
           </nav>
 
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
             <div className="max-w-3xl">
-              <h1 className="text-5xl font-semibold leading-[1.02] text-[var(--heading)] md:text-7xl">
+              <h1 className="text-4xl font-semibold leading-[1.05] text-[var(--heading)] md:text-6xl">
                 Open Reliability Copilot
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-                A reliability engineering workspace that currently supports
-                persistent Reliability Agent conversations, with specialist
-                data, strategy, knowledge, and improvement workflows planned as
-                incremental product capabilities.
+                A reliability engineering workspace with persistent
+                conversations, defect elimination analysis, and maintenance
+                strategy review coordinated through the Reliability Agent.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link className="button button-primary" href="/features/reliability-agent-team">
                   Chat with Reliability Agent
                 </Link>
-                <Link className="button button-secondary" href="#planned-workflows">
-                  View planned workflows
+                <Link className="button button-secondary" href="#capability-roadmap">
+                  Explore capability roadmap
                 </Link>
               </div>
             </div>
 
-            <div className="status-panel">
-              <div>
-                <p className="panel-label">Backend</p>
-                <p className="panel-value">{backendState.status}</p>
-              </div>
-              <div>
-                <p className="panel-label">API</p>
-                <p className="panel-value">{backendState.api}</p>
-              </div>
-              <div>
-                <p className="panel-label">Storage</p>
-                <p className="panel-value">{backendState.database}</p>
-              </div>
+            <div className="benefit-panel" aria-label="Open Reliability benefits">
+              <p className="panel-label">Why it matters</p>
+              {heroBenefits.map((benefit) => (
+                <article className="benefit-item" key={benefit.title}>
+                  <h2>{benefit.title}</h2>
+                  <p>{benefit.description}</p>
+                </article>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="architecture-section" id="planned-workflows">
-        <div className="mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-12">
+      <section className="architecture-section" id="agent-workflow">
+        <div className="architecture-container mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-12">
         <div className="section-heading">
-          <h2>Planned Agent Workflow</h2>
+          <h2>Agent Workflow</h2>
           <p>
-            The current backend supports the Reliability Agent chat. The
-            planned architecture keeps the Reliability Agent as the only
-            user-visible agent while specialist agents handle data, defect
-            elimination, strategy, and improvement workflows behind it.
+            The Reliability Agent is the only user-visible agent. It coordinates
+            implemented specialist workflows for defect elimination and
+            maintenance strategy review, with additional specialists added in
+            practical stages.
           </p>
         </div>
 
@@ -231,7 +250,7 @@ export default function Home() {
             </article>
 
             <span className="flow-connector flow-connector-spawn" aria-hidden="true">
-              will coordinate
+              coordinates
             </span>
 
             <div className="spawn-stack" aria-label="Specialist agents">
@@ -242,6 +261,9 @@ export default function Home() {
                   tabIndex={0}
                 >
                   <span className="flow-node-index">{index + 3}</span>
+                  {agent.status === "future" ? (
+                    <span className="flow-node-status">Future</span>
+                  ) : null}
                   <h3>{agent.title}</h3>
                 </article>
               ))}
@@ -279,19 +301,24 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="feature-section border-t border-[var(--border)]">
+      <section className="feature-section border-t border-[var(--border)]" id="capability-roadmap">
         <div className="mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-20">
           <div className="section-heading">
-            <h2>Feature areas</h2>
+            <h2>Capability roadmap</h2>
             <p>
-              Each feature page is intentionally light for now. We will decide
-              the detailed design and workflows one feature at a time.
+              These product capabilities define how Open Reliability will grow
+              from chat into a practical reliability engineering workspace.
+              Each capability will be designed and shipped one workflow at a
+              time.
             </p>
           </div>
 
           <div className="feature-grid">
             {features.map((feature) => (
               <article className="feature-card" key={feature.title}>
+                {"status" in feature && feature.status === "future" ? (
+                  <span className="feature-card-status">Future</span>
+                ) : null}
                 <span className="feature-card-title">{feature.title}</span>
                 <span className="feature-card-description">{feature.description}</span>
               </article>
