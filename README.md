@@ -11,10 +11,9 @@ The Master Data, Defect Elimination, and Maintenance Strategy agents are
 implemented specialists in the broader multi-agent vision. Reliability
 Improvement remains planned.
 
-## Apps
+## Sample Demo
 
-- `apps/web` — Next.js frontend.
-- `apps/api` — FastAPI backend for conversations, message persistence, memory updates, and model-provider access.
+![Open Reliability Demo](demo.gif)
 
 ## Reliability Agent
 
@@ -105,6 +104,11 @@ Troubleshoot Repeated Failures Pump P-101
 ```
 
 The title summariser is deterministic rather than model-generated. This keeps session creation fast and avoids spending model tokens just to name a chat.
+
+## Apps
+
+- `apps/web` — Next.js frontend.
+- `apps/api` — FastAPI backend for conversations, message persistence, memory updates, and model-provider access.
 
 ## Local setup
 
