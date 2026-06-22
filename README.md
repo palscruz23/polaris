@@ -16,59 +16,37 @@ Improvement remains planned.
 - `apps/web` — Next.js frontend.
 - `apps/api` — FastAPI backend for conversations, message persistence, memory updates, and model-provider access.
 
-## Current Reliability Agent
+## Reliability Agent
 
-The Reliability Agent lives at:
+The Reliability Agent is available at `/features/reliability-agent-team`.
 
-```text
-/features/reliability-agent-team
-```
+Capabilities:
 
-Current chat capabilities:
+- Persistent reliability conversations that retain context across follow-up
+  questions and planning sessions.
+- Conversation history panel to review and switch between past reliability
+  discussions.
+- Automatic session titles summarised from the first reliability question.
+- Conversation memory that carries forward key reliability context.
+- Specialist selection and coordination — the Reliability Agent chooses which
+  specialists to call, suppresses duplicate analysis, and limits to five
+  specialist calls before synthesising a final response.
+- Live progress updates while the agent coordinates specialist analysis.
 
-- Persistent conversations stored by the API.
-- A left-side conversation history panel inspired by ChatGPT.
-- Recent conversations ordered by most recently updated.
-- Summarised session titles generated from the first user message.
-- Returning to the latest active conversation via browser local storage.
-- Conversation memory updates so follow-up questions retain useful context.
-- Model-selected specialist execution with duplicate-call suppression and a
-  five-call limit before final response synthesis.
-- Live natural-language progress while the Reliability Agent coordinates
-  specialists and their deterministic analysis tools.
+Specialists:
 
-Current backend capabilities:
-
-- `GET /health` service status.
-- `POST /conversations` conversation creation.
-- `GET /conversations` recent conversation listing.
-- `GET /conversations/{conversation_id}` conversation retrieval.
-- `POST /conversations/{conversation_id}/messages` user-message persistence,
-  provider-backed assistant response generation, and memory updates.
-- `POST /conversations/{conversation_id}/messages/stream` emits NDJSON
-  orchestration progress followed by the persisted message exchange.
-- Reliability data model tables for equipment, work orders, maintenance
-  strategies, failure modes, import batches, and validation results.
-- Master Data Agent equipment discovery with text search, asset filters,
-  pagination, and matching equipment summary counts.
-- Clean reliability seed loader for loading MVP-ready CSV data into the
-  normalized reliability model.
-- Defect Elimination Agent with deterministic tools for bad actor
-  analysis, repeat failure detection, reliability summary metrics, MTBF
-  calculation, RCA evidence planning, 5 Whys generation, RCA template building,
-  defect elimination charter generation, and recommendations.
-- Reliability Agent orchestration of Defect Elimination findings into the
-  user-facing chat response.
-- Maintenance Strategy Agent review of maintenance task profiles, maintenance
-  mix, observed failure-mode coverage, frequency risks, strategy gaps,
-  condition-monitoring opportunities, and evidence-backed recommendations.
-
-Current defect elimination endpoint:
-
-- `GET /defect-elimination/overview` returns dataset summary, ranked bad
-  actors, repeat failure groups, MTBF metrics, RCA evidence plans, 5 Whys
-  prompts, RCA templates, defect elimination charters, and recommended next
-  actions.
+- **Master Data Agent** — equipment discovery with text search, asset filters,
+  and paginated match summaries.
+- **Defect Elimination Agent** — bad actor ranking, repeat failure detection,
+  reliability summary metrics, MTBF calculation, RCA evidence planning, 5 Whys
+  generation, RCA template construction, defect elimination charter generation,
+  and prioritised recommendations.
+- **Maintenance Strategy Agent** — maintenance task profile review, maintenance
+  mix breakdown, failure-mode coverage analysis, frequency risk assessment,
+  strategy gap identification, condition-monitoring opportunity review, and
+  evidence-backed recommendations.
+- **Reliability Improvement Agent** — planned value, action-plan, reporting, and
+  roadmap workflow.
 
 ## Workflow and Tooling
 
