@@ -41,6 +41,51 @@ Current backend capabilities:
 - `GET /conversations/{conversation_id}` conversation retrieval.
 - `POST /conversations/{conversation_id}/messages` user-message persistence,
   provider-backed assistant response generation, and memory updates.
+- Reliability data model tables for equipment, work orders, maintenance
+  strategies, failure modes, import batches, and validation results.
+- Clean reliability seed loader for loading MVP-ready CSV data into the
+  normalized reliability model.
+- Defect Elimination Agent foundation with deterministic tools for bad actor
+  analysis, repeat failure detection, reliability summary metrics, MTBF
+  calculation, RCA evidence planning, 5 Whys generation, RCA template building,
+  defect elimination charter generation, and recommendations.
+
+Current defect elimination endpoint:
+
+- `GET /defect-elimination/overview` returns dataset summary, ranked bad
+  actors, repeat failure groups, MTBF metrics, RCA evidence plans, 5 Whys
+  prompts, RCA templates, defect elimination charters, and recommended next
+  actions.
+
+## Clean reliability seed data
+
+The MVP assumes clean source data. To load the included sample reliability
+dataset, start Postgres, run migrations, then run the seed loader:
+
+```bash
+docker compose up -d postgres
+cd apps/api
+./.venv/bin/alembic upgrade head
+./.venv/bin/python -m app.cli.seed_reliability_data sample_data/reliability
+```
+
+The seed directory expects these CSV files:
+
+```text
+equipment.csv
+failure_modes.csv
+maintenance_strategies.csv
+work_orders.csv
+work_order_failure_modes.csv
+```
+
+The final failure-mode link file is optional, but the other four are required.
+Rows are treated as clean data: missing required references raise an error
+instead of being guessed or repaired.
+
+The included sample dataset contains 50 equipment records, 100 maintenance
+strategy tasks, 1,000 work orders across 2023-2025, and failure-mode links for
+corrective, emergency, and condition-monitoring work orders.
 
 ## Agent Naming
 

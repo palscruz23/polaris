@@ -1,0 +1,654 @@
+order_number,failure_mode_name,equipment_type,source,confidence,evidence
+WO-2023001,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-101.
+WO-2023003,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-135.
+WO-2023005,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-119.
+WO-2023007,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-103.
+WO-2023008,Imbalance,fan,import,0.850,Work order text identifies imbalance on F-120.
+WO-2023009,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-137.
+WO-2023011,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-121.
+WO-2023013,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-106.
+WO-2023014,Overheating,motor,import,1.000,Work order text identifies overheating on M-123.
+WO-2023016,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-107.
+WO-2023018,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-141.
+WO-2023019,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-108.
+WO-2023020,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-125.
+WO-2023022,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-109.
+WO-2023024,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-144.
+WO-2023026,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-128.
+WO-2023027,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-145.
+WO-2023029,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-129.
+WO-2023030,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-146.
+WO-2023031,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-113.
+WO-2023033,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-147.
+WO-2023035,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-132.
+WO-2023037,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-116.
+WO-2023038,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-133.
+WO-2023039,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-150.
+WO-2023040,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-117.
+WO-2023041,Imbalance,fan,import,0.850,Work order text identifies imbalance on F-134.
+WO-2023042,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-101.
+WO-2023044,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-135.
+WO-2023046,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-120.
+WO-2023048,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-104.
+WO-2023049,Tube fouling,heat_exchanger,import,0.850,Work order text identifies tube fouling on HX-121.
+WO-2023050,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-138.
+WO-2023052,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-122.
+WO-2023053,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-139.
+WO-2023055,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-123.
+WO-2023057,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-108.
+WO-2023059,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-142.
+WO-2023060,Insulation breakdown,motor,import,0.850,Work order text identifies insulation breakdown on M-109.
+WO-2023061,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-126.
+WO-2023063,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-110.
+WO-2023065,Overheating,motor,import,1.000,Work order text identifies overheating on M-144.
+WO-2023066,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-111.
+WO-2023068,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-146.
+WO-2023070,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-130.
+WO-2023071,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-147.
+WO-2023072,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-114.
+WO-2023074,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-148.
+WO-2023076,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-132.
+WO-2023078,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-117.
+WO-2023079,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-134.
+WO-2023081,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-118.
+WO-2023082,Tube fouling,heat_exchanger,import,0.850,Work order text identifies tube fouling on HX-135.
+WO-2023083,Overheating,motor,import,1.000,Work order text identifies overheating on M-102.
+WO-2023085,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-136.
+WO-2023087,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-120.
+WO-2023089,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-105.
+WO-2023090,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-122.
+WO-2023091,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-139.
+WO-2023092,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-106.
+WO-2023093,Insulation breakdown,motor,import,0.850,Work order text identifies insulation breakdown on M-123.
+WO-2023094,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-140.
+WO-2023096,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-124.
+WO-2023098,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-108.
+WO-2023100,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-143.
+WO-2023101,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-110.
+WO-2023102,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-127.
+WO-2023104,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-111.
+WO-2023105,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-128.
+WO-2023107,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-112.
+WO-2023109,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-146.
+WO-2023111,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-131.
+WO-2023112,Belt slippage,fan,import,0.850,Work order text identifies belt slippage on F-148.
+WO-2023113,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-115.
+WO-2023115,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-149.
+WO-2023117,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-133.
+WO-2023118,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-150.
+WO-2023120,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-134.
+WO-2023122,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-119.
+WO-2023123,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-136.
+WO-2023124,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-103.
+WO-2023126,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-137.
+WO-2023128,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-121.
+WO-2023130,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-105.
+WO-2023131,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-122.
+WO-2023133,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-107.
+WO-2023134,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-124.
+WO-2023135,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-141.
+WO-2023137,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-125.
+WO-2023139,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-109.
+WO-2023141,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-143.
+WO-2023142,Belt mistracking,conveyor,import,0.850,Work order text identifies belt mistracking on CV-110.
+WO-2023143,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-127.
+WO-2023144,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-145.
+WO-2023145,Low capacity,compressor,import,0.850,Work order text identifies low capacity on C-112.
+WO-2023146,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-129.
+WO-2023148,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-113.
+WO-2023150,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-147.
+WO-2023152,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-131.
+WO-2023153,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-148.
+WO-2023154,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-115.
+WO-2023156,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-150.
+WO-2023157,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-117.
+WO-2023159,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-101.
+WO-2023161,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-135.
+WO-2023163,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-119.
+WO-2023164,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-136.
+WO-2023165,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-103.
+WO-2023167,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-138.
+WO-2023169,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-122.
+WO-2023170,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-139.
+WO-2023172,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-123.
+WO-2023174,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-107.
+WO-2023175,Belt mistracking,conveyor,import,0.850,Work order text identifies belt mistracking on CV-124.
+WO-2023176,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-141.
+WO-2023178,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-126.
+WO-2023180,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-110.
+WO-2023182,Overheating,motor,import,1.000,Work order text identifies overheating on M-144.
+WO-2023183,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-111.
+WO-2023185,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-145.
+WO-2023186,Oil carryover,compressor,import,0.850,Work order text identifies oil carryover on C-112.
+WO-2023187,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-129.
+WO-2023189,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-114.
+WO-2023191,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-148.
+WO-2023193,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-132.
+WO-2023194,Tube leak,heat_exchanger,import,0.850,Work order text identifies tube leak on HX-149.
+WO-2023195,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-116.
+WO-2023196,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-133.
+WO-2023197,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-150.
+WO-2023198,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-117.
+WO-2023200,Overheating,motor,import,1.000,Work order text identifies overheating on M-102.
+WO-2023202,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-136.
+WO-2023204,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-120.
+WO-2023205,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-137.
+WO-2023206,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-104.
+WO-2023208,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-138.
+WO-2023209,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-105.
+WO-2023211,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-140.
+WO-2023213,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-124.
+WO-2023215,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-108.
+WO-2023216,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-125.
+WO-2023217,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-142.
+WO-2023219,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-126.
+WO-2023221,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-111.
+WO-2023222,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-128.
+WO-2023224,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-112.
+WO-2023226,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-146.
+WO-2023227,Imbalance,fan,import,0.850,Work order text identifies imbalance on F-113.
+WO-2023228,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-130.
+WO-2023230,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-114.
+WO-2023232,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-149.
+WO-2023234,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-133.
+WO-2023235,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-150.
+WO-2023237,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-134.
+WO-2023238,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-101.
+WO-2023239,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-118.
+WO-2023241,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-102.
+WO-2023243,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-137.
+WO-2023245,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-121.
+WO-2023246,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-138.
+WO-2023247,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-105.
+WO-2023248,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-122.
+WO-2023249,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-139.
+WO-2023250,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-106.
+WO-2023252,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-140.
+WO-2023254,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-125.
+WO-2023256,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-109.
+WO-2023257,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-126.
+WO-2023258,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-143.
+WO-2023260,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-127.
+WO-2023261,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-144.
+WO-2023263,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-128.
+WO-2023265,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-113.
+WO-2023267,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-147.
+WO-2023268,Tube fouling,heat_exchanger,import,0.850,Work order text identifies tube fouling on HX-114.
+WO-2023269,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-131.
+WO-2023271,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-115.
+WO-2023273,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-149.
+WO-2023274,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-116.
+WO-2023276,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-101.
+WO-2023278,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-135.
+WO-2023279,Insulation breakdown,motor,import,0.850,Work order text identifies insulation breakdown on M-102.
+WO-2023280,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-119.
+WO-2023282,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-103.
+WO-2023284,Overheating,motor,import,1.000,Work order text identifies overheating on M-137.
+WO-2023286,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-121.
+WO-2023287,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-139.
+WO-2023289,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-123.
+WO-2023290,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-140.
+WO-2023291,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-107.
+WO-2023293,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-141.
+WO-2023295,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-125.
+WO-2023297,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-109.
+WO-2023298,Belt slippage,fan,import,0.850,Work order text identifies belt slippage on F-127.
+WO-2023299,Overheating,motor,import,1.000,Work order text identifies overheating on M-144.
+WO-2023300,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-111.
+WO-2023301,Tube fouling,heat_exchanger,import,0.850,Work order text identifies tube fouling on HX-128.
+WO-2023302,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-145.
+WO-2023304,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-129.
+WO-2023306,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-113.
+WO-2023308,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-147.
+WO-2023309,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-115.
+WO-2023310,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-132.
+WO-2023312,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-116.
+WO-2023313,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-133.
+WO-2023315,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-117.
+WO-2023317,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-101.
+WO-2023319,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-135.
+WO-2023320,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-103.
+WO-2023321,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-120.
+WO-2023323,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-104.
+WO-2023325,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-138.
+WO-2023326,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-105.
+WO-2023328,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-139.
+WO-2023330,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-123.
+WO-2023331,Belt slippage,fan,import,0.850,Work order text identifies belt slippage on F-141.
+WO-2023332,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-108.
+WO-2023334,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-142.
+WO-2023336,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-126.
+WO-2023338,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-110.
+WO-2023339,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-127.
+WO-2023341,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-111.
+WO-2023342,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-129.
+WO-2023343,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-146.
+WO-2023345,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-130.
+WO-2023347,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-114.
+WO-2023349,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-148.
+WO-2023350,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-115.
+WO-2023351,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-132.
+WO-2023352,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-149.
+WO-2023353,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-117.
+WO-2023354,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-134.
+WO-2023356,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-118.
+WO-2023358,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-102.
+WO-2023360,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-136.
+WO-2023361,Belt mistracking,conveyor,import,0.850,Work order text identifies belt mistracking on CV-103.
+WO-2023362,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-120.
+WO-2023364,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-105.
+WO-2023365,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-122.
+WO-2023367,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-106.
+WO-2023369,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-140.
+WO-2023371,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-124.
+WO-2023372,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-141.
+WO-2023373,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-108.
+WO-2023375,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-143.
+WO-2023377,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-127.
+WO-2023378,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-144.
+WO-2023380,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-128.
+WO-2023382,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-112.
+WO-2023383,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-129.
+WO-2023384,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-146.
+WO-2023386,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-131.
+WO-2023388,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-115.
+WO-2023390,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-149.
+WO-2023391,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-116.
+WO-2023393,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-150.
+WO-2023394,Belt mistracking,conveyor,import,0.850,Work order text identifies belt mistracking on CV-117.
+WO-2023395,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-134.
+WO-2023397,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-119.
+WO-2023399,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-103.
+WO-2023401,Overheating,motor,import,1.000,Work order text identifies overheating on M-137.
+WO-2023402,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-104.
+WO-2023403,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-121.
+WO-2023404,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-138.
+WO-2023405,Oil carryover,compressor,import,0.850,Work order text identifies oil carryover on C-105.
+WO-2023406,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-122.
+WO-2023408,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-107.
+WO-2023410,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-141.
+WO-2023412,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-125.
+WO-2023413,Tube leak,heat_exchanger,import,0.850,Work order text identifies tube leak on HX-142.
+WO-2023414,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-109.
+WO-2023416,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-143.
+WO-2023417,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-110.
+WO-2023419,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-145.
+WO-2023421,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-129.
+WO-2023423,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-113.
+WO-2023424,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-130.
+WO-2023425,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-147.
+WO-2023427,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-131.
+WO-2023429,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-115.
+WO-2023430,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-133.
+WO-2023432,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-117.
+WO-2023434,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-101.
+WO-2023435,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-118.
+WO-2023436,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-135.
+WO-2023438,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-119.
+WO-2023440,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-103.
+WO-2023442,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-138.
+WO-2023443,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-105.
+WO-2023445,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-139.
+WO-2023446,Imbalance,fan,import,0.850,Work order text identifies imbalance on F-106.
+WO-2023447,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-123.
+WO-2023449,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-107.
+WO-2023451,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-141.
+WO-2023453,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-126.
+WO-2023454,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-143.
+WO-2023455,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-110.
+WO-2023456,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-127.
+WO-2023457,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-144.
+WO-2023458,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-111.
+WO-2023460,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-145.
+WO-2023462,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-129.
+WO-2023464,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-114.
+WO-2023465,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-131.
+WO-2023466,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-148.
+WO-2023468,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-132.
+WO-2023469,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-149.
+WO-2023471,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-133.
+WO-2023473,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-117.
+WO-2023475,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-102.
+WO-2023476,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-119.
+WO-2023477,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-136.
+WO-2023479,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-120.
+WO-2023481,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-104.
+WO-2023482,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-121.
+WO-2023484,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-105.
+WO-2023486,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-140.
+WO-2023487,Tube fouling,heat_exchanger,import,0.850,Work order text identifies tube fouling on HX-107.
+WO-2023488,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-124.
+WO-2023490,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-108.
+WO-2023492,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-142.
+WO-2023494,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-126.
+WO-2023495,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-143.
+WO-2023497,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-128.
+WO-2023498,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-145.
+WO-2023499,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-112.
+WO-2023501,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-146.
+WO-2023503,Overheating,motor,import,1.000,Work order text identifies overheating on M-130.
+WO-2023505,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-114.
+WO-2023506,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-131.
+WO-2023507,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-149.
+WO-2023508,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-116.
+WO-2023509,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-133.
+WO-2023510,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-150.
+WO-2023512,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-134.
+WO-2023514,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-118.
+WO-2023516,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-102.
+WO-2023517,Low capacity,compressor,import,0.850,Work order text identifies low capacity on C-119.
+WO-2023518,Overheating,motor,import,1.000,Work order text identifies overheating on M-137.
+WO-2023520,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-121.
+WO-2023521,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-138.
+WO-2023523,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-122.
+WO-2023525,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-106.
+WO-2023527,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-140.
+WO-2023528,Low heat transfer,heat_exchanger,import,0.850,Work order text identifies low heat transfer on HX-107.
+WO-2023529,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-125.
+WO-2023531,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-109.
+WO-2023533,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-143.
+WO-2023534,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-110.
+WO-2023536,Overheating,motor,import,1.000,Work order text identifies overheating on M-144.
+WO-2023538,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-128.
+WO-2023539,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-145.
+WO-2023540,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-113.
+WO-2023542,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-147.
+WO-2023544,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-131.
+WO-2023546,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-115.
+WO-2023547,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-132.
+WO-2023549,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-116.
+WO-2023550,Low capacity,compressor,import,0.850,Work order text identifies low capacity on C-133.
+WO-2023551,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-101.
+WO-2023553,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-135.
+WO-2023555,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-119.
+WO-2023557,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-103.
+WO-2023558,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-120.
+WO-2023559,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-137.
+WO-2023560,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-104.
+WO-2023561,Low heat transfer,heat_exchanger,import,0.850,Work order text identifies low heat transfer on HX-121.
+WO-2023562,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-139.
+WO-2023564,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-123.
+WO-2023566,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-107.
+WO-2023568,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-141.
+WO-2023569,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-108.
+WO-2023570,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-125.
+WO-2023572,Overheating,motor,import,1.000,Work order text identifies overheating on M-109.
+WO-2023573,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-127.
+WO-2023575,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-111.
+WO-2023577,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-145.
+WO-2023579,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-129.
+WO-2023580,Stem leakage,valve,import,0.850,Work order text identifies stem leakage on V-146.
+WO-2023581,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-113.
+WO-2023583,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-147.
+WO-2023585,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-132.
+WO-2023586,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-149.
+WO-2023588,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-133.
+WO-2023590,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-117.
+WO-2023591,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-134.
+WO-2023592,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-101.
+WO-2023594,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-135.
+WO-2023596,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-120.
+WO-2023598,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-104.
+WO-2023599,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-121.
+WO-2023601,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-105.
+WO-2023602,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-122.
+WO-2023603,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-139.
+WO-2023605,Overheating,motor,import,1.000,Work order text identifies overheating on M-123.
+WO-2023607,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-108.
+WO-2023609,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-142.
+WO-2023610,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-109.
+WO-2023611,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-126.
+WO-2023612,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-143.
+WO-2023613,Belt mistracking,conveyor,import,0.850,Work order text identifies belt mistracking on CV-110.
+WO-2023614,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-127.
+WO-2023616,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-111.
+WO-2023618,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-146.
+WO-2023620,Overheating,motor,import,1.000,Work order text identifies overheating on M-130.
+WO-2023621,Oil carryover,compressor,import,0.850,Work order text identifies oil carryover on C-147.
+WO-2023622,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-114.
+WO-2023624,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-148.
+WO-2023625,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-115.
+WO-2023627,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-149.
+WO-2023629,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-134.
+WO-2023631,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-118.
+WO-2023632,Tube leak,heat_exchanger,import,0.850,Work order text identifies tube leak on HX-135.
+WO-2023633,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-102.
+WO-2023635,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-136.
+WO-2023637,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-120.
+WO-2023638,Overheating,motor,import,1.000,Work order text identifies overheating on M-137.
+WO-2023640,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-122.
+WO-2023642,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-106.
+WO-2023643,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-123.
+WO-2023644,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-140.
+WO-2023646,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-124.
+WO-2023648,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-108.
+WO-2023650,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-143.
+WO-2023651,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-110.
+WO-2023653,Overheating,motor,import,1.000,Work order text identifies overheating on M-144.
+WO-2023654,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-111.
+WO-2023655,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-128.
+WO-2023657,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-112.
+WO-2023659,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-146.
+WO-2023661,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-131.
+WO-2023662,Imbalance,fan,import,0.850,Work order text identifies imbalance on F-148.
+WO-2023663,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-115.
+WO-2023664,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-132.
+WO-2023665,Tube leak,heat_exchanger,import,0.850,Work order text identifies tube leak on HX-149.
+WO-2023666,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-116.
+WO-2023668,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-150.
+WO-2023670,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-134.
+WO-2023672,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-119.
+WO-2023673,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-136.
+WO-2023674,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-103.
+WO-2023676,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-137.
+WO-2023677,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-104.
+WO-2023679,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-138.
+WO-2023681,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-122.
+WO-2023683,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-107.
+WO-2023684,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-124.
+WO-2023685,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-141.
+WO-2023687,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-125.
+WO-2023689,Overheating,motor,import,1.000,Work order text identifies overheating on M-109.
+WO-2023690,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-126.
+WO-2023692,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-110.
+WO-2023694,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-145.
+WO-2023695,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-112.
+WO-2023696,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-129.
+WO-2023698,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-113.
+WO-2023700,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-147.
+WO-2023702,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-131.
+WO-2023703,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-148.
+WO-2023705,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-133.
+WO-2023706,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-150.
+WO-2023707,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-117.
+WO-2023709,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-101.
+WO-2023711,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-135.
+WO-2023713,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-119.
+WO-2023714,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-136.
+WO-2023715,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-103.
+WO-2023716,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-121.
+WO-2023717,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-138.
+WO-2023718,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-105.
+WO-2023720,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-139.
+WO-2023722,Overheating,motor,import,1.000,Work order text identifies overheating on M-123.
+WO-2023724,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-107.
+WO-2023725,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-124.
+WO-2023726,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-141.
+WO-2023728,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-126.
+WO-2023729,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-143.
+WO-2023731,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-127.
+WO-2023733,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-111.
+WO-2023735,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-145.
+WO-2023736,Low capacity,compressor,import,0.850,Work order text identifies low capacity on C-112.
+WO-2023737,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-129.
+WO-2023739,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-114.
+WO-2023741,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-148.
+WO-2023742,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-115.
+WO-2023744,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-149.
+WO-2023746,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-133.
+WO-2023747,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-150.
+WO-2023748,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-117.
+WO-2023750,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-102.
+WO-2023752,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-136.
+WO-2023754,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-120.
+WO-2023755,Overheating,motor,import,1.000,Work order text identifies overheating on M-137.
+WO-2023757,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-121.
+WO-2023758,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-138.
+WO-2023759,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-105.
+WO-2023761,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-140.
+WO-2023763,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-124.
+WO-2023765,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-108.
+WO-2023766,Stem leakage,valve,import,0.850,Work order text identifies stem leakage on V-125.
+WO-2023767,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-142.
+WO-2023768,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-109.
+WO-2023769,Low capacity,compressor,import,0.850,Work order text identifies low capacity on C-126.
+WO-2023770,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-143.
+WO-2023772,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-128.
+WO-2023774,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-112.
+WO-2023776,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-146.
+WO-2023777,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-113.
+WO-2023778,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-130.
+WO-2023780,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-114.
+WO-2023781,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-131.
+WO-2023783,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-116.
+WO-2023785,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-150.
+WO-2023787,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-134.
+WO-2023788,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-101.
+WO-2023789,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-118.
+WO-2023791,Overheating,motor,import,1.000,Work order text identifies overheating on M-102.
+WO-2023793,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-137.
+WO-2023794,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-104.
+WO-2023796,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-138.
+WO-2023798,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-122.
+WO-2023799,Stem leakage,valve,import,0.850,Work order text identifies stem leakage on V-139.
+WO-2023800,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-106.
+WO-2023802,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-140.
+WO-2023804,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-125.
+WO-2023806,Overheating,motor,import,1.000,Work order text identifies overheating on M-109.
+WO-2023807,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-126.
+WO-2023809,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-110.
+WO-2023810,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-127.
+WO-2023811,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-144.
+WO-2023813,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-128.
+WO-2023815,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-113.
+WO-2023817,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-147.
+WO-2023818,Tube leak,heat_exchanger,import,0.850,Work order text identifies tube leak on HX-114.
+WO-2023819,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-131.
+WO-2023820,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-148.
+WO-2023821,Bearing failure,pump,import,0.850,Work order text identifies bearing failure on P-115.
+WO-2023822,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-132.
+WO-2023824,Overheating,motor,import,1.000,Work order text identifies overheating on M-116.
+WO-2023826,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-101.
+WO-2023828,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-135.
+WO-2023829,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-102.
+WO-2023830,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-119.
+WO-2023832,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-103.
+WO-2023833,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-120.
+WO-2023835,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-104.
+WO-2023837,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-139.
+WO-2023839,Overheating,motor,import,1.000,Work order text identifies overheating on M-123.
+WO-2023840,Oil carryover,compressor,import,0.850,Work order text identifies oil carryover on C-140.
+WO-2023841,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-107.
+WO-2023843,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-141.
+WO-2023845,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-125.
+WO-2023846,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-142.
+WO-2023848,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-127.
+WO-2023850,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-111.
+WO-2023851,Tube leak,heat_exchanger,import,0.850,Work order text identifies tube leak on HX-128.
+WO-2023852,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-145.
+WO-2023854,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-129.
+WO-2023856,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-113.
+WO-2023858,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-147.
+WO-2023859,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-115.
+WO-2023861,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-149.
+WO-2023862,Bearing failure,motor,import,0.850,Work order text identifies bearing failure on M-116.
+WO-2023863,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-133.
+WO-2023865,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-117.
+WO-2023867,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-101.
+WO-2023869,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-135.
+WO-2023870,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-103.
+WO-2023871,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-120.
+WO-2023872,Overheating,motor,import,1.000,Work order text identifies overheating on M-137.
+WO-2023873,Actuator failure,valve,import,0.850,Work order text identifies actuator failure on V-104.
+WO-2023874,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-121.
+WO-2023876,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-105.
+WO-2023878,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-139.
+WO-2023880,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-123.
+WO-2023881,Imbalance,fan,import,0.850,Work order text identifies imbalance on F-141.
+WO-2023882,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-108.
+WO-2023884,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-142.
+WO-2023885,Insulation breakdown,motor,import,1.000,Work order text identifies insulation breakdown on M-109.
+WO-2023887,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-143.
+WO-2023889,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-127.
+WO-2023891,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-111.
+WO-2023892,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-129.
+WO-2023893,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-146.
+WO-2023895,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-130.
+WO-2023897,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-114.
+WO-2023898,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-131.
+WO-2023900,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-115.
+WO-2023902,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-149.
+WO-2023903,Belt damage,conveyor,import,0.850,Work order text identifies belt damage on CV-117.
+WO-2023904,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-134.
+WO-2023906,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-118.
+WO-2023908,Overheating,motor,import,1.000,Work order text identifies overheating on M-102.
+WO-2023910,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-136.
+WO-2023911,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-103.
+WO-2023913,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-137.
+WO-2023914,High discharge temperature,compressor,import,0.850,Work order text identifies high discharge temperature on C-105.
+WO-2023915,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-122.
+WO-2023917,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-106.
+WO-2023919,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-140.
+WO-2023921,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-124.
+WO-2023922,Belt slippage,fan,import,0.850,Work order text identifies belt slippage on F-141.
+WO-2023923,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-108.
+WO-2023924,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-125.
+WO-2023925,Cavitation,pump,import,0.850,Work order text identifies cavitation on P-143.
+WO-2023926,Pulley bearing failure,conveyor,import,1.000,Work order text identifies pulley bearing failure on CV-110.
+WO-2023928,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-144.
+WO-2023930,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-128.
+WO-2023932,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-112.
+WO-2023933,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-129.
+WO-2023934,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-146.
+WO-2023936,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-131.
+WO-2023937,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-148.
+WO-2023939,Actuator failure,valve,import,1.000,Work order text identifies actuator failure on V-132.
+WO-2023941,Overheating,motor,import,1.000,Work order text identifies overheating on M-116.
+WO-2023943,Cavitation,pump,import,1.000,Work order text identifies cavitation on P-150.
+WO-2023944,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-117.
+WO-2023945,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-134.
+WO-2023947,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-119.
+WO-2023949,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-103.
+WO-2023950,Imbalance,fan,import,1.000,Work order text identifies imbalance on F-120.
+WO-2023952,Stem leakage,valve,import,1.000,Work order text identifies stem leakage on V-104.
+WO-2023954,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-138.
+WO-2023955,Low capacity,compressor,import,0.850,Work order text identifies low capacity on C-105.
+WO-2023956,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-122.
+WO-2023958,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-107.
+WO-2023960,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-141.
+WO-2023962,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-125.
+WO-2023963,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-142.
+WO-2023965,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-126.
+WO-2023966,Seal leakage,pump,import,0.850,Work order text identifies seal leakage on P-143.
+WO-2023967,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-110.
+WO-2023969,Belt damage,conveyor,import,1.000,Work order text identifies belt damage on CV-145.
+WO-2023971,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-129.
+WO-2023973,Belt slippage,fan,import,1.000,Work order text identifies belt slippage on F-113.
+WO-2023974,Overheating,motor,import,0.850,Work order text identifies overheating on M-130.
+WO-2023975,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-147.
+WO-2023976,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-114.
+WO-2023977,Pulley bearing failure,conveyor,import,0.850,Work order text identifies pulley bearing failure on CV-131.
+WO-2023978,Bearing failure,fan,import,1.000,Work order text identifies bearing failure on F-148.
+WO-2023980,High discharge temperature,compressor,import,1.000,Work order text identifies high discharge temperature on C-133.
+WO-2023982,Belt mistracking,conveyor,import,1.000,Work order text identifies belt mistracking on CV-117.
+WO-2023984,Seal leakage,pump,import,1.000,Work order text identifies seal leakage on P-101.
+WO-2023985,Stem leakage,valve,import,0.850,Work order text identifies stem leakage on V-118.
+WO-2023986,Tube leak,heat_exchanger,import,1.000,Work order text identifies tube leak on HX-135.
+WO-2023988,Low capacity,compressor,import,1.000,Work order text identifies low capacity on C-119.
+WO-2023989,Bearing failure,pump,import,1.000,Work order text identifies bearing failure on P-136.
+WO-2023991,Tube fouling,heat_exchanger,import,1.000,Work order text identifies tube fouling on HX-121.
+WO-2023993,Oil carryover,compressor,import,1.000,Work order text identifies oil carryover on C-105.
+WO-2023995,Passing valve,valve,import,1.000,Work order text identifies passing valve on V-139.
+WO-2023996,Bearing failure,fan,import,0.850,Work order text identifies bearing failure on F-106.
+WO-2023997,Bearing failure,motor,import,1.000,Work order text identifies bearing failure on M-123.
+WO-2023999,Low heat transfer,heat_exchanger,import,1.000,Work order text identifies low heat transfer on HX-107.

@@ -1,0 +1,22 @@
+name,equipment_type,mechanism,cause,symptom,consequence_category
+Bearing failure,pump,fatigue or lubrication breakdown,contamination or insufficient lubrication,vibration and bearing temperature increase,production
+Seal leakage,pump,seal face wear,process contamination or misalignment,visible leakage and loss of containment,safety-environment
+Cavitation,pump,vapor bubble collapse,low suction pressure or blocked strainer,"noise, vibration, and flow instability",production
+Overheating,motor,thermal overload,blocked ventilation or excessive load,high winding temperature and trip,production
+Insulation breakdown,motor,electrical insulation degradation,moisture ingress or age-related deterioration,earth fault or winding fault,production
+Bearing failure,motor,fatigue or lubrication breakdown,contamination or insufficient lubrication,vibration and bearing temperature increase,production
+Belt mistracking,conveyor,belt alignment instability,material build-up or pulley misalignment,belt running off center,production
+Pulley bearing failure,conveyor,bearing wear or lubrication breakdown,contamination or over-tension,noise and pulley vibration,production
+Belt damage,conveyor,belt cover or carcass damage,foreign object impact or material carryback,visible belt tears or splice damage,production
+Passing valve,valve,seat leakage,seat wear or debris,flow leakage when closed,quality
+Actuator failure,valve,actuator drive fault,air supply issue or limit switch fault,valve fails to stroke,production
+Stem leakage,valve,packing degradation,packing wear or gland adjustment issue,external leakage around stem,safety-environment
+High discharge temperature,compressor,compression heat not controlled,cooler fouling or low oil level,high discharge temperature alarm,production
+Oil carryover,compressor,separator performance loss,separator element saturation or high oil level,oil downstream of compressor,quality
+Low capacity,compressor,reduced compression output,inlet restriction or valve wear,low pressure or low flow,production
+Imbalance,fan,rotor imbalance,dust build-up or blade damage,high vibration at fan speed,production
+Bearing failure,fan,fatigue or lubrication breakdown,contamination or insufficient lubrication,vibration and bearing temperature increase,production
+Belt slippage,fan,drive belt traction loss,low belt tension or worn belt,speed loss and belt dust,production
+Tube fouling,heat_exchanger,heat transfer surface fouling,process scaling or solids deposition,high approach temperature,production
+Tube leak,heat_exchanger,pressure boundary failure,corrosion or erosion,cross-contamination or pressure loss,safety-environment
+Low heat transfer,heat_exchanger,thermal performance degradation,fouling or bypassing,outlet temperature not achieved,production
