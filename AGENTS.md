@@ -23,6 +23,8 @@ For refactoring or design decisions, explain:
 
 Keep explanations concise and focused on practical engineering insights, not line-by-line code commentary.
 
+Update milestones.md to keep track of the progress.
+
 Goal: Help me understand the concepts, design decisions, and tradeoffs behind the implementation while maintaining development velocity.
 
 

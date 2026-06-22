@@ -1,13 +1,22 @@
 # Open Reliability
 
-Open Reliability is a reliability-engineering assistant workspace. The current app includes a marketing/features site and a Reliability Agent chat experience for asking maintenance, asset reliability, and defect-elimination questions.
+Open Reliability is a reliability-engineering assistant workspace. The current
+app ships a Reliability Agent chat experience for asking maintenance, asset
+reliability, and defect-elimination questions, backed by persistent
+conversations, message history, model-provider access, and conversation memory
+updates.
+
+The broader product vision is a planned multi-agent reliability platform with
+Master Data, Defect Elimination, Strategy, and Reliability Improvement agents.
+Until those specialist workflows are implemented, they should be described as
+planned capability rather than live backend behavior.
 
 ## Apps
 
 - `apps/web` — Next.js frontend.
 - `apps/api` — FastAPI backend for conversations, message persistence, memory updates, and model-provider access.
 
-## Reliability Agent
+## Current Reliability Agent
 
 The Reliability Agent lives at:
 
@@ -23,6 +32,28 @@ Current chat capabilities:
 - Summarised session titles generated from the first user message.
 - Returning to the latest active conversation via browser local storage.
 - Conversation memory updates so follow-up questions retain useful context.
+
+Current backend capabilities:
+
+- `GET /health` service status.
+- `POST /conversations` conversation creation.
+- `GET /conversations` recent conversation listing.
+- `GET /conversations/{conversation_id}` conversation retrieval.
+- `POST /conversations/{conversation_id}/messages` user-message persistence,
+  provider-backed assistant response generation, and memory updates.
+
+## Agent Naming
+
+Use this naming scheme across product copy, docs, and workflows:
+
+- `Reliability Agent` - the only user-visible chat agent and future
+  orchestrator.
+- `Master Data Agent` - planned upload, mapping, validation, and data-readiness
+  workflow.
+- `Defect Elimination Agent` - planned repeat-failure and RCA workflow.
+- `Strategy Agent` - planned PM strategy and failure-mode coverage workflow.
+- `Reliability Improvement Agent` - planned value, action-plan, reporting, and
+  roadmap workflow.
 
 Example title behavior:
 

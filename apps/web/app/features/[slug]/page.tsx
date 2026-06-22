@@ -25,9 +25,9 @@ const featurePages: Record<
       "A searchable engineering repository for FMEAs, RCA reports, OEM manuals, and site standards.",
   },
   "reliability-agent-team": {
-    title: "Reliability Agent Team",
+    title: "Reliability Agent",
     description:
-      "Specialist reliability agents that combine data, strategies, and engineering knowledge to support decisions.",
+      "The current reliability chat experience with persistent conversations, message history, and memory updates.",
   },
   "equipment-intelligence": {
     title: "Equipment Intelligence",
