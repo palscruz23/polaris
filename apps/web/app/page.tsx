@@ -115,9 +115,9 @@ const heroBenefits = [
       "Planned workflows connect data review, defect elimination, strategy checks, and improvement planning.",
   },
   {
-    title: "Grow capability in practical stages",
+    title: "Add capabilities as tools",
     description:
-      "Each product capability can be designed, tested, and released without hiding what is available today.",
+      "Reliability workflows can grow through focused tools for search, analysis, planning, and reporting.",
   },
 ];
 
