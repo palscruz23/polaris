@@ -3,7 +3,8 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
-from app.domain.chat import ChatMessage
+from app.agents.registry import SpecialistRegistry
+from app.domain.progress import ProgressCallback
 from app.exceptions import (
     ChatServiceError,
     ConversationBusyError,
@@ -17,7 +18,9 @@ from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
 from app.services.context_builder import ContextBuilder
 from app.services.memory_service import MemoryService
-
+from app.services.reliability_agent_orchestrator import (
+    ReliabilityAgentOrchestrator,
+)
 
 TITLE_STOP_WORDS = {
     "a",
@@ -54,6 +57,7 @@ class ConversationChatService:
         self,
         session: Session,
         provider: ChatProvider,
+        orchestrator: ReliabilityAgentOrchestrator | None = None,
     ):
         self.session = session
         self.provider = provider
@@ -61,11 +65,16 @@ class ConversationChatService:
         self.messages = MessageRepository(session)
         self.context_builder = ContextBuilder(provider)
         self.memory_service = MemoryService(provider)
+        self.orchestrator = orchestrator or ReliabilityAgentOrchestrator(
+            provider=provider,
+            registry=SpecialistRegistry(session),
+        )
 
     def respond(
         self,
         conversation_id: uuid.UUID,
         content: str,
+        progress: ProgressCallback | None = None,
     ) -> tuple[Message, Message, str]:
         conversation = self.conversations.get_for_update(conversation_id)
 
@@ -119,7 +128,7 @@ class ConversationChatService:
                 )
 
                 if locked_conversation is None:
-                    raise ConversationNotFoundError
+                    raise ConversationNotFoundError from None
 
                 self.conversations.save_memory(
                     conversation=locked_conversation,
@@ -135,9 +144,10 @@ class ConversationChatService:
                     current_user_message=content,
                 )
 
-            assistant_content = self.provider.generate(
+            assistant_content = self.orchestrator.respond(
                 messages=context.messages,
                 max_output_tokens=context.max_output_tokens,
+                progress=progress,
             )
         except Exception:
             self._clear_processing(conversation_id)
@@ -180,10 +190,11 @@ class ConversationChatService:
             if word.lower() not in TITLE_STOP_WORDS
         ]
 
-        if len(summary_words) < 3:
-            summary_words = words[:6]
-        else:
-            summary_words = summary_words[:7]
+        summary_words = (
+            words[:6]
+            if len(summary_words) < 3
+            else summary_words[:7]
+        )
 
         title = " ".join(
             word if word.isupper() or any(char.isdigit() for char in word)

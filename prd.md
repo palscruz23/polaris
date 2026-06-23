@@ -4,13 +4,15 @@
 
 The current product includes the user-facing Reliability Agent chat, FastAPI
 conversation endpoints, PostgreSQL-backed conversation and message persistence,
-provider-backed assistant responses, deterministic conversation titles, and
-per-conversation memory updates.
+provider-backed assistant responses, deterministic conversation titles,
+per-conversation memory updates, bounded specialist orchestration, and
+implemented Master Data equipment discovery, Defect Elimination, and
+Maintenance Strategy specialist workflows.
 
-The multi-agent workflows below describe the product direction. Master Data,
-Defect Elimination, Strategy, Reliability Improvement, knowledge-base, and
-pgvector-backed retrieval capabilities are planned unless explicitly marked as
-implemented elsewhere.
+The multi-agent workflows below describe the product direction. Master Data
+upload and mapping, Reliability Improvement, knowledge-base, and
+pgvector-backed retrieval capabilities remain planned unless explicitly marked
+as implemented elsewhere.
 
 ## New Product Positioning
 
@@ -57,9 +59,16 @@ The Reliability Agent is the only agent visible to the user.
 
 ### Purpose
 
-Prepare, clean, validate, and standardize uploaded data.
+Provide trusted equipment-master discovery now, then prepare, clean, validate,
+and standardize uploaded data in later workflows.
 
-### Tools
+### Implemented Tools
+
+* Equipment master listing and search
+* Equipment type, location, criticality, and status filters
+* Bounded pagination and matching summary counts
+
+### Planned Tools
 
 * File type detection
 * Dataset type detection
@@ -120,7 +129,7 @@ Convert reliability issues into structured investigations.
 
 ---
 
-## 3. Strategy Agent
+## 3. Maintenance Strategy Agent
 
 ### Purpose
 
@@ -128,26 +137,19 @@ Review and optimize maintenance strategies.
 
 ### Tools
 
-* PM frequency analysis
-* PM effectiveness check
-* Corrective vs preventive ratio
-* Over-maintenance detection
-* Missing PM detection
-* Strategy summariser
-* Spares and cost analysis
-* Condition monitoring recommendations
-* FMEA control review
-* OEM recommendations
-* Strategy gap analysis
-* Failure mode coverage analysis
+* Maintenance strategy profile builder
+* Maintenance mix analyzer
+* Failure mode coverage analyzer
+* Frequency risk analyzer
+* Maintenance strategy gap detector
+* Condition monitoring opportunity analyzer
+* Maintenance strategy recommendation builder
 
 ### Outputs
 
-* Keep PM tasks
-* Modify PM tasks
-* Delete PM tasks
-* Recommended frequencies
-* Missing PM recommendations
+* Keep, modify, add, or engineering-review recommendations
+* Frequency risk flags
+* Missing or partial failure-mode coverage
 * Condition monitoring opportunities
 * Strategy gaps
 
@@ -196,7 +198,7 @@ Reliability Agent
   ↓
 Specialist Agents:
   - Defect Elimination Agent
-  - Strategy Agent
+  - Maintenance Strategy Agent
   - Reliability Improvement Agent
   ↓
 Reliability Agent
@@ -216,7 +218,7 @@ Reliability Agent
 ├── Defect Elimination Agent
 │   └── RCA + repeat failure tools
 │
-├── Strategy Agent
+├── Maintenance Strategy Agent
 │   └── PM review tools
 │
 └── Reliability Improvement Agent

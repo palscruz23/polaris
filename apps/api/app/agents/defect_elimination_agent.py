@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.domain.progress import ProgressCallback, report_progress
 from app.models import WorkOrder, WorkOrderFailureMode
 from app.tools.defect_elimination import (
     BadActorAnalysisTool,
@@ -12,8 +13,8 @@ from app.tools.defect_elimination import (
     DefectEliminationDatasetSummary,
     FiveWhysAnalysis,
     FiveWhysGeneratorTool,
-    MTBFFinding,
     MTBFCalculationTool,
+    MTBFFinding,
     RCAEvidencePlan,
     RCAEvidencePlanningTool,
     RCATemplate,
@@ -74,12 +75,40 @@ class DefectEliminationAgent:
         bad_actor_limit: int = 10,
         repeat_failure_limit: int = 10,
         minimum_repeat_occurrences: int = 2,
+        progress: ProgressCallback | None = None,
     ) -> DefectEliminationFindings:
         work_orders = self._load_work_orders()
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="reliability_metrics",
+            message=(
+                "Defect Elimination Agent is summarizing the reliability "
+                "history."
+            ),
+        )
         summary = self.metrics_tool.summarize(work_orders)
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="bad_actor_analysis",
+            message="Defect Elimination Agent is identifying bad actors.",
+        )
         bad_actors = self.bad_actor_tool.run(
             work_orders,
             limit=bad_actor_limit,
+        )
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="repeat_failure_detection",
+            message=(
+                "Defect Elimination Agent is checking repeat failures and "
+                "MTBF."
+            ),
         )
         repeat_failures = self.repeat_failure_tool.run(
             work_orders,
@@ -93,6 +122,16 @@ class DefectEliminationAgent:
         weibull_analysis = self.weibull_tool.run(
             work_orders,
             limit=bad_actor_limit,
+        )
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="rca_planning",
+            message=(
+                "Defect Elimination Agent is preparing investigation "
+                "recommendations."
+            ),
         )
         rca_evidence_plans = self.rca_evidence_tool.run(repeat_failures)
         five_whys = self.five_whys_tool.run(repeat_failures)

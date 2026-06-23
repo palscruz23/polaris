@@ -1,10 +1,16 @@
+import json
 import uuid
+from dataclasses import asdict
+from queue import Queue
+from threading import Thread
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.database import get_database_session
+from app.database import SessionLocal, get_database_session
+from app.domain.progress import OrchestrationProgress
 from app.exceptions import (
     ChatServiceError,
     ContextBudgetError,
@@ -21,7 +27,6 @@ from app.schemas.conversation import (
 )
 from app.schemas.message import MessageCreate, MessageExchangeResponse
 from app.services.conversation_chat_service import ConversationChatService
-
 
 router = APIRouter(
     prefix="/conversations",
@@ -130,4 +135,108 @@ def create_message(
         user_message=user_message,
         assistant_message=assistant_message,
         memory_update_status=memory_status,
+    )
+
+
+@router.post(
+    "/{conversation_id}/messages/stream",
+    response_class=StreamingResponse,
+)
+def stream_message(
+    conversation_id: uuid.UUID,
+    request: MessageCreate,
+    provider: ProviderDependency,
+) -> StreamingResponse:
+    event_queue: Queue[dict[str, object] | None] = Queue()
+
+    def publish_progress(event: OrchestrationProgress) -> None:
+        event_queue.put(
+            {
+                "type": "progress",
+                **asdict(event),
+            }
+        )
+
+    def produce_response() -> None:
+        with SessionLocal() as session:
+            service = ConversationChatService(
+                session=session,
+                provider=provider,
+            )
+
+            try:
+                user_message, assistant_message, memory_status = service.respond(
+                    conversation_id=conversation_id,
+                    content=request.content,
+                    progress=publish_progress,
+                )
+                exchange = MessageExchangeResponse(
+                    user_message=user_message,
+                    assistant_message=assistant_message,
+                    memory_update_status=memory_status,
+                )
+                event_queue.put(
+                    {
+                        "type": "complete",
+                        "exchange": exchange.model_dump(mode="json"),
+                    }
+                )
+            except ConversationNotFoundError:
+                event_queue.put(
+                    {
+                        "type": "error",
+                        "message": "Conversation not found.",
+                    }
+                )
+            except ConversationBusyError:
+                event_queue.put(
+                    {
+                        "type": "error",
+                        "message": (
+                            "The conversation already has an active response."
+                        ),
+                    }
+                )
+            except (ContextBudgetError, ChatServiceError) as error:
+                event_queue.put(
+                    {
+                        "type": "error",
+                        "message": str(error),
+                    }
+                )
+            except Exception:
+                event_queue.put(
+                    {
+                        "type": "error",
+                        "message": (
+                            "The Reliability Agent could not complete the "
+                            "request."
+                        ),
+                    }
+                )
+            finally:
+                event_queue.put(None)
+
+    def generate_events():
+        worker = Thread(
+            target=produce_response,
+            name=f"conversation-stream-{conversation_id}",
+            daemon=True,
+        )
+        worker.start()
+
+        while True:
+            event = event_queue.get()
+            if event is None:
+                break
+
+            yield f"{json.dumps(event)}\n"
+
+    return StreamingResponse(
+        generate_events(),
+        media_type="application/x-ndjson",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
     )

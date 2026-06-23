@@ -41,6 +41,7 @@ class RecordingProvider(ChatProvider):
         messages: Sequence[ChatMessage],
         max_output_tokens: int,
     ) -> str:
+        del max_output_tokens
         captured_messages = list(messages)
         self.calls.append(captured_messages)
 

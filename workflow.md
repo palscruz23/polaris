@@ -2,8 +2,10 @@
 
 This workflow describes the planned multi-agent product architecture. The
 current backend supports the user-facing Reliability Agent chat with persistent
-conversations, message history, provider-backed responses, and conversation
-memory updates. Specialist agents and their tools are planned increments.
+conversations, message history, provider-backed responses, conversation memory,
+and a bounded sequential multi-call orchestration loop. The Master Data, Defect
+Elimination, and Maintenance Strategy agents are registered specialists;
+additional specialists remain planned increments.
 
 ## Reliability Agent (Orchestrator)
 
@@ -47,6 +49,11 @@ failure detection, MTBF/MTTR calculation, and charter generation. The Defect
 Elimination Agent returns structured findings to the Reliability Agent, and the
 Reliability Agent consolidates the final response to the user.
 
+The chat streams transient operational progress while this workflow runs. These
+events describe coordination and named analysis stages, such as failure-mode
+coverage or bad actor analysis. They are not stored as conversation messages
+and do not expose private model reasoning.
+
 ---
 
 # Specialist Agents
@@ -55,9 +62,18 @@ Reliability Agent consolidates the final response to the user.
 
 ### Purpose
 
-Prepare, clean, validate, and standardize uploaded data.
+Provide trusted equipment-master discovery now, then prepare, clean, validate,
+and standardize uploaded data in later workflows.
 
-### Tools
+### Implemented Tools
+
+* Equipment master listing
+* Equipment text search
+* Equipment type, location, criticality, and status filters
+* Bounded pagination
+* Matching status and equipment-type summary counts
+
+### Planned Tools
 
 * File type detection
 * Dataset type detection
@@ -197,36 +213,33 @@ Reliability Agent consolidates findings into the user-facing response
 
 ---
 
-## 3. Strategy Agent
+## 3. Maintenance Strategy Agent
 
 ### Purpose
 
 Review and optimize maintenance strategies.
 
-### Tools
+### Implemented Tools
 
-* PM frequency analysis
-* PM effectiveness check
-* Corrective vs preventive ratio
-* Over-maintenance detection
-* Missing PM detection
-* Strategy summariser
-* Spares and cost analysis
-* Condition monitoring recommendations
-* FMEA control review
-* OEM recommendations
-* Strategy gap analysis
-* Failure mode coverage analysis
+* Maintenance strategy profile builder
+* Maintenance mix analyzer
+* Failure mode coverage analyzer
+* Frequency risk analyzer
+* Maintenance strategy gap detector
+* Condition monitoring opportunity analyzer
+* Maintenance strategy recommendation builder
 
 ### Outputs
 
-* Keep PM tasks
-* Modify PM tasks
-* Delete PM tasks
-* Recommended frequencies
-* Missing PM recommendations
+* Keep, modify, add, or engineering-review recommendations
+* Frequency risk flags
+* Missing or partial failure-mode coverage
 * Condition monitoring opportunities
 * Strategy gaps
+
+The v1 agent does not recommend deleting tasks or claim causal PM
+effectiveness. Task completion, schedule compliance, OEM, FMEA, statutory,
+labor-hour, and spares data are not yet represented in the reliability model.
 
 ---
 
@@ -272,7 +285,7 @@ Reliability Agent delegates to one or more specialist agents:
       └── Uses mapping, validation, cleaning, and readiness tools
   - Defect Elimination Agent
       └── Uses bad actor, repeat failure, MTBF/MTTR, RCA, and charter tools
-  - Strategy Agent
+  - Maintenance Strategy Agent
       └── Uses PM review, frequency, effectiveness, and coverage tools
   - Reliability Improvement Agent
       └── Uses value, risk, ranking, action-plan, and reporting tools
@@ -297,7 +310,7 @@ Reliability Agent
 ├── Defect Elimination Agent
 │   └── RCA + repeat failure tools
 │
-├── Strategy Agent
+├── Maintenance Strategy Agent
 │   └── PM review tools
 │
 └── Reliability Improvement Agent

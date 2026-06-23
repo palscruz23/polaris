@@ -44,6 +44,29 @@ type MessageExchangeApiResponse = {
   memory_update_status: string;
 };
 
+type ProgressStreamEvent = {
+  type: "progress";
+  stage: string;
+  message: string;
+  specialist: string | null;
+  tool: string | null;
+};
+
+type CompleteStreamEvent = {
+  type: "complete";
+  exchange: MessageExchangeApiResponse;
+};
+
+type ErrorStreamEvent = {
+  type: "error";
+  message: string;
+};
+
+type MessageStreamEvent =
+  | ProgressStreamEvent
+  | CompleteStreamEvent
+  | ErrorStreamEvent;
+
 const CONVERSATION_STORAGE_KEY = "open-reliability-conversation-id";
 const TITLE_STOP_WORDS = new Set([
   "a",
@@ -212,6 +235,14 @@ function AssistantMessage({ content }: { content: string }) {
               {children}
             </a>
           ),
+          table: ({ children, node, ...props }) => {
+            void node;
+            return (
+              <div className="agent-message-table-scroll">
+                <table {...props}>{children}</table>
+              </div>
+            );
+          },
         }}
         remarkPlugins={[remarkGfm]}
       >
@@ -270,9 +301,12 @@ export default function AgentWorkflowChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [attachment, setAttachment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [progressMessage, setProgressMessage] = useState(
+    "Reliability Agent is reviewing your request.",
+  );
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  const [historyIsOpen, setHistoryIsOpen] = useState(true);
+  const [historyIsOpen, setHistoryIsOpen] = useState(false);
   const [historyError, setHistoryError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
@@ -333,6 +367,7 @@ export default function AgentWorkflowChat() {
     setDraft("");
     setAttachment("");
     setIsLoading(true);
+    setProgressMessage("Reliability Agent is reviewing your request.");
     composerInputRef.current?.focus();
 
     const requestController = new AbortController();
@@ -343,7 +378,7 @@ export default function AgentWorkflowChat() {
         conversationId ??
         (await createConversation(requestController.signal, trimmedMessage));
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/conversations/${activeConversationId}/messages`,
+        `${process.env.NEXT_PUBLIC_API_URL}/conversations/${activeConversationId}/messages/stream`,
         {
           method: "POST",
           headers: {
@@ -360,8 +395,47 @@ export default function AgentWorkflowChat() {
         throw new Error("The Reliability Agent request failed.");
       }
 
-      const data: MessageExchangeApiResponse = await response.json();
+      if (!response.body) {
+        throw new Error("The Reliability Agent stream was unavailable.");
+      }
 
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let completedExchange: MessageExchangeApiResponse | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.trim()) {
+            continue;
+          }
+
+          const event = JSON.parse(line) as MessageStreamEvent;
+
+          if (event.type === "progress") {
+            setProgressMessage(event.message);
+          } else if (event.type === "complete") {
+            completedExchange = event.exchange;
+          } else {
+            throw new Error(event.message);
+          }
+        }
+
+        if (done) {
+          break;
+        }
+      }
+
+      if (!completedExchange) {
+        throw new Error("The Reliability Agent stream ended unexpectedly.");
+      }
+
+      const data = completedExchange;
       setMessages((currentMessages) => [
         ...currentMessages.map((message) =>
           message.id === temporaryMessageId
@@ -393,6 +467,7 @@ export default function AgentWorkflowChat() {
     } finally {
       requestControllerRef.current = null;
       setIsLoading(false);
+      setProgressMessage("Reliability Agent is reviewing your request.");
     }
   }
 
@@ -519,7 +594,7 @@ export default function AgentWorkflowChat() {
           <span>Back to home</span>
         </Link>
         <Link className="agent-chat-brand" href="/">
-          Open Reliability
+          <span>Open Reliability</span>
         </Link>
         <h1>Reliability Agent</h1>
         <div className="agent-chat-status" aria-label="Agent online">
@@ -648,7 +723,7 @@ export default function AgentWorkflowChat() {
                 <AgentMark />
                 <div>
                   <span className="agent-message-role">Reliability Agent</span>
-                  <p>Reliability Agent is thinking…</p>
+                  <p>{progressMessage}</p>
                 </div>
               </article>
             ) : null}
