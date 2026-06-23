@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from math import exp, gamma, log
 
 from app.models import Equipment, WorkOrder
 
@@ -14,6 +15,7 @@ REPAIR_ACTIVITY_TYPES = {
     "corrective",
     "emergency",
 }
+MINIMUM_WEIBULL_INTERVALS = 3
 PREVENTIVE_ACTIVITY_TYPES = {
     "preventive",
     "inspection",
@@ -88,6 +90,23 @@ class MTBFFinding:
     corrective_event_count: int
     observation_days: Decimal | None
     mtbf_days: Decimal | None
+    first_event_at: datetime | None
+    last_event_at: datetime | None
+
+
+@dataclass(frozen=True)
+class WeibullAnalysisFinding:
+    equipment_number: str
+    equipment_description: str | None
+    equipment_type: str | None
+    failure_count: int
+    interval_count: int
+    shape_beta: Decimal | None
+    scale_eta_days: Decimal | None
+    characteristic_life_days: Decimal | None
+    mean_time_between_failures_days: Decimal | None
+    failure_behavior: str
+    confidence: str
     first_event_at: datetime | None
     last_event_at: datetime | None
 
@@ -388,6 +407,76 @@ class MTBFCalculationTool:
             corrective_event_count=len(work_orders),
             observation_days=observation_days,
             mtbf_days=mtbf_days,
+            first_event_at=dates[0] if dates else None,
+            last_event_at=dates[-1] if dates else None,
+        )
+
+
+class WeibullAnalysisTool:
+    def run(
+        self,
+        work_orders: list[WorkOrder],
+        limit: int = 10,
+    ) -> list[WeibullAnalysisFinding]:
+        grouped: dict[str, list[WorkOrder]] = {}
+
+        for work_order in work_orders:
+            if work_order.maintenance_activity_type not in REPAIR_ACTIVITY_TYPES:
+                continue
+
+            equipment_number = _equipment_number(work_order)
+            if equipment_number is None:
+                continue
+
+            grouped.setdefault(equipment_number, []).append(work_order)
+
+        findings = [
+            self._build_finding(equipment_number, equipment_work_orders)
+            for equipment_number, equipment_work_orders in grouped.items()
+        ]
+
+        return sorted(
+            findings,
+            key=lambda finding: (
+                finding.shape_beta is not None,
+                finding.interval_count,
+                -(finding.shape_beta or Decimal("0")),
+            ),
+            reverse=True,
+        )[:limit]
+
+    def _build_finding(
+        self,
+        equipment_number: str,
+        work_orders: list[WorkOrder],
+    ) -> WeibullAnalysisFinding:
+        first_work_order = work_orders[0]
+        equipment = first_work_order.equipment
+        dates = _repair_event_dates(work_orders)
+        intervals = _failure_intervals_days(dates)
+        shape_beta = None
+        scale_eta = None
+        mean_time_between_failures = None
+
+        if len(intervals) >= MINIMUM_WEIBULL_INTERVALS:
+            shape_beta, scale_eta = _fit_weibull(intervals)
+            if shape_beta is not None and scale_eta is not None:
+                mean_time_between_failures = Decimal(
+                    str(float(scale_eta) * gamma(1 + (1 / float(shape_beta))))
+                ).quantize(Decimal("0.01"))
+
+        return WeibullAnalysisFinding(
+            equipment_number=equipment_number,
+            equipment_description=_equipment_description(equipment),
+            equipment_type=_equipment_type(equipment),
+            failure_count=len(dates),
+            interval_count=len(intervals),
+            shape_beta=shape_beta,
+            scale_eta_days=scale_eta,
+            characteristic_life_days=scale_eta,
+            mean_time_between_failures_days=mean_time_between_failures,
+            failure_behavior=_weibull_failure_behavior(shape_beta),
+            confidence=_weibull_confidence(len(intervals)),
             first_event_at=dates[0] if dates else None,
             last_event_at=dates[-1] if dates else None,
         )
@@ -855,6 +944,75 @@ def _safe_divide_decimal(
         return None
 
     return (numerator / denominator).quantize(Decimal("0.01"))
+
+
+def _failure_intervals_days(dates: list[datetime]) -> list[Decimal]:
+    intervals: list[Decimal] = []
+
+    for previous, current in zip(dates, dates[1:]):
+        elapsed_seconds = Decimal(str((current - previous).total_seconds()))
+        if elapsed_seconds > 0:
+            intervals.append(
+                (elapsed_seconds / Decimal("86400")).quantize(Decimal("0.01"))
+            )
+
+    return intervals
+
+
+def _fit_weibull(intervals: list[Decimal]) -> tuple[Decimal | None, Decimal | None]:
+    ordered = sorted(float(interval) for interval in intervals if interval > 0)
+    count = len(ordered)
+    if count < MINIMUM_WEIBULL_INTERVALS:
+        return None, None
+
+    x_values = [log(value) for value in ordered]
+    y_values = [
+        log(-log(1 - ((rank - 0.3) / (count + 0.4))))
+        for rank in range(1, count + 1)
+    ]
+    mean_x = sum(x_values) / count
+    mean_y = sum(y_values) / count
+    denominator = sum((x_value - mean_x) ** 2 for x_value in x_values)
+    if denominator == 0:
+        return None, None
+
+    beta = sum(
+        (x_value - mean_x) * (y_value - mean_y)
+        for x_value, y_value in zip(x_values, y_values)
+    ) / denominator
+    if beta <= 0:
+        return None, None
+
+    intercept = mean_y - (beta * mean_x)
+    eta = exp(-intercept / beta)
+
+    return (
+        Decimal(str(beta)).quantize(Decimal("0.01")),
+        Decimal(str(eta)).quantize(Decimal("0.01")),
+    )
+
+
+def _weibull_failure_behavior(shape_beta: Decimal | None) -> str:
+    if shape_beta is None:
+        return "insufficient interval history"
+
+    if shape_beta < Decimal("0.90"):
+        return "early-life or infant mortality pattern"
+
+    if shape_beta <= Decimal("1.10"):
+        return "random failure pattern"
+
+    return "wear-out or age-related pattern"
+
+
+def _weibull_confidence(interval_count: int) -> str:
+    if interval_count >= 8:
+        return "moderate"
+
+    if interval_count >= MINIMUM_WEIBULL_INTERVALS:
+        return "directional"
+
+    return "insufficient"
 
 
 def _format_datetime(value: datetime | None) -> str:

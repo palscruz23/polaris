@@ -21,6 +21,8 @@ from app.tools.defect_elimination import (
     ReliabilityMetricsTool,
     RepeatFailureDetectionTool,
     RepeatFailureFinding,
+    WeibullAnalysisFinding,
+    WeibullAnalysisTool,
 )
 
 
@@ -30,6 +32,7 @@ class DefectEliminationFindings:
     bad_actors: list[BadActorFinding]
     repeat_failures: list[RepeatFailureFinding]
     mtbf_metrics: list[MTBFFinding]
+    weibull_analysis: list[WeibullAnalysisFinding]
     rca_evidence_plans: list[RCAEvidencePlan]
     five_whys: list[FiveWhysAnalysis]
     rca_templates: list[RCATemplate]
@@ -47,6 +50,7 @@ class DefectEliminationAgent:
         repeat_failure_tool: RepeatFailureDetectionTool | None = None,
         metrics_tool: ReliabilityMetricsTool | None = None,
         mtbf_tool: MTBFCalculationTool | None = None,
+        weibull_tool: WeibullAnalysisTool | None = None,
         rca_evidence_tool: RCAEvidencePlanningTool | None = None,
         five_whys_tool: FiveWhysGeneratorTool | None = None,
         rca_template_tool: RCATemplateBuilderTool | None = None,
@@ -59,6 +63,7 @@ class DefectEliminationAgent:
         )
         self.metrics_tool = metrics_tool or ReliabilityMetricsTool()
         self.mtbf_tool = mtbf_tool or MTBFCalculationTool()
+        self.weibull_tool = weibull_tool or WeibullAnalysisTool()
         self.rca_evidence_tool = rca_evidence_tool or RCAEvidencePlanningTool()
         self.five_whys_tool = five_whys_tool or FiveWhysGeneratorTool()
         self.rca_template_tool = rca_template_tool or RCATemplateBuilderTool()
@@ -85,6 +90,10 @@ class DefectEliminationAgent:
             work_orders,
             limit=bad_actor_limit,
         )
+        weibull_analysis = self.weibull_tool.run(
+            work_orders,
+            limit=bad_actor_limit,
+        )
         rca_evidence_plans = self.rca_evidence_tool.run(repeat_failures)
         five_whys = self.five_whys_tool.run(repeat_failures)
         rca_templates = self.rca_template_tool.run(repeat_failures)
@@ -100,6 +109,7 @@ class DefectEliminationAgent:
             bad_actors=bad_actors,
             repeat_failures=repeat_failures,
             mtbf_metrics=mtbf_metrics,
+            weibull_analysis=weibull_analysis,
             rca_evidence_plans=rca_evidence_plans,
             five_whys=five_whys,
             rca_templates=rca_templates,
@@ -108,6 +118,7 @@ class DefectEliminationAgent:
                 bad_actors,
                 repeat_failures,
                 mtbf_metrics,
+                weibull_analysis,
             ),
         )
 
@@ -129,6 +140,7 @@ class DefectEliminationAgent:
         bad_actors: list[BadActorFinding],
         repeat_failures: list[RepeatFailureFinding],
         mtbf_metrics: list[MTBFFinding],
+        weibull_analysis: list[WeibullAnalysisFinding],
     ) -> list[str]:
         recommendations: list[str] = []
 
@@ -167,6 +179,16 @@ class DefectEliminationAgent:
                     f"{shortest_mtbf.equipment_number}; it has an estimated "
                     f"MTBF of {shortest_mtbf.mtbf_days} days across "
                     f"{shortest_mtbf.corrective_event_count} repair events."
+                )
+
+        if weibull_analysis:
+            top_weibull = weibull_analysis[0]
+            if top_weibull.shape_beta is not None:
+                recommendations.append(
+                    "Use Weibull analysis for "
+                    f"{top_weibull.equipment_number}; beta is "
+                    f"{top_weibull.shape_beta}, indicating a "
+                    f"{top_weibull.failure_behavior}."
                 )
 
         if not recommendations:
