@@ -1,6 +1,5 @@
 # Open Reliability
 
-Website: [open-reliability.vercel.app](https://open-reliability.vercel.app)
 
 Open Reliability is a reliability-engineering assistant workspace. The current
 app ships a Reliability Agent chat experience for asking maintenance, asset
@@ -12,6 +11,8 @@ capabilities through a bounded sequential multi-call loop.
 The Master Data, Defect Elimination, and Maintenance Strategy agents are
 implemented specialists in the broader multi-agent vision. Reliability
 Improvement remains planned.
+
+Website: [open-reliability.vercel.app](https://open-reliability.vercel.app)
 
 ## Sample Demo
 
