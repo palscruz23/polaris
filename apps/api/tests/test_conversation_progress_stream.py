@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 
 from app.domain.progress import report_progress
 from app.main import app
-from app.providers.factory import get_chat_provider
 from app.routes import conversations
 
 
@@ -80,17 +79,27 @@ def test_stream_message_returns_progress_before_completed_exchange(
         "ConversationChatService",
         ProgressService,
     )
-    app.dependency_overrides[get_chat_provider] = lambda: object()
+    selected_models: list[str | None] = []
+
+    def build_provider(model_id: str | None = None) -> object:
+        selected_models.append(model_id)
+        return object()
+
+    monkeypatch.setattr(
+        conversations,
+        "get_chat_provider",
+        build_provider,
+    )
     conversation_id = uuid.uuid4()
 
-    try:
-        with TestClient(app) as client:
-            response = client.post(
-                f"/conversations/{conversation_id}/messages/stream",
-                json={"content": "Review the strategy for P-101."},
-            )
-    finally:
-        app.dependency_overrides.clear()
+    with TestClient(app) as client:
+        response = client.post(
+            f"/conversations/{conversation_id}/messages/stream",
+            json={
+                "content": "Review the strategy for P-101.",
+                "model": "anthropic/claude-sonnet-4.6",
+            },
+        )
 
     events = [
         json.loads(line)
@@ -113,3 +122,4 @@ def test_stream_message_returns_progress_before_completed_exchange(
     assert events[-1]["exchange"]["assistant_message"]["content"] == (
         "Maintenance strategy review complete."
     )
+    assert selected_models == ["anthropic/claude-sonnet-4.6"]

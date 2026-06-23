@@ -14,10 +14,15 @@ This roadmap tracks the high-level milestones needed to develop Open Reliability
 | Milestone | Status | Outcome |
 | --- | --- | --- |
 | Project foundation | Done | Monorepo structure with Next.js frontend, FastAPI backend, Postgres-oriented persistence, migrations, and local development setup. |
+| Open-source licensing | Done | Repository uses the Apache License 2.0 with a project NOTICE file, preserving permissive commercial use while adding explicit patent terms. |
+| Deployment runbook | Done | A local gitignored deployment guide documents the Vercel frontend, Render API, Render Postgres, migrations, environment variables, CORS prerequisite, and production smoke test. |
 | Reliability Agent chat | Done | User-facing chat experience for reliability engineering questions. |
+| Reliability chat route | Done | The canonical chat URL is `/chat-with-reliability`, with redirects from previous chat routes. |
+| Chat starter prompt alignment | Done | Suggested questions represent the implemented equipment search, failure analysis, work-order analysis, and maintenance strategy tools. |
 | Conversation persistence | Done | Conversations and messages are stored in PostgreSQL with conversation history and session recovery. |
 | Conversation memory | Done | Per-session Markdown memory captures durable context for follow-up questions. |
 | Provider abstraction | Done | Backend uses a model-provider interface so chat logic is not tightly coupled to one LLM provider. |
+| OpenRouter model selection | Done | Chat users can select approved MVP models per message while GPT and Claude options remain visible but disabled for production use; credentials and the model allowlist remain server-controlled. |
 | Product-state cleanup | Done | Homepage, README, PRD, and workflow naming now reflect current backend capability and use one agent naming scheme. |
 | Tool catalog documentation | Done | README presents tools as concise PascalCase identifiers with short descriptions. |
 | Homepage capability messaging | Done | Hero messaging now emphasizes high-level reliability benefits, and the secondary CTA links to the renamed capability roadmap section. |
@@ -25,7 +30,7 @@ This roadmap tracks the high-level milestones needed to develop Open Reliability
 | Homepage mobile responsive pass | Done | Hero content, CTAs, benefit panel, and planned architecture diagram now adapt into a narrow-screen vertical layout. |
 | Homepage agent status refactor | Done | Agent workflow reflects current orchestration and marks only unimplemented specialists as future capabilities. |
 | Chat history default collapse | Done | Reliability Agent chat opens with the conversation history panel collapsed while preserving the existing History toggle. |
-| Contact and brand cleanup | Done | Homepage and chat headers use a text-only Open Reliability brand, while the homepage keeps all three contact icons and adds a Contact for demo label. |
+| Contact and brand cleanup | Done | Homepage and chat headers use the Open Reliability brand, while the compact centered homepage footer highlights demo and collaboration availability and links to the GitHub repository, issue reporting, and the Apache 2.0 license. |
 | Brand logo integration | Done | The provided Open Reliability logo appears beside the product name in the homepage and Reliability Agent headers. |
 | Chat Markdown table presentation | Done | Assistant tables render with readable cell spacing, borders, alternating rows, and horizontal scrolling on narrow screens. |
 | Master Data Agent v1 | Done | Lists and searches stored equipment with filters for type, location, criticality, and status, bounded pagination, and matching summary counts. Upload, mapping, validation, and data-readiness workflows remain planned. |

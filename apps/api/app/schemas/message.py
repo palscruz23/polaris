@@ -12,6 +12,10 @@ class MessageCreate(BaseModel):
         min_length=1,
         max_length=10_000,
     )
+    model: str | None = Field(
+        default=None,
+        max_length=100,
+    )
 
 
 class MessageResponse(BaseModel):

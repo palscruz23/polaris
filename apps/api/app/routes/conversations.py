@@ -17,7 +17,6 @@ from app.exceptions import (
     ConversationBusyError,
     ConversationNotFoundError,
 )
-from app.providers.base import ChatProvider
 from app.providers.factory import get_chat_provider
 from app.repositories.conversation_repository import ConversationRepository
 from app.schemas.conversation import (
@@ -36,10 +35,6 @@ router = APIRouter(
 DatabaseSession = Annotated[
     Session,
     Depends(get_database_session),
-]
-ProviderDependency = Annotated[
-    ChatProvider,
-    Depends(get_chat_provider),
 ]
 
 
@@ -98,8 +93,20 @@ def create_message(
     conversation_id: uuid.UUID,
     request: MessageCreate,
     session: DatabaseSession,
-    provider: ProviderDependency,
 ) -> MessageExchangeResponse:
+    try:
+        provider = get_chat_provider(request.model)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(error),
+        ) from error
+    except ChatServiceError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(error),
+        ) from error
+
     service = ConversationChatService(
         session=session,
         provider=provider,
@@ -145,8 +152,20 @@ def create_message(
 def stream_message(
     conversation_id: uuid.UUID,
     request: MessageCreate,
-    provider: ProviderDependency,
 ) -> StreamingResponse:
+    try:
+        provider = get_chat_provider(request.model)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(error),
+        ) from error
+    except ChatServiceError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(error),
+        ) from error
+
     event_queue: Queue[dict[str, object] | None] = Queue()
 
     def publish_progress(event: OrchestrationProgress) -> None:

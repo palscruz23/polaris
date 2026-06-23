@@ -22,28 +22,40 @@ from app.domain.orchestration import (
 )
 from app.exceptions import ChatServiceError
 from app.providers.base import ChatProvider
+from app.providers.models import AvailableModel
 
 
-class DeepSeekProvider(ChatProvider):
-    def __init__(self) -> None:
+class OpenRouterProvider(ChatProvider):
+    def __init__(self, selected_model: AvailableModel) -> None:
+        if not settings.openrouter_api_key:
+            raise ChatServiceError("OPENROUTER_API_KEY is not configured.")
+
+        default_headers = {
+            "X-Title": settings.openrouter_app_name,
+        }
+        if settings.openrouter_site_url:
+            default_headers["HTTP-Referer"] = settings.openrouter_site_url
+
+        self.selected_model = selected_model
         self.client = OpenAI(
-            api_key=settings.deepseek_api_key,
-            base_url=settings.deepseek_base_url,
+            api_key=settings.openrouter_api_key,
+            base_url=settings.openrouter_base_url,
+            default_headers=default_headers,
             timeout=30.0,
             max_retries=1,
         )
 
     @property
     def name(self) -> str:
-        return "deepseek"
+        return "openrouter"
 
     @property
     def model(self) -> str:
-        return settings.deepseek_model
+        return self.selected_model.id
 
     @property
     def context_window(self) -> int:
-        return settings.deepseek_context_window
+        return self.selected_model.context_window
 
     def count_tokens(
         self,

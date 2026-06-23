@@ -6,7 +6,8 @@ from app.domain.orchestration import (
     AgentToolExchange,
     AgentToolResult,
 )
-from app.providers.deepseek import DeepSeekProvider
+from app.providers.models import get_available_model
+from app.providers.openrouter import OpenRouterProvider
 
 
 class RecordingCompletions:
@@ -19,7 +20,7 @@ class RecordingCompletions:
         return self.responses.pop(0)
 
 
-def test_deepseek_provider_translates_tool_calls_and_results() -> None:
+def test_openrouter_provider_translates_tool_calls_and_results() -> None:
     tool_call = SimpleNamespace(
         id="call-1",
         function=SimpleNamespace(
@@ -51,7 +52,10 @@ def test_deepseek_provider_translates_tool_calls_and_results() -> None:
             ),
         ]
     )
-    provider = DeepSeekProvider.__new__(DeepSeekProvider)
+    provider = OpenRouterProvider.__new__(OpenRouterProvider)
+    provider.selected_model = get_available_model(
+        "qwen/qwen3-235b-a22b-2507"
+    )
     provider.client = SimpleNamespace(
         chat=SimpleNamespace(completions=completions)
     )
@@ -86,6 +90,7 @@ def test_deepseek_provider_translates_tool_calls_and_results() -> None:
         "bad_actor_limit": 3
     }
     assert final_response.content == "P-101 is the leading bad actor."
+    assert completions.requests[0]["model"] == "qwen/qwen3-235b-a22b-2507"
     assert completions.requests[0]["tools"][0]["function"]["name"] == (
         "analyze_defect_elimination"
     )

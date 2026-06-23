@@ -114,67 +114,73 @@ a {
   color: #082f7a;
 }
 
-.social-links {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.75rem;
+.home-footer {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 42%),
+    var(--navy-panel);
+  border-top: 1px solid rgba(147, 197, 253, 0.24);
 }
 
-.contact-links {
+.home-footer-container {
   align-items: center;
-  display: inline-flex;
-  gap: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  justify-content: center;
+  text-align: center;
 }
 
-.contact-links-label {
-  color: var(--accent-strong);
-  font-size: 0.82rem;
-  font-weight: 780;
+.home-footer-brand {
+  color: #f8fbff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.home-footer-status {
+  color: #93c5fd;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.home-footer-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 0.45rem;
+}
+
+.home-footer-link-item {
+  align-items: center;
+  display: inline-flex;
+}
+
+.home-footer-link {
+  color: #dbeafe;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-underline-offset: 0.25rem;
+  transition:
+    color 180ms ease,
+    text-decoration-color 180ms ease;
   white-space: nowrap;
 }
 
-.social-link {
-  align-items: center;
-  background:
-    linear-gradient(180deg, rgba(13, 54, 117, 0.96), rgba(6, 22, 45, 0.98)),
-    var(--navy-panel);
-  border: 1px solid rgba(147, 197, 253, 0.34);
-  border-radius: 8px;
-  box-shadow: 0 12px 28px rgba(3, 16, 38, 0.18);
-  color: #f8fbff;
-  display: inline-flex;
-  height: 2.75rem;
-  justify-content: center;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
-  width: 2.75rem;
-}
-
-.social-link:hover,
-.social-link:focus-visible {
-  border-color: rgba(125, 211, 252, 0.78);
+.home-footer-link:hover,
+.home-footer-link:focus-visible {
   color: #93c5fd;
-  box-shadow: 0 16px 36px rgba(3, 16, 38, 0.26);
-  transform: translateY(-1px);
+  text-decoration: underline;
 }
 
-.social-link:focus-visible {
+.home-footer-link:focus-visible {
+  border-radius: 2px;
   outline: 2px solid var(--signal);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
-.social-link svg {
-  fill: none;
-  height: 1.25rem;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-  width: 1.25rem;
+.home-footer-separator {
+  color: rgba(147, 197, 253, 0.68);
+  margin: 0 0.65rem;
 }
 
 .benefit-panel {
@@ -1336,6 +1342,72 @@ a {
   z-index: 20;
 }
 
+.agent-model-control {
+  align-self: center;
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin-left: auto;
+  position: relative;
+}
+
+.agent-model-control select {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #7b8796;
+  cursor: pointer;
+  field-sizing: content;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  max-width: 12.5rem;
+  outline: none;
+  padding: 0.65rem 1.6rem 0.65rem 0.65rem;
+  text-overflow: ellipsis;
+  text-align: right;
+  text-align-last: right;
+  width: auto;
+}
+
+.agent-model-control option {
+  direction: ltr;
+  text-align: left;
+}
+
+.agent-model-control select:focus-visible {
+  background: var(--accent-wash);
+  box-shadow: 0 0 0 2px rgba(39, 122, 183, 0.18);
+}
+
+.agent-model-control select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.agent-model-control svg {
+  fill: none;
+  height: 1rem;
+  pointer-events: none;
+  position: absolute;
+  right: 0.45rem;
+  stroke: #7b8796;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  width: 1rem;
+}
+
+.agent-model-error {
+  color: #a33838;
+  font-size: 0.72rem;
+  margin: 0.45rem auto 0;
+  max-width: 68rem;
+  text-align: right;
+}
+
 .agent-composer {
   align-items: flex-end;
   background: #ffffff;
@@ -1496,9 +1568,6 @@ a {
   }
 
   .app-nav {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 1rem;
     padding-bottom: 0.85rem;
   }
 
@@ -1506,23 +1575,20 @@ a {
     font-size: 1rem;
   }
 
-  .social-links {
-    gap: 0.55rem;
+  .home-footer-container {
+    gap: 0.4rem;
   }
 
-  .contact-links {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.55rem;
+  .home-footer-link {
+    font-size: 0.72rem;
   }
 
-  .contact-links-label {
-    font-size: 0.76rem;
+  .home-footer-status {
+    font-size: 0.72rem;
   }
 
-  .social-link {
-    height: 2.45rem;
-    width: 2.45rem;
+  .home-footer-separator {
+    margin: 0 0.3rem;
   }
 
   .hero-container h1 {
@@ -1723,6 +1789,16 @@ a {
 
   .agent-composer-dock {
     padding: 0.85rem 0.75rem 0.75rem;
+  }
+
+  .agent-model-control {
+    max-width: 8rem;
+  }
+
+  .agent-model-control select {
+    max-width: 8rem;
+    padding-left: 0.4rem;
+    padding-right: 1.4rem;
   }
 
   .agent-composer {

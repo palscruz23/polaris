@@ -121,41 +121,18 @@ const heroBenefits = [
   },
 ];
 
-const socialLinks = [
-  {
-    label: "Gmail",
-    href: "https://mail.google.com/mail/?view=cm&fs=1&to=poljohncruz@gmail.com",
-    icon: (
-      <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
-        <path d="M4.75 6.25h14.5A1.75 1.75 0 0 1 21 8v8a1.75 1.75 0 0 1-1.75 1.75H4.75A1.75 1.75 0 0 1 3 16V8a1.75 1.75 0 0 1 1.75-1.75Z" />
-        <path d="m4.35 7.15 7.65 6.1 7.65-6.1" />
-        <path d="m4.5 17 5.45-5" />
-        <path d="m19.5 17-5.45-5" />
-      </svg>
-    ),
-  },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/poljohncruz/",
-    icon: (
-      <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
-        <path d="M7.35 9.25v8.5" />
-        <path d="M7.35 6.35v.05" />
-        <path d="M11.2 17.75v-8.5" />
-        <path d="M11.2 12.85c.52-2.48 5.45-3.06 5.45 1.4v3.5" />
-        <path d="M5.25 3.75h13.5A1.5 1.5 0 0 1 20.25 5.25v13.5a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V5.25a1.5 1.5 0 0 1 1.5-1.5Z" />
-      </svg>
-    ),
-  },
+const footerLinks = [
   {
     label: "GitHub",
-    href: "https://github.com/palscruz23",
-    icon: (
-      <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
-        <path d="M10 19.5c-4.6 1.4-4.6-2.3-6.5-2.8" />
-        <path d="M14 22v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 18 4.77 5.07 5.07 0 0 0 17.91 2S16.73 1.65 14 3.48a13.38 13.38 0 0 0-7 0C4.27 1.65 3.09 2 3.09 2A5.07 5.07 0 0 0 3 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 7 18.13V22" />
-      </svg>
-    ),
+    href: "https://github.com/palscruz23/open-reliability",
+  },
+  {
+    label: "Report an issue",
+    href: "https://github.com/palscruz23/open-reliability/issues/new",
+  },
+  {
+    label: "Apache 2.0",
+    href: "https://github.com/palscruz23/open-reliability/blob/main/LICENSE",
   },
 ];
 
@@ -168,24 +145,6 @@ export default function Home() {
             <Link href="/" className="brand-link text-lg font-semibold">
               <span>Open Reliability</span>
             </Link>
-            <div className="contact-links">
-              <span className="contact-links-label">Contact for demo</span>
-              <div className="social-links" aria-label="Open Reliability contact links">
-                {socialLinks.map((link) => (
-                  <a
-                    aria-label={link.label}
-                    className="social-link inline-flex h-11 w-11 items-center justify-center rounded-lg border border-sky-200/35 bg-slate-950 text-white shadow-lg"
-                    href={link.href}
-                    key={link.label}
-                    rel="noreferrer"
-                    target="_blank"
-                    title={link.label}
-                  >
-                    {link.icon}
-                  </a>
-                ))}
-              </div>
-            </div>
           </nav>
 
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
@@ -199,7 +158,10 @@ export default function Home() {
                 strategy review coordinated through the Reliability Agent.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link className="button button-primary" href="/features/reliability-agent-team">
+                <Link
+                  className="button button-primary"
+                  href="/chat-with-reliability"
+                >
                   Chat with Reliability Agent
                 </Link>
                 <Link className="button button-secondary" href="#capability-roadmap">
@@ -326,6 +288,34 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <footer className="home-footer">
+        <div className="home-footer-container mx-auto max-w-6xl px-6 py-4 md:px-8">
+          <Link href="/" className="home-footer-brand">
+            Open Reliability
+          </Link>
+          <p className="home-footer-status">Open for demo / collab</p>
+          <nav className="home-footer-links" aria-label="Footer">
+            {footerLinks.map((link, index) => (
+              <span className="home-footer-link-item" key={link.label}>
+                {index > 0 ? (
+                  <span className="home-footer-separator" aria-hidden="true">
+                    ·
+                  </span>
+                ) : null}
+                <a
+                  className="home-footer-link"
+                  href={link.href}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {link.label}
+                </a>
+              </span>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </main>
   );
 }

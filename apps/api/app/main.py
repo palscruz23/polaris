@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.conversations import router as conversations_router
 from app.routes.defect_elimination import router as defect_elimination_router
+from app.routes.models import router as models_router
 
 app = FastAPI(title="Open Reliability API", version="0.1.0")
 
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(conversations_router)
 app.include_router(defect_elimination_router)
+app.include_router(models_router)
 
 
 @app.get("/health")

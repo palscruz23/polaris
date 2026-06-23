@@ -17,7 +17,7 @@ Improvement remains planned.
 
 ## Reliability Agent
 
-The Reliability Agent is available at `/features/reliability-agent-team`.
+The Reliability Agent is available at `/chat-with-reliability`.
 
 Capabilities:
 
@@ -27,10 +27,23 @@ Capabilities:
   discussions.
 - Automatic session titles summarised from the first reliability question.
 - Conversation memory that carries forward key reliability context.
+- Per-message model selection across approved OpenRouter models, with
+  higher-cost GPT and Claude options reserved for production use.
 - Specialist selection and coordination — the Reliability Agent chooses which
   specialists to call, suppresses duplicate analysis, and limits to five
   specialist calls before synthesising a final response.
 - Live progress updates while the agent coordinates specialist analysis.
+
+MVP models:
+
+- `DeepSeek V4 Flash` — default model.
+- `DeepSeek V4 Pro`
+- `Qwen3 235B`
+- `Gemma 3 12B`
+- `Llama 3.3 70B`
+
+GPT-5 and Claude models remain visible in the model selector but are disabled
+and marked `For prod use`. The backend enforces the same restriction.
 
 Specialists:
 
@@ -114,7 +127,23 @@ python3 -m venv .venv
 ./.venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Update `apps/api/.env` with your database URL and model provider key.
+Update `apps/api/.env`:
+
+```env
+OPENROUTER_API_KEY=sk-or-v1-your-key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_SITE_URL=http://localhost:3000
+OPENROUTER_APP_NAME=Open Reliability
+
+DATABASE_URL=postgresql+psycopg://user:password@host:5432/open_reliability
+```
+
+The OpenRouter key is used only by the backend. Never place it in
+`apps/web/.env.local`, expose it through a `NEXT_PUBLIC_*` variable, or commit
+the real key to Git.
+
+Restart or reload Uvicorn after changing `apps/api/.env`, because environment
+settings are loaded when the backend starts.
 
 ### Web
 
@@ -133,8 +162,12 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 Open the app at:
 
 ```text
-http://localhost:3000
+http://localhost:3000/chat-with-reliability
 ```
+
+For production, configure `OPENROUTER_API_KEY` and `DATABASE_URL` through the
+hosting platform's encrypted backend secrets rather than a deployed `.env`
+file.
 
 ## Useful checks
 
@@ -160,3 +193,8 @@ npm run build
 - Preserve existing user changes in the working tree.
 - Do not commit real secrets from `.env` files.
 - Recommended future enhancement: add rename/delete controls for conversation history.
+
+## License
+
+Open Reliability is licensed under the
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution information.

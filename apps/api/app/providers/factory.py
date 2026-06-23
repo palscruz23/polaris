@@ -1,9 +1,7 @@
-from functools import lru_cache
-
 from app.providers.base import ChatProvider
-from app.providers.deepseek import DeepSeekProvider
+from app.providers.models import get_available_model
+from app.providers.openrouter import OpenRouterProvider
 
 
-@lru_cache(maxsize=1)
-def get_chat_provider() -> ChatProvider:
-    return DeepSeekProvider()
+def get_chat_provider(model_id: str | None = None) -> ChatProvider:
+    return OpenRouterProvider(get_available_model(model_id))

@@ -67,7 +67,16 @@ type MessageStreamEvent =
   | CompleteStreamEvent
   | ErrorStreamEvent;
 
+type AvailableModel = {
+  id: string;
+  label: string;
+  is_default: boolean;
+  is_enabled: boolean;
+};
+
 const CONVERSATION_STORAGE_KEY = "open-reliability-conversation-id";
+const MODEL_STORAGE_KEY = "open-reliability-model-id";
+const FALLBACK_MODEL_ID = "deepseek/deepseek-v4-flash";
 const TITLE_STOP_WORDS = new Set([
   "a",
   "about",
@@ -114,8 +123,9 @@ const starterPrompts = [
     icon: "document",
   },
   {
-    label: "Build a defect elimination plan",
-    prompt: "Help me build a defect elimination plan for a recurring equipment issue.",
+    label: "Search equipment records",
+    prompt:
+      "Find critical pumps in the equipment register and summarize the matching assets.",
     icon: "target",
   },
 ] as const;
@@ -159,6 +169,14 @@ function StopIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <rect height="10" rx="1.5" width="10" x="7" y="7" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20">
+      <path d="m6.5 8 3.5 3.5L13.5 8" />
     </svg>
   );
 }
@@ -308,6 +326,9 @@ export default function AgentWorkflowChat() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [historyIsOpen, setHistoryIsOpen] = useState(false);
   const [historyError, setHistoryError] = useState("");
+  const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
+  const [selectedModelId, setSelectedModelId] = useState(FALLBACK_MODEL_ID);
+  const [modelError, setModelError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -321,6 +342,7 @@ export default function AgentWorkflowChat() {
     );
 
     refreshConversations(requestController.signal);
+    loadAvailableModels(requestController.signal);
 
     if (savedConversationId) {
       loadConversation(savedConversationId, requestController.signal);
@@ -386,6 +408,7 @@ export default function AgentWorkflowChat() {
           },
           body: JSON.stringify({
             content: trimmedMessage,
+            model: selectedModelId,
           }),
           signal: requestController.signal,
         },
@@ -532,6 +555,43 @@ export default function AgentWorkflowChat() {
         setHistoryError("History unavailable while the API is offline.");
       }
     }
+  }
+
+  async function loadAvailableModels(signal?: AbortSignal) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/models`,
+        { signal },
+      );
+
+      if (!response.ok) {
+        throw new Error("Models could not be loaded.");
+      }
+
+      const models: AvailableModel[] = await response.json();
+      const savedModelId = window.localStorage.getItem(MODEL_STORAGE_KEY);
+      const defaultModel =
+        models.find(
+          (model) => model.id === savedModelId && model.is_enabled,
+        ) ??
+        models.find((model) => model.is_default && model.is_enabled) ??
+        models.find((model) => model.is_enabled);
+
+      setAvailableModels(models);
+      if (defaultModel) {
+        setSelectedModelId(defaultModel.id);
+      }
+      setModelError("");
+    } catch {
+      if (!signal?.aborted) {
+        setModelError("Model list unavailable.");
+      }
+    }
+  }
+
+  function selectModel(modelId: string) {
+    setSelectedModelId(modelId);
+    window.localStorage.setItem(MODEL_STORAGE_KEY, modelId);
   }
 
   async function loadConversation(id: string, signal?: AbortSignal) {
@@ -779,6 +839,33 @@ export default function AgentWorkflowChat() {
               value={draft}
             />
           </div>
+          <div className="agent-model-control">
+            <label className="sr-only" htmlFor="agent-model-select">
+              Model
+            </label>
+            <select
+              aria-label="Select AI model"
+              disabled={isLoading || availableModels.length === 0}
+              id="agent-model-select"
+              onChange={(event) => selectModel(event.target.value)}
+              value={selectedModelId}
+            >
+              {availableModels.length === 0 ? (
+                <option value={FALLBACK_MODEL_ID}>DeepSeek V4 Flash</option>
+              ) : (
+                availableModels.map((model) => (
+                  <option
+                    disabled={!model.is_enabled}
+                    key={model.id}
+                    value={model.id}
+                  >
+                    {model.label}
+                  </option>
+                ))
+              )}
+            </select>
+            <ChevronDownIcon />
+          </div>
           <button
             aria-label={isLoading ? "Stop response" : "Send message"}
             className={`agent-send-button ${
@@ -791,6 +878,9 @@ export default function AgentWorkflowChat() {
             {isLoading ? <StopIcon /> : <SendIcon />}
           </button>
         </form>
+        {modelError ? (
+          <p className="agent-model-error">{modelError}</p>
+        ) : null}
         <p className="agent-composer-note">
           <ShieldCheckIcon />
           Recommendations should be validated against site standards and
