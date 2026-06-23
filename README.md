@@ -12,7 +12,7 @@ The Master Data, Defect Elimination, and Maintenance Strategy agents are
 implemented specialists in the broader multi-agent vision. Reliability
 Improvement remains planned.
 
-Website: [open-reliability.vercel.app](https://open-reliability.vercel.app)
+[Open Reliability Webpage](https://open-reliability.vercel.app)
 
 ## Sample Demo
 
