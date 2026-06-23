@@ -134,6 +134,7 @@ OPENROUTER_API_KEY=sk-or-v1-your-key
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_SITE_URL=http://localhost:3000
 OPENROUTER_APP_NAME=Open Reliability
+FRONTEND_URL=http://localhost:3000
 
 DATABASE_URL=postgresql+psycopg://user:password@host:5432/open_reliability
 ```

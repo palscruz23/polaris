@@ -15,7 +15,26 @@ class Settings:
     openrouter_base_url: str
     openrouter_site_url: str | None
     openrouter_app_name: str
+    frontend_url: str | None
     database_url: str
+
+
+def normalize_optional_url(value: str | None) -> str | None:
+    if not value:
+        return None
+    normalized = value.strip().rstrip("/")
+    return normalized or None
+
+
+def build_cors_origins(frontend_url: str | None) -> list[str]:
+    origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+    normalized_frontend_url = normalize_optional_url(frontend_url)
+    if normalized_frontend_url and normalized_frontend_url not in origins:
+        origins.append(normalized_frontend_url)
+    return origins
 
 
 def load_settings() -> Settings:
@@ -33,6 +52,7 @@ def load_settings() -> Settings:
             "OPENROUTER_APP_NAME",
             "Open Reliability",
         ),
+        frontend_url=normalize_optional_url(os.getenv("FRONTEND_URL")),
         database_url=database_url,
     )
 

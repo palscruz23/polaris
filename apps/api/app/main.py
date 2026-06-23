@@ -1,19 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import build_cors_origins, settings
 from app.routes.conversations import router as conversations_router
 from app.routes.defect_elimination import router as defect_elimination_router
 from app.routes.models import router as models_router
 
 app = FastAPI(title="Open Reliability API", version="0.1.0")
 
+cors_origins = build_cors_origins(settings.frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
