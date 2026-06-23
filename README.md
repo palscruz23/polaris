@@ -54,45 +54,76 @@ Available tools by agent:
 
 ### Reliability Agent tools
 
-- `SpecialistRouter` — Selects the right specialist for the request.
-- `BoundedSpecialistLoop` — Runs up to five sequential specialist calls.
-- `DuplicateCallSuppressor` — Blocks repeated specialist calls.
-- `ProgressStreamer` — Streams coordination status to the UI.
-- `MemoryUpdater` — Saves useful context for follow-up questions.
+- **Specialist router** — selects the best specialist agent for each user
+  request based on the reliability question and available context.
+- **Bounded multi-call loop** — calls specialist agents sequentially, with a
+  limit of five specialist calls per request before the Reliability Agent
+  synthesises a final answer.
+- **Duplicate-call suppression** — prevents redundant specialist invocations
+  when the same specialist has already addressed the request.
+- **Live progress streaming** — sends natural-language coordination updates to
+  the frontend while specialist analysis is running.
+- **Conversation memory update** — preserves key reliability context from the
+  exchange so follow-up questions can reuse asset, work-order, and strategy
+  details.
 
 ### Master Data Agent tools
 
-- `EquipmentSearch` — Finds equipment by keyword and asset filters.
-- `PaginatedMatchSummaries` — Pages large equipment result sets.
+- **Equipment search** — finds equipment by keyword, asset tag, functional
+  location, facility/system context, and other asset filters.
+- **Paginated match summaries** — returns equipment matches in pages with
+  total match counts so large result sets remain reviewable.
 
 ### Defect Elimination Agent tools
 
-- `ReliabilityMetricsTool` — Summarises failures, downtime, and cost.
-- `BadActorAnalysisTool` — Ranks assets by reliability impact.
-- `RepeatFailureDetectionTool` — Finds recurring asset/failure-mode pairs.
-- `MTBFCalculator` — Estimates mean time between failures.
-- `RCAEvidencePlanningTool` — Lists evidence needed for RCA.
-- `FiveWhysGeneratorTool` — Drafts 5 Whys prompts.
-- `RCATemplateBuilderTool` — Builds RCA worksheets.
-- `DefectEliminationCharterGeneratorTool` — Creates defect elimination charters.
-- `PrioritisedRecommendations` — Recommends evidence-backed next actions.
+- **Reliability metrics summary** — calculates asset-level and system-level
+  reliability totals from work order history, including failure counts,
+  downtime, and maintenance cost.
+- **Bad actor analysis** — ranks equipment by failure count, downtime hours,
+  and maintenance cost to highlight priority assets.
+- **Repeat failure detection** — identifies recurring equipment/failure-mode
+  combinations across work order time windows.
+- **MTBF calculation** — estimates mean time between failures from repair work
+  order history for comparable assets.
+- **RCA evidence planning** — lists the evidence, stakeholders, and data needed
+  to validate repeat-failure root causes.
+- **5 Whys generation** — drafts structured 5 Whys prompts and likely themes
+  for failure mode investigation.
+- **RCA template construction** — creates an RCA worksheet with problem
+  statement, evidence needs, hypotheses, and recommended next questions.
+- **Defect elimination charter generation** — builds a charter with business
+  case, scope, hypotheses, actions, success measures, and owners for priority
+  repeat failures.
+- **Prioritised recommendations** — produces evidence-backed next actions from
+  the metrics, repeat failures, RCA outputs, and charters.
 
 ### Maintenance Strategy Agent tools
 
-- `TaskProfileReviewer` — Summarises planned maintenance tasks.
-- `MaintenanceMixBreakdown` — Groups tasks by maintenance type.
-- `FailureModeCoverageAnalyzer` — Shows covered and uncovered risks.
-- `FrequencyRiskAssessor` — Flags interval risk.
-- `StrategyGapIdentifier` — Finds missing or duplicated controls.
-- `ConditionMonitoringReviewer` — Identifies PdM/CBM opportunities.
-- `StrategyRecommendationEngine` — Recommends strategy changes.
+- **Maintenance task profile review** — summarises planned tasks for an asset
+  or equipment context.
+- **Maintenance mix breakdown** — groups strategy tasks by PM, PdM, CBM,
+  corrective, and run-to-failure work types.
+- **Failure-mode coverage analysis** — compares strategy tasks against known
+  failure modes to show covered and uncovered risks.
+- **Frequency risk assessment** — reviews scheduled task frequencies for
+  under-maintenance and over-maintenance risk.
+- **Strategy gap identification** — highlights missing controls, duplicated
+  tasks, unsupported intervals, and weak links between failure modes and tasks.
+- **Condition-monitoring opportunity review** — identifies candidates for PdM or
+  CBM based on failure modes, equipment context, and current task mix.
+- **Evidence-backed strategy recommendations** — proposes maintenance strategy
+  changes with supporting rationale from available asset and task data.
 
 ### Reliability Improvement Agent tools
 
-- `ValueWorkflow` — Planned value sizing.
-- `ActionPlanWorkflow` — Planned delivery planning.
-- `ReportingWorkflow` — Planned benefits tracking.
-- `RoadmapWorkflow` — Planned initiative sequencing.
+- **Planned value workflow** — planned toolset for quantifying expected value
+  from reliability improvement opportunities.
+- **Action-plan workflow** — planned toolset for converting approved
+  opportunities into owners, milestones, and deliverables.
+- **Reporting workflow** — planned toolset for tracking benefits, progress,
+  and reliability outcomes.
+- **Roadmap workflow** — planned toolset for sequencing initiatives into a
+  reliability improvement roadmap.
 
 ## Agent Naming
 
