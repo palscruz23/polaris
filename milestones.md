@@ -19,6 +19,7 @@ This roadmap tracks the high-level milestones needed to develop Open Reliability
 | Conversation memory | Done | Per-session Markdown memory captures durable context for follow-up questions. |
 | Provider abstraction | Done | Backend uses a model-provider interface so chat logic is not tightly coupled to one LLM provider. |
 | Product-state cleanup | Done | Homepage, README, PRD, and workflow naming now reflect current backend capability and use one agent naming scheme. |
+| Tool catalog documentation | Done | README presents tools as concise PascalCase identifiers with short descriptions. |
 | Homepage capability messaging | Done | Hero messaging now emphasizes high-level reliability benefits, and the secondary CTA links to the renamed capability roadmap section. |
 | Homepage desktop fit pass | Done | Hero and planned architecture sections now use desktop-specific density rules so the main product story fits more comfortably in a desktop viewport. |
 | Homepage mobile responsive pass | Done | Hero content, CTAs, benefit panel, and planned architecture diagram now adapt into a narrow-screen vertical layout. |
