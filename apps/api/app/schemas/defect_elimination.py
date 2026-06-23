@@ -70,6 +70,24 @@ class MTBFFindingResponse(BaseModel):
     last_event_at: datetime | None
 
 
+class WeibullAnalysisFindingResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    equipment_number: str
+    equipment_description: str | None
+    equipment_type: str | None
+    failure_count: int
+    interval_count: int
+    shape_beta: Decimal | None
+    scale_eta_days: Decimal | None
+    characteristic_life_days: Decimal | None
+    mean_time_between_failures_days: Decimal | None
+    failure_behavior: str
+    confidence: str
+    first_event_at: datetime | None
+    last_event_at: datetime | None
+
+
 class RCAEvidencePlanResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -123,6 +141,7 @@ class DefectEliminationOverviewResponse(BaseModel):
     bad_actors: list[BadActorFindingResponse]
     repeat_failures: list[RepeatFailureFindingResponse]
     mtbf_metrics: list[MTBFFindingResponse]
+    weibull_analysis: list[WeibullAnalysisFindingResponse]
     rca_evidence_plans: list[RCAEvidencePlanResponse]
     five_whys: list[FiveWhysAnalysisResponse]
     rca_templates: list[RCATemplateResponse]

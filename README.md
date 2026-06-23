@@ -37,7 +37,8 @@ Specialists:
 - **Master Data Agent** — equipment discovery with text search, asset filters,
   and paginated match summaries.
 - **Defect Elimination Agent** — bad actor ranking, repeat failure detection,
-  reliability summary metrics, MTBF calculation, RCA evidence planning, 5 Whys
+  reliability summary metrics, MTBF calculation, Weibull analysis, RCA
+  evidence planning, 5 Whys
   generation, RCA template construction, defect elimination charter generation,
   and prioritised recommendations.
 - **Maintenance Strategy Agent** — maintenance task profile review, maintenance
@@ -60,6 +61,7 @@ The Reliability Agent coordinates specialists through deterministic tools:
 - Repeat failure detection across time windows.
 - Reliability summary metrics (asset-level and system-level).
 - MTBF calculation from work order history.
+- Weibull analysis to estimate beta, characteristic life, and failure behavior.
 - 5 Whys generation for failure mode investigation.
 - RCA template construction with evidence planning.
 - Defect elimination charter generation.

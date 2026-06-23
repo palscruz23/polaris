@@ -16,6 +16,7 @@ from app.tools.defect_elimination import (
     RCATemplateBuilderTool,
     ReliabilityMetricsTool,
     RepeatFailureDetectionTool,
+    WeibullAnalysisTool,
 )
 
 
@@ -59,6 +60,7 @@ def test_defect_elimination_tools_analyze_seeded_work_orders() -> None:
     bad_actors = BadActorAnalysisTool().run(work_orders, limit=5)
     repeat_failures = RepeatFailureDetectionTool().run(work_orders, limit=5)
     mtbf_metrics = MTBFCalculationTool().run(work_orders, limit=5)
+    weibull_analysis = WeibullAnalysisTool().run(work_orders, limit=5)
     evidence_plans = RCAEvidencePlanningTool().run(repeat_failures, limit=2)
     five_whys = FiveWhysGeneratorTool().run(repeat_failures, limit=2)
     rca_templates = RCATemplateBuilderTool().run(repeat_failures, limit=2)
@@ -86,6 +88,11 @@ def test_defect_elimination_tools_analyze_seeded_work_orders() -> None:
     assert len(mtbf_metrics) == 5
     assert mtbf_metrics[0].corrective_event_count >= 2
     assert mtbf_metrics[0].mtbf_days is not None
+    assert len(weibull_analysis) == 5
+    assert weibull_analysis[0].failure_count >= 3
+    assert weibull_analysis[0].shape_beta is not None
+    assert weibull_analysis[0].scale_eta_days is not None
+    assert weibull_analysis[0].failure_behavior
     assert len(evidence_plans) == 2
     assert evidence_plans[0].evidence_to_collect
     assert len(five_whys) == 2
@@ -114,6 +121,7 @@ def test_defect_elimination_agent_returns_structured_findings() -> None:
     assert len(findings.bad_actors) == 3
     assert len(findings.repeat_failures) == 4
     assert len(findings.mtbf_metrics) == 3
+    assert len(findings.weibull_analysis) == 3
     assert len(findings.rca_evidence_plans) == 4
     assert len(findings.five_whys) == 4
     assert len(findings.rca_templates) == 4
@@ -121,7 +129,7 @@ def test_defect_elimination_agent_returns_structured_findings() -> None:
     assert findings.recommendations
     assert "defect elimination review" in findings.recommendations[0]
     assert any(
-        "MTBF" in recommendation
+        "MTBF" in recommendation or "Weibull" in recommendation
         for recommendation in findings.recommendations
     )
 
@@ -279,3 +287,52 @@ def _work_order(
         total_cost=Decimal("1000.00"),
         downtime_hours=Decimal(downtime_hours),
     )
+
+
+def test_weibull_analysis_identifies_wear_out_pattern() -> None:
+    asset = Equipment(
+        equipment_number="PUMP-004",
+        description="Wear out pump",
+        equipment_type="pump",
+    )
+    work_orders = [
+        _work_order("WO-W1", asset, "corrective", "2026-01-01", 2),
+        _work_order("WO-W2", asset, "corrective", "2026-01-06", 2),
+        _work_order("WO-W3", asset, "corrective", "2026-01-16", 2),
+        _work_order("WO-W4", asset, "corrective", "2026-02-05", 2),
+        _work_order("WO-W5", asset, "corrective", "2026-03-17", 2),
+    ]
+
+    finding = WeibullAnalysisTool().run(work_orders, limit=1)[0]
+
+    assert finding.equipment_number == "PUMP-004"
+    assert finding.failure_count == 5
+    assert finding.interval_count == 4
+    assert finding.shape_beta is not None
+    assert finding.shape_beta > Decimal("1.10")
+    assert finding.scale_eta_days is not None
+    assert finding.mean_time_between_failures_days is not None
+    assert finding.failure_behavior == "wear-out or age-related pattern"
+    assert finding.confidence == "directional"
+
+
+def test_weibull_analysis_requires_three_failure_intervals() -> None:
+    asset = Equipment(
+        equipment_number="PUMP-005",
+        description="Sparse history pump",
+        equipment_type="pump",
+    )
+    work_orders = [
+        _work_order("WO-S1", asset, "corrective", "2026-01-01", 2),
+        _work_order("WO-S2", asset, "corrective", "2026-01-06", 2),
+        _work_order("WO-S3", asset, "corrective", "2026-01-16", 2),
+    ]
+
+    finding = WeibullAnalysisTool().run(work_orders, limit=1)[0]
+
+    assert finding.failure_count == 3
+    assert finding.interval_count == 2
+    assert finding.shape_beta is None
+    assert finding.scale_eta_days is None
+    assert finding.failure_behavior == "insufficient interval history"
+    assert finding.confidence == "insufficient"
