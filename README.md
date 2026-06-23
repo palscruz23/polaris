@@ -34,17 +34,6 @@ Capabilities:
   specialist calls before synthesising a final response.
 - Live progress updates while the agent coordinates specialist analysis.
 
-MVP models:
-
-- `DeepSeek V4 Flash` — default model.
-- `DeepSeek V4 Pro`
-- `Qwen3 235B`
-- `Gemma 3 12B`
-- `Llama 3.3 70B`
-
-GPT-5 and Claude models remain visible in the model selector but are disabled
-and marked `For prod use`. The backend enforces the same restriction.
-
 Specialists:
 
 - **Master Data Agent** — equipment discovery with text search, asset filters,
@@ -193,7 +182,7 @@ npm run build
 - Keep feature work incremental.
 - Preserve existing user changes in the working tree.
 - Do not commit real secrets from `.env` files.
-- Recommended future enhancement: add rename/delete controls for conversation history.
+
 
 ## License
 
