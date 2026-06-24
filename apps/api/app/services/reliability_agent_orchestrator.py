@@ -1,14 +1,19 @@
 import json
 from collections.abc import Sequence
+from time import perf_counter
 
 from app.agents.registry import SpecialistRegistry
 from app.domain.chat import ChatMessage
 from app.domain.orchestration import (
     AgentAnswerReview,
+    AgentModelCallTrace,
+    AgentModelResponse,
     AgentOrchestrationResponse,
     AgentToolCall,
+    AgentToolDefinition,
     AgentToolExchange,
     AgentToolResult,
+    ModelCallObserver,
 )
 from app.domain.progress import ProgressCallback, report_progress
 from app.exceptions import ChatServiceError
@@ -38,11 +43,13 @@ class ReliabilityAgentOrchestrator:
         messages: Sequence[ChatMessage],
         max_output_tokens: int,
         progress: ProgressCallback | None = None,
+        model_call_observer: ModelCallObserver | None = None,
     ) -> str:
         return self.respond_with_metadata(
             messages=messages,
             max_output_tokens=max_output_tokens,
             progress=progress,
+            model_call_observer=model_call_observer,
         ).content
 
     def respond_with_metadata(
@@ -50,6 +57,7 @@ class ReliabilityAgentOrchestrator:
         messages: Sequence[ChatMessage],
         max_output_tokens: int,
         progress: ProgressCallback | None = None,
+        model_call_observer: ModelCallObserver | None = None,
     ) -> AgentOrchestrationResponse:
         exchanges: list[AgentToolExchange] = []
         seen_calls: set[str] = set()
@@ -62,11 +70,13 @@ class ReliabilityAgentOrchestrator:
         )
 
         while tool_call_count < self.max_tool_calls:
-            response = self.provider.generate_with_tools(
+            response = self._generate_with_tools(
+                call_type="agent_tool_selection",
                 messages=messages,
                 max_output_tokens=max_output_tokens,
                 tools=self.registry.definitions,
                 exchanges=exchanges,
+                observer=model_call_observer,
             )
 
             if not response.tool_calls:
@@ -79,6 +89,7 @@ class ReliabilityAgentOrchestrator:
                         seen_calls=seen_calls,
                         tool_call_count=tool_call_count,
                         progress=progress,
+                        model_call_observer=model_call_observer,
                     )
 
                 raise ChatServiceError(
@@ -109,11 +120,13 @@ class ReliabilityAgentOrchestrator:
             stage="synthesizing",
             message="Reliability Agent is consolidating the findings.",
         )
-        final_response = self.provider.generate_with_tools(
+        final_response = self._generate_with_tools(
+            call_type="agent_final_synthesis",
             messages=messages,
             max_output_tokens=max_output_tokens,
             tools=(),
             exchanges=exchanges,
+            observer=model_call_observer,
         )
 
         if final_response.content:
@@ -125,6 +138,7 @@ class ReliabilityAgentOrchestrator:
                 seen_calls=seen_calls,
                 tool_call_count=tool_call_count,
                 progress=progress,
+                model_call_observer=model_call_observer,
             )
 
         raise ChatServiceError(
@@ -171,6 +185,7 @@ class ReliabilityAgentOrchestrator:
         seen_calls: set[str],
         tool_call_count: int,
         progress: ProgressCallback | None,
+        model_call_observer: ModelCallObserver | None,
     ) -> AgentOrchestrationResponse:
         if exchanges:
             report_progress(
@@ -187,6 +202,7 @@ class ReliabilityAgentOrchestrator:
                 answer=current_answer,
                 exchanges=exchanges,
                 progress=progress,
+                model_call_observer=model_call_observer,
             )
 
             if review.accepted:
@@ -230,6 +246,7 @@ class ReliabilityAgentOrchestrator:
                 seen_calls=seen_calls,
                 tool_call_count=tool_call_count,
                 progress=progress,
+                model_call_observer=model_call_observer,
             )
 
         return AgentOrchestrationResponse(
@@ -244,6 +261,7 @@ class ReliabilityAgentOrchestrator:
         answer: str,
         exchanges: Sequence[AgentToolExchange],
         progress: ProgressCallback | None,
+        model_call_observer: ModelCallObserver | None,
     ) -> AgentAnswerReview:
         report_progress(
             progress,
@@ -277,9 +295,11 @@ class ReliabilityAgentOrchestrator:
         ]
 
         try:
-            content = self.provider.generate(
+            content = self._generate(
+                call_type="answer_review",
                 messages=review_messages,
                 max_output_tokens=800,
+                observer=model_call_observer,
             )
             payload = json.loads(content)
         except (ChatServiceError, json.JSONDecodeError, TypeError, ValueError):
@@ -312,6 +332,7 @@ class ReliabilityAgentOrchestrator:
         seen_calls: set[str],
         tool_call_count: int,
         progress: ProgressCallback | None,
+        model_call_observer: ModelCallObserver | None,
     ) -> tuple[str, int]:
         revision_messages = [
             *messages,
@@ -331,11 +352,13 @@ class ReliabilityAgentOrchestrator:
         ]
 
         while tool_call_count < self.max_tool_calls:
-            response = self.provider.generate_with_tools(
+            response = self._generate_with_tools(
+                call_type="answer_revision",
                 messages=revision_messages,
                 max_output_tokens=max_output_tokens,
                 tools=self.registry.definitions,
                 exchanges=exchanges,
+                observer=model_call_observer,
             )
 
             if not response.tool_calls:
@@ -365,11 +388,13 @@ class ReliabilityAgentOrchestrator:
                 )
                 tool_call_count += 1
 
-        final_response = self.provider.generate_with_tools(
+        final_response = self._generate_with_tools(
+            call_type="answer_revision_final",
             messages=revision_messages,
             max_output_tokens=max_output_tokens,
             tools=(),
             exchanges=exchanges,
+            observer=model_call_observer,
         )
 
         if final_response.content:
@@ -378,6 +403,127 @@ class ReliabilityAgentOrchestrator:
         raise ChatServiceError(
             "The Reliability Agent could not produce a revised response."
         )
+
+    def _generate(
+        self,
+        *,
+        call_type: str,
+        messages: Sequence[ChatMessage],
+        max_output_tokens: int,
+        observer: ModelCallObserver | None,
+    ) -> str:
+        start = perf_counter()
+        input_tokens = self.provider.count_tokens(messages)
+
+        try:
+            content = self.provider.generate(
+                messages=messages,
+                max_output_tokens=max_output_tokens,
+            )
+        except Exception as error:
+            self._observe_model_call(
+                observer,
+                AgentModelCallTrace(
+                    call_type=call_type,
+                    status="failed",
+                    latency_ms=self._elapsed_ms(start),
+                    input_tokens_estimate=input_tokens,
+                    output_tokens_estimate=None,
+                    max_output_tokens=max_output_tokens,
+                    requested_tool_count=0,
+                    error_type=type(error).__name__,
+                    error_message=str(error),
+                ),
+            )
+            raise
+
+        self._observe_model_call(
+            observer,
+            AgentModelCallTrace(
+                call_type=call_type,
+                status="completed",
+                latency_ms=self._elapsed_ms(start),
+                input_tokens_estimate=input_tokens,
+                output_tokens_estimate=self.provider.count_tokens(
+                    [ChatMessage(role="assistant", content=content)]
+                ),
+                max_output_tokens=max_output_tokens,
+                requested_tool_count=0,
+                response_tool_call_count=0,
+            ),
+        )
+        return content
+
+    def _generate_with_tools(
+        self,
+        *,
+        call_type: str,
+        messages: Sequence[ChatMessage],
+        max_output_tokens: int,
+        tools: Sequence[AgentToolDefinition],
+        exchanges: Sequence[AgentToolExchange],
+        observer: ModelCallObserver | None,
+    ) -> AgentModelResponse:
+        start = perf_counter()
+        input_tokens = self.provider.count_tokens(messages)
+
+        try:
+            response = self.provider.generate_with_tools(
+                messages=messages,
+                max_output_tokens=max_output_tokens,
+                tools=tools,
+                exchanges=exchanges,
+            )
+        except Exception as error:
+            self._observe_model_call(
+                observer,
+                AgentModelCallTrace(
+                    call_type=call_type,
+                    status="failed",
+                    latency_ms=self._elapsed_ms(start),
+                    input_tokens_estimate=input_tokens,
+                    output_tokens_estimate=None,
+                    max_output_tokens=max_output_tokens,
+                    requested_tool_count=len(tools),
+                    error_type=type(error).__name__,
+                    error_message=str(error),
+                ),
+            )
+            raise
+
+        output_tokens = (
+            self.provider.count_tokens(
+                [ChatMessage(role="assistant", content=response.content)]
+            )
+            if response.content
+            else None
+        )
+        self._observe_model_call(
+            observer,
+            AgentModelCallTrace(
+                call_type=call_type,
+                status="completed",
+                latency_ms=self._elapsed_ms(start),
+                input_tokens_estimate=input_tokens,
+                output_tokens_estimate=output_tokens,
+                max_output_tokens=max_output_tokens,
+                requested_tool_count=len(tools),
+                response_tool_call_count=len(response.tool_calls),
+            ),
+        )
+        return response
+
+    @staticmethod
+    def _observe_model_call(
+        observer: ModelCallObserver | None,
+        trace: AgentModelCallTrace,
+    ) -> None:
+        if observer is not None:
+            observer(trace)
+
+    @staticmethod
+    def _elapsed_ms(start: float) -> int:
+        return max(0, round((perf_counter() - start) * 1000))
 
     @staticmethod
     def _honest_fallback_answer(

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import build_cors_origins, settings
 from app.routes.conversations import router as conversations_router
+from app.routes.data_browser import router as data_browser_router
 from app.routes.defect_elimination import router as defect_elimination_router
 from app.routes.models import router as models_router
 
@@ -19,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(conversations_router)
+app.include_router(data_browser_router)
 app.include_router(defect_elimination_router)
 app.include_router(models_router)
 

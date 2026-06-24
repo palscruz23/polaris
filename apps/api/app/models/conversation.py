@@ -17,6 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 if TYPE_CHECKING:
+    from app.models.agent_run import AgentRun
     from app.models.conversation_memory_revision import ConversationMemoryRevision
     from app.models.message import Message
 
@@ -112,4 +113,10 @@ class Conversation(Base):
         back_populates="conversation",
         cascade="all, delete-orphan",
         order_by="ConversationMemoryRevision.created_at",
+    )
+
+    agent_runs: Mapped[list["AgentRun"]] = relationship(
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        order_by="AgentRun.started_at",
     )

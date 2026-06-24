@@ -164,8 +164,8 @@ export default function Home() {
                 >
                   Chat with Reliability Agent
                 </Link>
-                <Link className="button button-secondary" href="#capability-roadmap">
-                  Explore capability roadmap
+                <Link className="button button-secondary" href="/view-existing-data">
+                  View synthetic data
                 </Link>
               </div>
             </div>

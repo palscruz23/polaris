@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import engine
 from app.domain.chat import ChatMessage
 from app.domain.orchestration import (
+    AgentModelCallTrace,
     AgentOrchestrationResponse,
     AgentToolCall,
     AgentToolExchange,
@@ -70,8 +71,22 @@ class MetadataOrchestrator:
         messages: Sequence[ChatMessage],
         max_output_tokens: int,
         progress=None,
+        model_call_observer=None,
     ) -> AgentOrchestrationResponse:
         del messages, max_output_tokens, progress
+        if model_call_observer is not None:
+            model_call_observer(
+                AgentModelCallTrace(
+                    call_type="agent_tool_selection",
+                    status="completed",
+                    latency_ms=42,
+                    input_tokens_estimate=120,
+                    output_tokens_estimate=20,
+                    max_output_tokens=500,
+                    requested_tool_count=4,
+                    response_tool_call_count=1,
+                )
+            )
         return AgentOrchestrationResponse(
             content="Review complete.",
             tool_calls=(
@@ -114,7 +129,11 @@ def test_conversation_service_persists_follow_up_context_and_memory() -> None:
         )
 
         reloaded = ConversationRepository(session).get_by_id(conversation.id)
-        second_response_context = provider.calls[2]
+        second_response_context = next(
+            call
+            for call in provider.calls
+            if call[-1].content == "What about the bearings?"
+        )
         second_context_contents = [
             message.content for message in second_response_context
         ]
@@ -185,10 +204,11 @@ def test_conversation_service_persists_agent_tool_metadata() -> None:
             orchestrator=MetadataOrchestrator(),  # type: ignore[arg-type]
         )
 
-        _, assistant_message, _ = service.respond(
+        user_message, assistant_message, _ = service.respond(
             conversation.id,
             "Review P-101 strategy.",
         )
+        session.refresh(conversation)
 
         assert assistant_message.metadata_ == {
             "tool_calls": [
@@ -204,6 +224,19 @@ def test_conversation_service_persists_agent_tool_metadata() -> None:
                 }
             ]
         }
+        assert len(conversation.agent_runs) == 1
+        agent_run = conversation.agent_runs[0]
+        assert agent_run.user_message_id == user_message.id
+        assert agent_run.assistant_message_id == assistant_message.id
+        assert agent_run.status == "completed"
+        assert agent_run.provider == "test"
+        assert agent_run.model == "test-model"
+        assert agent_run.tool_call_count == 1
+        assert agent_run.tool_metadata == assistant_message.metadata_
+        assert len(agent_run.model_calls) == 1
+        assert agent_run.model_calls[0].call_type == "agent_tool_selection"
+        assert agent_run.model_calls[0].latency_ms == 42
+        assert agent_run.model_calls[0].requested_tool_count == 4
     finally:
         session.close()
         transaction.rollback()

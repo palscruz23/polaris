@@ -1,10 +1,12 @@
 import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
+from time import perf_counter
 
 from sqlalchemy.orm import Session
 
 from app.agents.registry import SpecialistRegistry
+from app.domain.chat import ChatMessage
 from app.domain.orchestration import AgentToolExchange
 from app.domain.progress import ProgressCallback
 from app.exceptions import (
@@ -18,6 +20,7 @@ from app.prompts.reliability_agent import RELIABILITY_AGENT_SYSTEM_PROMPT
 from app.providers.base import ChatProvider
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
+from app.repositories.observability_repository import ObservabilityRepository
 from app.services.context_builder import ContextBuilder
 from app.services.memory_service import MemoryService
 from app.services.reliability_agent_orchestrator import (
@@ -65,6 +68,7 @@ class ConversationChatService:
         self.provider = provider
         self.conversations = ConversationRepository(session)
         self.messages = MessageRepository(session)
+        self.observability = ObservabilityRepository(session)
         self.context_builder = ContextBuilder(provider)
         self.memory_service = MemoryService(provider)
         self.orchestrator = orchestrator or ReliabilityAgentOrchestrator(
@@ -113,6 +117,9 @@ class ConversationChatService:
         )
         history = self.messages.to_chat_messages(history_records)
 
+        agent_run = None
+        run_started_at = perf_counter()
+
         try:
             try:
                 context = self.context_builder.build(
@@ -146,13 +153,34 @@ class ConversationChatService:
                     current_user_message=content,
                 )
 
+            agent_run = self.observability.start_agent_run(
+                conversation_id=conversation.id,
+                user_message_id=user_message.id,
+                provider=self.provider.name,
+                model=self.provider.model,
+                input_tokens_estimate=self.provider.count_tokens(
+                    context.messages
+                ),
+            )
             agent_response = self.orchestrator.respond_with_metadata(
                 messages=context.messages,
                 max_output_tokens=context.max_output_tokens,
                 progress=progress,
+                model_call_observer=lambda trace: (
+                    self.observability.record_model_call(
+                        agent_run=agent_run,
+                        trace=trace,
+                    )
+                ),
             )
             assistant_content = agent_response.content
-        except Exception:
+        except Exception as error:
+            if agent_run is not None:
+                self.observability.fail_agent_run(
+                    agent_run=agent_run,
+                    total_latency_ms=self._elapsed_ms(run_started_at),
+                    error=error,
+                )
             self._clear_processing(conversation_id)
             raise
 
@@ -161,14 +189,31 @@ class ConversationChatService:
         if locked_conversation is None:
             raise ConversationNotFoundError
 
+        tool_metadata = self._message_metadata(agent_response.tool_calls)
         assistant_message = self.messages.create(
             conversation=locked_conversation,
             role="assistant",
             content=assistant_content,
             provider=self.provider.name,
             model=self.provider.model,
-            metadata=self._message_metadata(agent_response.tool_calls),
+            metadata=tool_metadata,
         )
+        if agent_run is not None:
+            self.observability.complete_agent_run(
+                agent_run=agent_run,
+                assistant_message_id=assistant_message.id,
+                total_latency_ms=self._elapsed_ms(run_started_at),
+                output_tokens_estimate=self.provider.count_tokens(
+                    [
+                        ChatMessage(
+                            role="assistant",
+                            content=assistant_content,
+                        )
+                    ]
+                ),
+                tool_call_count=len(agent_response.tool_calls),
+                tool_metadata=tool_metadata,
+            )
         self._clear_processing(conversation_id)
 
         memory_status = self._update_memory(
@@ -180,6 +225,10 @@ class ConversationChatService:
         )
 
         return user_message, assistant_message, memory_status
+
+    @staticmethod
+    def _elapsed_ms(start: float) -> int:
+        return max(0, round((perf_counter() - start) * 1000))
 
     @staticmethod
     def _message_metadata(
