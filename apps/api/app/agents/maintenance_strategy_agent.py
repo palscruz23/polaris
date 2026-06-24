@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Literal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -65,6 +66,17 @@ class MaintenanceStrategyReviewFindings:
     limitations: list[str]
 
 
+MaintenanceStrategyIntent = Literal[
+    "full_strategy_review",
+    "summarize_strategy_profile",
+    "maintenance_mix",
+    "check_coverage",
+    "assess_frequency",
+    "detect_gaps",
+    "find_monitoring_opportunities",
+]
+
+
 class MaintenanceStrategyAgent:
     """Specialist agent for evidence-based maintenance strategy reviews."""
 
@@ -108,6 +120,22 @@ class MaintenanceStrategyAgent:
         maximum_assets: int = 10,
         progress: ProgressCallback | None = None,
     ) -> MaintenanceStrategyReviewFindings:
+        return self.analyze(
+            intent="full_strategy_review",
+            equipment_numbers=equipment_numbers,
+            include_failure_history=include_failure_history,
+            maximum_assets=maximum_assets,
+            progress=progress,
+        )
+
+    def analyze(
+        self,
+        intent: MaintenanceStrategyIntent = "full_strategy_review",
+        equipment_numbers: list[str] | None = None,
+        include_failure_history: bool = True,
+        maximum_assets: int = 10,
+        progress: ProgressCallback | None = None,
+    ) -> MaintenanceStrategyReviewFindings:
         requested = list(dict.fromkeys(equipment_numbers or []))
         equipment = self._load_equipment(requested)
         equipment_by_number = {
@@ -133,8 +161,9 @@ class MaintenanceStrategyAgent:
             )[:maximum_assets]
 
         reviews = [
-            self._review_asset(
+            self._analyze_asset(
                 item,
+                intent=intent,
                 include_failure_history=include_failure_history,
                 progress=progress,
             )
@@ -149,9 +178,10 @@ class MaintenanceStrategyAgent:
             limitations=MAINTENANCE_STRATEGY_REVIEW_LIMITATIONS,
         )
 
-    def _review_asset(
+    def _analyze_asset(
         self,
         equipment: Equipment,
+        intent: MaintenanceStrategyIntent,
         include_failure_history: bool,
         progress: ProgressCallback | None,
     ) -> AssetMaintenanceStrategyReview:
@@ -173,6 +203,10 @@ class MaintenanceStrategyAgent:
             ),
         )
         profile = self.profile_tool.run(equipment)
+
+        if intent == "summarize_strategy_profile":
+            return self._asset_review(profile=profile)
+
         report_progress(
             progress,
             stage="tool_started",
@@ -185,6 +219,13 @@ class MaintenanceStrategyAgent:
             ),
         )
         maintenance_mix = self.maintenance_mix_tool.run(work_orders)
+
+        if intent == "maintenance_mix":
+            return self._asset_review(
+                profile=profile,
+                maintenance_mix=maintenance_mix,
+            )
+
         report_progress(
             progress,
             stage="tool_started",
@@ -195,6 +236,14 @@ class MaintenanceStrategyAgent:
             ),
         )
         coverage = self.coverage_tool.run(strategies, work_orders)
+
+        if intent == "check_coverage":
+            return self._asset_review(
+                profile=profile,
+                maintenance_mix=maintenance_mix,
+                failure_mode_coverage=coverage,
+            )
+
         report_progress(
             progress,
             stage="tool_started",
@@ -209,11 +258,41 @@ class MaintenanceStrategyAgent:
             work_orders,
             coverage,
         )
+
+        if intent == "assess_frequency":
+            return self._asset_review(
+                profile=profile,
+                maintenance_mix=maintenance_mix,
+                failure_mode_coverage=coverage,
+                frequency_risks=frequency_risks,
+            )
+
         gaps = self.gap_tool.run(profile, coverage)
+
+        if intent == "detect_gaps":
+            return self._asset_review(
+                profile=profile,
+                maintenance_mix=maintenance_mix,
+                failure_mode_coverage=coverage,
+                frequency_risks=frequency_risks,
+                strategy_gaps=gaps,
+            )
+
         opportunities = self.monitoring_tool.run(
             equipment.equipment_type,
             coverage,
         )
+
+        if intent == "find_monitoring_opportunities":
+            return self._asset_review(
+                profile=profile,
+                maintenance_mix=maintenance_mix,
+                failure_mode_coverage=coverage,
+                frequency_risks=frequency_risks,
+                strategy_gaps=gaps,
+                condition_monitoring_opportunities=opportunities,
+            )
+
         report_progress(
             progress,
             stage="tool_started",
@@ -241,6 +320,42 @@ class MaintenanceStrategyAgent:
             strategy_gaps=gaps,
             condition_monitoring_opportunities=opportunities,
             recommendations=recommendations,
+        )
+
+    @staticmethod
+    def _asset_review(
+        *,
+        profile: MaintenanceStrategyProfile,
+        maintenance_mix: MaintenanceMix | None = None,
+        failure_mode_coverage: list[FailureModeCoverage] | None = None,
+        frequency_risks: list[FrequencyRisk] | None = None,
+        strategy_gaps: list[MaintenanceStrategyGap] | None = None,
+        condition_monitoring_opportunities: list[
+            ConditionMonitoringOpportunity
+        ] | None = None,
+        recommendations: list[MaintenanceStrategyRecommendation] | None = None,
+    ) -> AssetMaintenanceStrategyReview:
+        return AssetMaintenanceStrategyReview(
+            profile=profile,
+            maintenance_mix=maintenance_mix
+            or MaintenanceMix(
+                total_work_orders=0,
+                corrective_work_orders=0,
+                emergency_work_orders=0,
+                preventive_work_orders=0,
+                inspection_work_orders=0,
+                condition_monitoring_work_orders=0,
+                corrective_preventive_ratio=None,
+                total_cost=Decimal("0"),
+                total_downtime_hours=Decimal("0"),
+            ),
+            failure_mode_coverage=failure_mode_coverage or [],
+            frequency_risks=frequency_risks or [],
+            strategy_gaps=strategy_gaps or [],
+            condition_monitoring_opportunities=(
+                condition_monitoring_opportunities or []
+            ),
+            recommendations=recommendations or [],
         )
 
     def _load_equipment(

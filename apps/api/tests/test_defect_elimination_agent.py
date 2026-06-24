@@ -134,6 +134,51 @@ def test_defect_elimination_agent_returns_structured_findings() -> None:
     )
 
 
+def test_defect_elimination_agent_runs_focused_mtbf_path_for_specific_equipment() -> None:
+    target_asset = Equipment(
+        equipment_number="PUMP-001",
+        description="Target pump",
+        equipment_type="pump",
+    )
+    other_asset = Equipment(
+        equipment_number="PUMP-002",
+        description="Other pump",
+        equipment_type="pump",
+    )
+    session = FakeSession()
+    session.added.extend(
+        [
+            _work_order("WO-1", target_asset, "corrective", "2026-01-01", 2),
+            _work_order("WO-2", target_asset, "emergency", "2026-01-31", 3),
+            _work_order("WO-3", other_asset, "corrective", "2026-01-01", 4),
+            _work_order("WO-4", other_asset, "corrective", "2026-04-01", 5),
+        ]
+    )
+    progress_events = []
+    agent = DefectEliminationAgent(session)  # type: ignore[arg-type]
+
+    findings = agent.analyze(
+        intent="calculate_mtbf",
+        equipment_numbers=["PUMP-001"],
+        bad_actor_limit=5,
+        progress=progress_events.append,
+    )
+
+    assert findings.summary.total_work_orders == 2
+    assert [finding.equipment_number for finding in findings.mtbf_metrics] == [
+        "PUMP-001"
+    ]
+    assert findings.mtbf_metrics[0].mtbf_days == Decimal("30.00")
+    assert findings.bad_actors == []
+    assert findings.repeat_failures == []
+    assert findings.weibull_analysis == []
+    assert findings.rca_evidence_plans == []
+    assert [event.tool for event in progress_events] == [
+        "reliability_metrics",
+        "mtbf_calculation",
+    ]
+
+
 def test_five_whys_generator_supports_specific_failure() -> None:
     analysis = FiveWhysGeneratorTool().run_for_failure(
         equipment_number="PUMP-101",

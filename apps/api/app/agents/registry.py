@@ -4,10 +4,17 @@ from typing import Protocol
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.orm import Session
 
-from app.agents.defect_elimination_agent import DefectEliminationAgent
+from app.agents.defect_elimination_agent import (
+    DefectEliminationAgent,
+    DefectEliminationIntent,
+)
 from app.agents.master_data_agent import MasterDataAgent
 from app.agents.maintenance_strategy_agent import MaintenanceStrategyAgent
-from app.agents.reliability_improvement_agent import ReliabilityImprovementAgent
+from app.agents.maintenance_strategy_agent import MaintenanceStrategyIntent
+from app.agents.reliability_improvement_agent import (
+    ReliabilityImprovementAgent,
+    ReliabilityImprovementIntent,
+)
 from app.domain.orchestration import (
     AgentToolCall,
     AgentToolDefinition,
@@ -36,6 +43,8 @@ class Specialist(Protocol):
 
 
 class DefectEliminationArguments(BaseModel):
+    intent: DefectEliminationIntent = "overview"
+    equipment_numbers: list[str] = Field(default_factory=list, max_length=10)
     bad_actor_limit: int = Field(default=5, ge=1, le=10)
     repeat_failure_limit: int = Field(default=5, ge=1, le=10)
     minimum_repeat_occurrences: int = Field(default=2, ge=2, le=20)
@@ -52,9 +61,11 @@ class DefectEliminationSpecialist:
             description=(
                 "Analyze stored work-order data for bad actors, repeat "
                 "failures, MTBF patterns, RCA preparation, defect elimination "
-                "charters, and prioritized recommendations. Use this when the "
-                "user asks about actual equipment or failure history in the "
-                "reliability dataset."
+                "charters, and prioritized recommendations. Choose the narrowest "
+                "intent that satisfies the request: overview, rank_bad_actors, "
+                "find_repeat_failures, calculate_mtbf, analyze_weibull, or "
+                "prepare_rca. Use this when the user asks about actual equipment "
+                "or failure history in the reliability dataset."
             ),
             input_schema=DefectEliminationArguments.model_json_schema(),
         )
@@ -65,7 +76,9 @@ class DefectEliminationSpecialist:
         progress: ProgressCallback | None = None,
     ) -> str:
         request = DefectEliminationArguments.model_validate(arguments)
-        findings = self.agent.build_overview(
+        findings = self.agent.analyze(
+            intent=request.intent,
+            equipment_numbers=request.equipment_numbers,
             bad_actor_limit=request.bad_actor_limit,
             repeat_failure_limit=request.repeat_failure_limit,
             minimum_repeat_occurrences=request.minimum_repeat_occurrences,
@@ -132,6 +145,7 @@ class MasterDataSpecialist:
 
 
 class MaintenanceStrategyReviewArguments(BaseModel):
+    intent: MaintenanceStrategyIntent = "full_strategy_review"
     equipment_numbers: list[str] = Field(
         default_factory=list,
         max_length=10,
@@ -153,9 +167,13 @@ class MaintenanceStrategySpecialist:
                 "criticality, work-order history, costs, downtime, and "
                 "observed failure modes. Identify supported tasks, weak "
                 "failure-mode coverage, frequency risks, strategy gaps, and "
-                "condition-monitoring opportunities. Use this when the user "
-                "asks whether maintenance plans are adequate or how they "
-                "should change."
+                "condition-monitoring opportunities. Choose the narrowest "
+                "intent that satisfies the request: full_strategy_review, "
+                "summarize_strategy_profile, maintenance_mix, check_coverage, "
+                "assess_frequency, detect_gaps, or "
+                "find_monitoring_opportunities. Use this when the user asks "
+                "whether maintenance plans are adequate or how they should "
+                "change."
             ),
             input_schema=MaintenanceStrategyReviewArguments.model_json_schema(),
         )
@@ -166,7 +184,8 @@ class MaintenanceStrategySpecialist:
         progress: ProgressCallback | None = None,
     ) -> str:
         request = MaintenanceStrategyReviewArguments.model_validate(arguments)
-        findings = self.agent.review(
+        findings = self.agent.analyze(
+            intent=request.intent,
             equipment_numbers=request.equipment_numbers,
             include_failure_history=request.include_failure_history,
             maximum_assets=request.maximum_assets,
@@ -181,6 +200,8 @@ class MaintenanceStrategySpecialist:
 
 
 class ReliabilityImprovementArguments(BaseModel):
+    intent: ReliabilityImprovementIntent = "full_improvement_plan"
+    equipment_numbers: list[str] = Field(default_factory=list, max_length=10)
     opportunity_limit: int = Field(default=5, ge=1, le=10)
 
 
@@ -195,10 +216,12 @@ class ReliabilityImprovementSpecialist:
             description=(
                 "Convert stored reliability history into improvement "
                 "opportunities, rough value estimates, action plans, outcome "
-                "measures, and a sequenced roadmap. Use this when the user "
-                "asks what reliability improvements to prioritize, how to "
-                "turn findings into an action plan, or how to build a "
-                "reliability roadmap."
+                "measures, and a sequenced roadmap. Choose the narrowest "
+                "intent that satisfies the request: full_improvement_plan, "
+                "estimate_opportunities, build_action_plans, define_outcomes, "
+                "or plan_roadmap. Use this when the user asks what reliability "
+                "improvements to prioritize, how to turn findings into an "
+                "action plan, or how to build a reliability roadmap."
             ),
             input_schema=ReliabilityImprovementArguments.model_json_schema(),
         )
@@ -209,7 +232,9 @@ class ReliabilityImprovementSpecialist:
         progress: ProgressCallback | None = None,
     ) -> str:
         request = ReliabilityImprovementArguments.model_validate(arguments)
-        findings = self.agent.build_plan(
+        findings = self.agent.analyze(
+            intent=request.intent,
+            equipment_numbers=request.equipment_numbers,
             opportunity_limit=request.opportunity_limit,
             progress=progress,
         )

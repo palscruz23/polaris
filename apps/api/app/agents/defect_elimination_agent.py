@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -41,6 +42,16 @@ class DefectEliminationFindings:
     recommendations: list[str]
 
 
+DefectEliminationIntent = Literal[
+    "overview",
+    "rank_bad_actors",
+    "find_repeat_failures",
+    "calculate_mtbf",
+    "analyze_weibull",
+    "prepare_rca",
+]
+
+
 class DefectEliminationAgent:
     """Specialist agent for repeat failure and bad actor investigations."""
 
@@ -77,7 +88,25 @@ class DefectEliminationAgent:
         minimum_repeat_occurrences: int = 2,
         progress: ProgressCallback | None = None,
     ) -> DefectEliminationFindings:
+        return self.analyze(
+            intent="overview",
+            bad_actor_limit=bad_actor_limit,
+            repeat_failure_limit=repeat_failure_limit,
+            minimum_repeat_occurrences=minimum_repeat_occurrences,
+            progress=progress,
+        )
+
+    def analyze(
+        self,
+        intent: DefectEliminationIntent = "overview",
+        equipment_numbers: list[str] | None = None,
+        bad_actor_limit: int = 10,
+        repeat_failure_limit: int = 10,
+        minimum_repeat_occurrences: int = 2,
+        progress: ProgressCallback | None = None,
+    ) -> DefectEliminationFindings:
         work_orders = self._load_work_orders()
+        work_orders = self._filter_work_orders(work_orders, equipment_numbers)
         report_progress(
             progress,
             stage="tool_started",
@@ -89,58 +118,144 @@ class DefectEliminationAgent:
             ),
         )
         summary = self.metrics_tool.summarize(work_orders)
-        report_progress(
+
+        if intent == "rank_bad_actors":
+            bad_actors = self._rank_bad_actors(
+                work_orders,
+                bad_actor_limit,
+                progress,
+            )
+            return self._findings(
+                summary=summary,
+                bad_actors=bad_actors,
+                recommendations=self._build_recommendations(
+                    bad_actors,
+                    [],
+                    [],
+                    [],
+                ),
+            )
+
+        if intent == "find_repeat_failures":
+            repeat_failures = self._detect_repeat_failures(
+                work_orders,
+                repeat_failure_limit,
+                minimum_repeat_occurrences,
+                progress,
+            )
+            return self._findings(
+                summary=summary,
+                repeat_failures=repeat_failures,
+                recommendations=self._build_recommendations(
+                    [],
+                    repeat_failures,
+                    [],
+                    [],
+                ),
+            )
+
+        if intent == "calculate_mtbf":
+            mtbf_metrics = self._calculate_mtbf(
+                work_orders,
+                bad_actor_limit,
+                progress,
+            )
+            return self._findings(
+                summary=summary,
+                mtbf_metrics=mtbf_metrics,
+                recommendations=self._build_recommendations(
+                    [],
+                    [],
+                    mtbf_metrics,
+                    [],
+                ),
+            )
+
+        if intent == "analyze_weibull":
+            weibull_analysis = self._analyze_weibull(
+                work_orders,
+                bad_actor_limit,
+                progress,
+            )
+            return self._findings(
+                summary=summary,
+                weibull_analysis=weibull_analysis,
+                recommendations=self._build_recommendations(
+                    [],
+                    [],
+                    [],
+                    weibull_analysis,
+                ),
+            )
+
+        if intent == "prepare_rca":
+            repeat_failures = self._detect_repeat_failures(
+                work_orders,
+                repeat_failure_limit,
+                minimum_repeat_occurrences,
+                progress,
+            )
+            mtbf_metrics = self._calculate_mtbf(
+                work_orders,
+                bad_actor_limit,
+                progress,
+            )
+            (
+                rca_evidence_plans,
+                five_whys,
+                rca_templates,
+                charters,
+            ) = self._prepare_rca(
+                repeat_failures,
+                mtbf_metrics,
+                progress,
+            )
+            return self._findings(
+                summary=summary,
+                repeat_failures=repeat_failures,
+                mtbf_metrics=mtbf_metrics,
+                rca_evidence_plans=rca_evidence_plans,
+                five_whys=five_whys,
+                rca_templates=rca_templates,
+                charters=charters,
+                recommendations=self._build_recommendations(
+                    [],
+                    repeat_failures,
+                    mtbf_metrics,
+                    [],
+                ),
+            )
+
+        bad_actors = self._rank_bad_actors(
+            work_orders,
+            bad_actor_limit,
             progress,
-            stage="tool_started",
-            specialist="defect_elimination",
-            tool="bad_actor_analysis",
-            message="Defect Elimination Agent is identifying bad actors.",
         )
-        bad_actors = self.bad_actor_tool.run(
+        repeat_failures = self._detect_repeat_failures(
             work_orders,
-            limit=bad_actor_limit,
-        )
-        report_progress(
+            repeat_failure_limit,
+            minimum_repeat_occurrences,
             progress,
-            stage="tool_started",
-            specialist="defect_elimination",
-            tool="repeat_failure_detection",
-            message=(
-                "Defect Elimination Agent is checking repeat failures and "
-                "MTBF."
-            ),
         )
-        repeat_failures = self.repeat_failure_tool.run(
+        mtbf_metrics = self._calculate_mtbf(
             work_orders,
-            minimum_occurrences=minimum_repeat_occurrences,
-            limit=repeat_failure_limit,
+            bad_actor_limit,
+            None,
         )
-        mtbf_metrics = self.mtbf_tool.run(
+        weibull_analysis = self._analyze_weibull(
             work_orders,
-            limit=bad_actor_limit,
+            bad_actor_limit,
+            None,
         )
-        weibull_analysis = self.weibull_tool.run(
-            work_orders,
-            limit=bad_actor_limit,
-        )
-        report_progress(
+        (
+            rca_evidence_plans,
+            five_whys,
+            rca_templates,
+            charters,
+        ) = self._prepare_rca(
+            repeat_failures,
+            mtbf_metrics,
             progress,
-            stage="tool_started",
-            specialist="defect_elimination",
-            tool="rca_planning",
-            message=(
-                "Defect Elimination Agent is preparing investigation "
-                "recommendations."
-            ),
-        )
-        rca_evidence_plans = self.rca_evidence_tool.run(repeat_failures)
-        five_whys = self.five_whys_tool.run(repeat_failures)
-        rca_templates = self.rca_template_tool.run(repeat_failures)
-        charters = self.charter_tool.run(
-            repeat_failures=repeat_failures,
-            mtbf_metrics=mtbf_metrics,
-            evidence_plans=rca_evidence_plans,
-            five_whys=five_whys,
         )
 
         return DefectEliminationFindings(
@@ -173,6 +288,149 @@ class DefectEliminationAgent:
         )
 
         return list(self.session.scalars(statement).all())
+
+    @staticmethod
+    def _filter_work_orders(
+        work_orders: list[WorkOrder],
+        equipment_numbers: list[str] | None,
+    ) -> list[WorkOrder]:
+        if not equipment_numbers:
+            return work_orders
+
+        requested = set(equipment_numbers)
+        return [
+            work_order
+            for work_order in work_orders
+            if work_order.equipment is not None
+            and work_order.equipment.equipment_number in requested
+        ]
+
+    def _rank_bad_actors(
+        self,
+        work_orders: list[WorkOrder],
+        limit: int,
+        progress: ProgressCallback | None,
+    ) -> list[BadActorFinding]:
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="bad_actor_analysis",
+            message="Defect Elimination Agent is identifying bad actors.",
+        )
+        return self.bad_actor_tool.run(work_orders, limit=limit)
+
+    def _detect_repeat_failures(
+        self,
+        work_orders: list[WorkOrder],
+        limit: int,
+        minimum_occurrences: int,
+        progress: ProgressCallback | None,
+    ) -> list[RepeatFailureFinding]:
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="repeat_failure_detection",
+            message=(
+                "Defect Elimination Agent is checking repeat failures and "
+                "MTBF."
+            ),
+        )
+        return self.repeat_failure_tool.run(
+            work_orders,
+            minimum_occurrences=minimum_occurrences,
+            limit=limit,
+        )
+
+    def _calculate_mtbf(
+        self,
+        work_orders: list[WorkOrder],
+        limit: int,
+        progress: ProgressCallback | None,
+    ) -> list[MTBFFinding]:
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="mtbf_calculation",
+            message="Defect Elimination Agent is calculating MTBF.",
+        )
+        return self.mtbf_tool.run(work_orders, limit=limit)
+
+    def _analyze_weibull(
+        self,
+        work_orders: list[WorkOrder],
+        limit: int,
+        progress: ProgressCallback | None,
+    ) -> list[WeibullAnalysisFinding]:
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="weibull_analysis",
+            message="Defect Elimination Agent is estimating Weibull behavior.",
+        )
+        return self.weibull_tool.run(work_orders, limit=limit)
+
+    def _prepare_rca(
+        self,
+        repeat_failures: list[RepeatFailureFinding],
+        mtbf_metrics: list[MTBFFinding],
+        progress: ProgressCallback | None,
+    ) -> tuple[
+        list[RCAEvidencePlan],
+        list[FiveWhysAnalysis],
+        list[RCATemplate],
+        list[DefectEliminationCharter],
+    ]:
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="defect_elimination",
+            tool="rca_planning",
+            message=(
+                "Defect Elimination Agent is preparing investigation "
+                "recommendations."
+            ),
+        )
+        rca_evidence_plans = self.rca_evidence_tool.run(repeat_failures)
+        five_whys = self.five_whys_tool.run(repeat_failures)
+        rca_templates = self.rca_template_tool.run(repeat_failures)
+        charters = self.charter_tool.run(
+            repeat_failures=repeat_failures,
+            mtbf_metrics=mtbf_metrics,
+            evidence_plans=rca_evidence_plans,
+            five_whys=five_whys,
+        )
+        return rca_evidence_plans, five_whys, rca_templates, charters
+
+    @staticmethod
+    def _findings(
+        *,
+        summary: DefectEliminationDatasetSummary,
+        bad_actors: list[BadActorFinding] | None = None,
+        repeat_failures: list[RepeatFailureFinding] | None = None,
+        mtbf_metrics: list[MTBFFinding] | None = None,
+        weibull_analysis: list[WeibullAnalysisFinding] | None = None,
+        rca_evidence_plans: list[RCAEvidencePlan] | None = None,
+        five_whys: list[FiveWhysAnalysis] | None = None,
+        rca_templates: list[RCATemplate] | None = None,
+        charters: list[DefectEliminationCharter] | None = None,
+        recommendations: list[str] | None = None,
+    ) -> DefectEliminationFindings:
+        return DefectEliminationFindings(
+            summary=summary,
+            bad_actors=bad_actors or [],
+            repeat_failures=repeat_failures or [],
+            mtbf_metrics=mtbf_metrics or [],
+            weibull_analysis=weibull_analysis or [],
+            rca_evidence_plans=rca_evidence_plans or [],
+            five_whys=five_whys or [],
+            rca_templates=rca_templates or [],
+            charters=charters or [],
+            recommendations=recommendations or [],
+        )
 
     def _build_recommendations(
         self,

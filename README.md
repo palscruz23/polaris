@@ -23,6 +23,35 @@ vision.
 The Reliability Agent coordinates specialists through deterministic tools and
 orchestration components. Available tools and components by agent:
 
+### Specialist routes and intents
+
+The Reliability Agent exposes one route per specialist agent. For specialist
+routes with an `intent` argument, the Reliability Agent should choose the
+narrowest intent that satisfies the user request; the specialist then manages
+the internal deterministic tools required for that intent.
+
+| Specialist | Intent | Description | Tool Calls (in sequence) |
+| --- | --- | --- | --- |
+| Master Data Agent | n/a | Search or list stored equipment so the user can find asset identifiers before deeper analysis. | `EquipmentSearchTool` |
+| Defect Elimination Agent | `overview` | Run the full defect-elimination overview across reliability summary, bad actors, repeats, MTBF, Weibull, RCA prep, charters, and recommendations. | `ReliabilityMetricsTool` -> `BadActorAnalysisTool` -> `RepeatFailureDetectionTool` -> `MTBFCalculationTool` -> `WeibullAnalysisTool` -> `RCAEvidencePlanningTool` -> `FiveWhysGeneratorTool` -> `RCATemplateBuilderTool` -> `DefectEliminationCharterGeneratorTool` -> recommendation synthesis |
+| Defect Elimination Agent | `rank_bad_actors` | Rank high-impact equipment using corrective-like work history, downtime, cost, MTTR, and MTBF context. | `ReliabilityMetricsTool` -> `BadActorAnalysisTool` -> recommendation synthesis |
+| Defect Elimination Agent | `find_repeat_failures` | Find repeated equipment/failure-mode patterns that meet the occurrence threshold. | `ReliabilityMetricsTool` -> `RepeatFailureDetectionTool` -> recommendation synthesis |
+| Defect Elimination Agent | `calculate_mtbf` | Calculate asset-level MTBF from corrective and emergency repair events. | `ReliabilityMetricsTool` -> `MTBFCalculationTool` -> recommendation synthesis |
+| Defect Elimination Agent | `analyze_weibull` | Estimate directional Weibull behavior where enough repair interval history exists. | `ReliabilityMetricsTool` -> `WeibullAnalysisTool` -> recommendation synthesis |
+| Defect Elimination Agent | `prepare_rca` | Build RCA preparation outputs for repeat failures, including evidence plans, 5 Whys prompts, templates, and charters. | `ReliabilityMetricsTool` -> `RepeatFailureDetectionTool` -> `MTBFCalculationTool` -> `RCAEvidencePlanningTool` -> `FiveWhysGeneratorTool` -> `RCATemplateBuilderTool` -> `DefectEliminationCharterGeneratorTool` -> recommendation synthesis |
+| Maintenance Strategy Agent | `full_strategy_review` | Run the full maintenance strategy review from profile through recommendations. | `MaintenanceStrategyProfileBuilderTool` -> `MaintenanceMixAnalyzerTool` -> `FailureModeCoverageAnalyzerTool` -> `FrequencyRiskAnalyzerTool` -> `MaintenanceStrategyGapDetectorTool` -> `ConditionMonitoringOpportunityAnalyzerTool` -> `MaintenanceStrategyRecommendationBuilderTool` |
+| Maintenance Strategy Agent | `summarize_strategy_profile` | Summarize existing maintenance strategy tasks, active task counts, types, frequencies, and statuses. | `MaintenanceStrategyProfileBuilderTool` |
+| Maintenance Strategy Agent | `maintenance_mix` | Summarize preventive, inspection, condition-monitoring, corrective, and emergency work-order mix. | `MaintenanceStrategyProfileBuilderTool` -> `MaintenanceMixAnalyzerTool` |
+| Maintenance Strategy Agent | `check_coverage` | Compare observed failure modes with active strategy task descriptions to classify coverage. | `MaintenanceStrategyProfileBuilderTool` -> `MaintenanceMixAnalyzerTool` -> `FailureModeCoverageAnalyzerTool` |
+| Maintenance Strategy Agent | `assess_frequency` | Compare task intervals with observed repeat-failure recurrence to flag engineering-review risks. | `MaintenanceStrategyProfileBuilderTool` -> `MaintenanceMixAnalyzerTool` -> `FailureModeCoverageAnalyzerTool` -> `FrequencyRiskAnalyzerTool` |
+| Maintenance Strategy Agent | `detect_gaps` | Identify missing active strategies, uncovered failure modes, and recurring partial-coverage gaps. | `MaintenanceStrategyProfileBuilderTool` -> `MaintenanceMixAnalyzerTool` -> `FailureModeCoverageAnalyzerTool` -> `FrequencyRiskAnalyzerTool` -> `MaintenanceStrategyGapDetectorTool` |
+| Maintenance Strategy Agent | `find_monitoring_opportunities` | Suggest condition-monitoring methods based on equipment type and observed failure modes. | `MaintenanceStrategyProfileBuilderTool` -> `MaintenanceMixAnalyzerTool` -> `FailureModeCoverageAnalyzerTool` -> `FrequencyRiskAnalyzerTool` -> `MaintenanceStrategyGapDetectorTool` -> `ConditionMonitoringOpportunityAnalyzerTool` |
+| Reliability Improvement Agent | `full_improvement_plan` | Run the full improvement workflow from opportunity estimation through roadmap sequencing. | `ValueEstimatorTool` -> `ActionPlanBuilderTool` -> `OutcomeReporterTool` -> `RoadmapPlannerTool` |
+| Reliability Improvement Agent | `estimate_opportunities` | Rank improvement opportunities from corrective-like history, cost, downtime, repeats, and criticality. | `ValueEstimatorTool` |
+| Reliability Improvement Agent | `build_action_plans` | Convert improvement opportunities into draft actions, owners, milestones, and deliverables. | `ValueEstimatorTool` -> `ActionPlanBuilderTool` |
+| Reliability Improvement Agent | `define_outcomes` | Define baseline measures, expected outcomes, and reporting cadence for opportunities. | `ValueEstimatorTool` -> `ActionPlanBuilderTool` -> `OutcomeReporterTool` |
+| Reliability Improvement Agent | `plan_roadmap` | Sequence opportunities into `now`, `next`, and `later` roadmap horizons. | `ValueEstimatorTool` -> `ActionPlanBuilderTool` -> `OutcomeReporterTool` -> `RoadmapPlannerTool` |
+
 ### Reliability Agent tools
 
 - `ReliabilityAgentOrchestrator` — coordinates specialist tool calls through
@@ -50,6 +79,9 @@ orchestration components. Available tools and components by agent:
 
 - `ReliabilityMetricsTool` — summarizes work-order volume, activity mix, cost,
   downtime, date range, and corrective-to-preventive ratio.
+- `DefectEliminationAgent` — selects focused internal paths for overview, bad
+  actor, repeat failure, MTBF, Weibull, and RCA-preparation requests while
+  keeping one specialist route exposed to the Reliability Agent.
 - `BadActorAnalysisTool` — ranks high-impact equipment using corrective events,
   downtime, cost, MTTR, and MTBF context.
 - `RepeatFailureDetectionTool` — finds recurring equipment and failure-mode
@@ -75,6 +107,10 @@ Recommendation synthesis for Defect Elimination is implemented inside
 
 - `MaintenanceStrategyProfileBuilderTool` — summarizes existing maintenance
   strategy tasks, active task count, task types, and frequency details.
+- `MaintenanceStrategyAgent` — selects focused internal paths for strategy
+  profile summaries, maintenance mix, coverage, frequency, gap,
+  monitoring-opportunity, and full strategy review requests while keeping one
+  specialist route exposed to the Reliability Agent.
 - `MaintenanceMixAnalyzerTool` — summarizes work-order mix, corrective to
   preventive ratio, cost, and downtime.
 - `FailureModeCoverageAnalyzerTool` — compares observed failure modes with
@@ -93,6 +129,10 @@ Recommendation synthesis for Defect Elimination is implemented inside
 
 - `ValueEstimatorTool` — ranks improvement opportunities from corrective-like
   work orders, downtime, cost, repeat failures, and criticality.
+- `ReliabilityImprovementAgent` — selects focused internal paths for
+  opportunity estimation, action plans, outcome measures, roadmap sequencing,
+  and full improvement planning requests while keeping one specialist route
+  exposed to the Reliability Agent.
 - `ActionPlanBuilderTool` — creates draft owners, actions, milestones, and
   deliverables for each opportunity.
 - `OutcomeReporterTool` — defines baseline measures, expected outcomes, and

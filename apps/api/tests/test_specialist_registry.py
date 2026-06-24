@@ -74,6 +74,15 @@ def test_defect_elimination_arguments_enforce_bounded_limits() -> None:
 
     assert schema["properties"]["bad_actor_limit"]["maximum"] == 10
     assert schema["properties"]["repeat_failure_limit"]["maximum"] == 10
+    assert schema["properties"]["equipment_numbers"]["maxItems"] == 10
+    assert set(schema["properties"]["intent"]["enum"]) == {
+        "overview",
+        "rank_bad_actors",
+        "find_repeat_failures",
+        "calculate_mtbf",
+        "analyze_weibull",
+        "prepare_rca",
+    }
 
 
 def test_default_registry_exposes_all_specialist_capabilities() -> None:
@@ -101,6 +110,15 @@ def test_maintenance_strategy_arguments_enforce_asset_limits() -> None:
 
     assert schema["properties"]["equipment_numbers"]["maxItems"] == 10
     assert schema["properties"]["maximum_assets"]["maximum"] == 10
+    assert set(schema["properties"]["intent"]["enum"]) == {
+        "full_strategy_review",
+        "summarize_strategy_profile",
+        "maintenance_mix",
+        "check_coverage",
+        "assess_frequency",
+        "detect_gaps",
+        "find_monitoring_opportunities",
+    }
 
 
 def test_reliability_improvement_arguments_enforce_opportunity_limits() -> None:
@@ -108,3 +126,11 @@ def test_reliability_improvement_arguments_enforce_opportunity_limits() -> None:
 
     assert schema["properties"]["opportunity_limit"]["maximum"] == 10
     assert schema["properties"]["opportunity_limit"]["minimum"] == 1
+    assert schema["properties"]["equipment_numbers"]["maxItems"] == 10
+    assert set(schema["properties"]["intent"]["enum"]) == {
+        "full_improvement_plan",
+        "estimate_opportunities",
+        "build_action_plans",
+        "define_outcomes",
+        "plan_roadmap",
+    }

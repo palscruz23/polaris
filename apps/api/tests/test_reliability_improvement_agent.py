@@ -76,6 +76,28 @@ def test_reliability_improvement_agent_returns_structured_plan_and_progress() ->
     ]
 
 
+def test_reliability_improvement_agent_runs_focused_opportunity_path() -> None:
+    progress_events: list[OrchestrationProgress] = []
+    agent = ReliabilityImprovementAgent(
+        FakeSession(_improvement_work_orders())  # type: ignore[arg-type]
+    )
+
+    findings = agent.analyze(
+        intent="estimate_opportunities",
+        equipment_numbers=["P-101"],
+        opportunity_limit=5,
+        progress=progress_events.append,
+    )
+
+    assert [item.equipment_number for item in findings.opportunities] == [
+        "P-101"
+    ]
+    assert findings.action_plans == []
+    assert findings.outcome_reports == []
+    assert findings.roadmap == []
+    assert [event.tool for event in progress_events] == ["value_estimator"]
+
+
 def test_reliability_improvement_specialist_returns_json_for_orchestration() -> None:
     specialist = ReliabilityImprovementSpecialist(
         FakeSession(_improvement_work_orders())  # type: ignore[arg-type]

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -43,6 +44,15 @@ class ReliabilityImprovementFindings:
     limitations: list[str]
 
 
+ReliabilityImprovementIntent = Literal[
+    "full_improvement_plan",
+    "estimate_opportunities",
+    "build_action_plans",
+    "define_outcomes",
+    "plan_roadmap",
+]
+
+
 class ReliabilityImprovementAgent:
     """Specialist agent for reliability improvement planning."""
 
@@ -65,7 +75,62 @@ class ReliabilityImprovementAgent:
         opportunity_limit: int = 5,
         progress: ProgressCallback | None = None,
     ) -> ReliabilityImprovementFindings:
+        return self.analyze(
+            intent="full_improvement_plan",
+            opportunity_limit=opportunity_limit,
+            progress=progress,
+        )
+
+    def analyze(
+        self,
+        intent: ReliabilityImprovementIntent = "full_improvement_plan",
+        equipment_numbers: list[str] | None = None,
+        opportunity_limit: int = 5,
+        progress: ProgressCallback | None = None,
+    ) -> ReliabilityImprovementFindings:
         work_orders = self._load_work_orders()
+        work_orders = self._filter_work_orders(work_orders, equipment_numbers)
+        opportunities = self._estimate_opportunities(
+            work_orders,
+            opportunity_limit,
+            progress,
+        )
+
+        if intent == "estimate_opportunities":
+            return self._findings(opportunities=opportunities)
+
+        action_plans = self._build_action_plans(opportunities, progress)
+
+        if intent == "build_action_plans":
+            return self._findings(
+                opportunities=opportunities,
+                action_plans=action_plans,
+            )
+
+        outcome_reports = self._define_outcomes(opportunities, progress)
+
+        if intent == "define_outcomes":
+            return self._findings(
+                opportunities=opportunities,
+                action_plans=action_plans,
+                outcome_reports=outcome_reports,
+            )
+
+        roadmap = self._plan_roadmap(opportunities, action_plans, progress)
+
+        return self._findings(
+            opportunities=opportunities,
+            action_plans=action_plans,
+            outcome_reports=outcome_reports,
+            roadmap=roadmap,
+        )
+
+    def _estimate_opportunities(
+        self,
+        work_orders: list[WorkOrder],
+        opportunity_limit: int,
+        progress: ProgressCallback | None,
+    ) -> list[ReliabilityImprovementOpportunity]:
         report_progress(
             progress,
             stage="tool_started",
@@ -76,10 +141,16 @@ class ReliabilityImprovementAgent:
                 "opportunities."
             ),
         )
-        opportunities = self.value_tool.run(
+        return self.value_tool.run(
             work_orders,
             limit=opportunity_limit,
         )
+
+    def _build_action_plans(
+        self,
+        opportunities: list[ReliabilityImprovementOpportunity],
+        progress: ProgressCallback | None,
+    ) -> list[ReliabilityImprovementActionPlan]:
         report_progress(
             progress,
             stage="tool_started",
@@ -89,7 +160,13 @@ class ReliabilityImprovementAgent:
                 "Reliability Improvement Agent is drafting action plans."
             ),
         )
-        action_plans = self.action_plan_tool.run(opportunities)
+        return self.action_plan_tool.run(opportunities)
+
+    def _define_outcomes(
+        self,
+        opportunities: list[ReliabilityImprovementOpportunity],
+        progress: ProgressCallback | None,
+    ) -> list[ReliabilityImprovementOutcomeReport]:
         report_progress(
             progress,
             stage="tool_started",
@@ -99,7 +176,14 @@ class ReliabilityImprovementAgent:
                 "Reliability Improvement Agent is defining outcome measures."
             ),
         )
-        outcome_reports = self.outcome_tool.run(opportunities)
+        return self.outcome_tool.run(opportunities)
+
+    def _plan_roadmap(
+        self,
+        opportunities: list[ReliabilityImprovementOpportunity],
+        action_plans: list[ReliabilityImprovementActionPlan],
+        progress: ProgressCallback | None,
+    ) -> list[ReliabilityImprovementRoadmapItem]:
         report_progress(
             progress,
             stage="tool_started",
@@ -109,13 +193,38 @@ class ReliabilityImprovementAgent:
                 "Reliability Improvement Agent is sequencing the roadmap."
             ),
         )
-        roadmap = self.roadmap_tool.run(opportunities, action_plans)
+        return self.roadmap_tool.run(opportunities, action_plans)
 
+    @staticmethod
+    def _filter_work_orders(
+        work_orders: list[WorkOrder],
+        equipment_numbers: list[str] | None,
+    ) -> list[WorkOrder]:
+        if not equipment_numbers:
+            return work_orders
+
+        requested = set(equipment_numbers)
+        return [
+            work_order
+            for work_order in work_orders
+            if work_order.equipment is not None
+            and work_order.equipment.equipment_number in requested
+        ]
+
+    @staticmethod
+    def _findings(
+        *,
+        opportunities: list[ReliabilityImprovementOpportunity] | None = None,
+        action_plans: list[ReliabilityImprovementActionPlan] | None = None,
+        outcome_reports: list[ReliabilityImprovementOutcomeReport]
+        | None = None,
+        roadmap: list[ReliabilityImprovementRoadmapItem] | None = None,
+    ) -> ReliabilityImprovementFindings:
         return ReliabilityImprovementFindings(
-            opportunities=opportunities,
-            action_plans=action_plans,
-            outcome_reports=outcome_reports,
-            roadmap=roadmap,
+            opportunities=opportunities or [],
+            action_plans=action_plans or [],
+            outcome_reports=outcome_reports or [],
+            roadmap=roadmap or [],
             limitations=RELIABILITY_IMPROVEMENT_LIMITATIONS,
         )
 

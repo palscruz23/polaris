@@ -151,6 +151,31 @@ def test_maintenance_strategy_agent_reports_named_tool_progress() -> None:
     )
 
 
+def test_maintenance_strategy_agent_runs_focused_gap_path() -> None:
+    equipment = _pump_with_maintenance_strategy_history()
+    agent = MaintenanceStrategyAgent(FakeSession([equipment]))  # type: ignore[arg-type]
+    progress_events: list[OrchestrationProgress] = []
+
+    findings = agent.analyze(
+        intent="detect_gaps",
+        equipment_numbers=["P-101"],
+        maximum_assets=1,
+        progress=progress_events.append,
+    )
+    review = findings.asset_reviews[0]
+
+    assert review.strategy_gaps
+    assert any(gap.failure_mode == "Cavitation" for gap in review.strategy_gaps)
+    assert review.condition_monitoring_opportunities == []
+    assert review.recommendations == []
+    assert [event.tool for event in progress_events] == [
+        "maintenance_strategy_profile_builder",
+        "maintenance_mix_analyzer",
+        "failure_mode_coverage_analyzer",
+        "frequency_risk_analyzer",
+    ]
+
+
 def test_maintenance_strategy_specialist_returns_json_for_orchestration() -> None:
     equipment = _pump_with_maintenance_strategy_history()
     specialist = MaintenanceStrategySpecialist(
