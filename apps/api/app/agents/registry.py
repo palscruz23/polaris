@@ -20,7 +20,7 @@ from app.domain.orchestration import (
     AgentToolDefinition,
     AgentToolResult,
 )
-from app.domain.progress import ProgressCallback
+from app.domain.progress import ProgressCallback, ToolCallCollector
 from app.schemas.defect_elimination import DefectEliminationOverviewResponse
 from app.schemas.master_data import EquipmentSearchResponse
 from app.schemas.maintenance_strategy import MaintenanceStrategyReviewResponse
@@ -289,8 +289,10 @@ class SpecialistRegistry:
                 is_error=True,
             )
 
+        collector = ToolCallCollector(progress)
+
         try:
-            content = specialist.execute(call.arguments, progress)
+            content = specialist.execute(call.arguments, collector)
         except ValidationError as error:
             content = (
                 "The specialist arguments were invalid: "
@@ -301,6 +303,7 @@ class SpecialistRegistry:
                 tool_name=call.name,
                 content=content,
                 is_error=True,
+                sub_calls=tuple(collector.sub_calls),
             )
         except Exception:
             return AgentToolResult(
@@ -312,10 +315,12 @@ class SpecialistRegistry:
                     "the limitation."
                 ),
                 is_error=True,
+                sub_calls=tuple(collector.sub_calls),
             )
 
         return AgentToolResult(
             call_id=call.id,
             tool_name=call.name,
             content=content,
+            sub_calls=tuple(collector.sub_calls),
         )

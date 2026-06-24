@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.agents.registry import SpecialistRegistry
 from app.domain.chat import ChatMessage
-from app.domain.orchestration import AgentToolExchange
+from app.domain.orchestration import AgentInternalCall, AgentToolExchange
 from app.domain.progress import ProgressCallback
 from app.exceptions import (
     ChatServiceError,
@@ -119,6 +119,7 @@ class ConversationChatService:
 
         agent_run = None
         run_started_at = perf_counter()
+        memory_operations: list[dict] = []
 
         try:
             try:
@@ -146,6 +147,11 @@ class ConversationChatService:
                         locked_conversation.memory_through_sequence_number
                     ),
                 )
+                memory_operations.append({
+                    "sequence": 0,
+                    "call_type": "memory_compaction",
+                    "message": "Compact conversation memory to stay within context limit",
+                })
                 context = self.context_builder.build(
                     system_prompt=RELIABILITY_AGENT_SYSTEM_PROMPT,
                     memory_markdown=compacted_memory,
@@ -189,7 +195,11 @@ class ConversationChatService:
         if locked_conversation is None:
             raise ConversationNotFoundError
 
-        tool_metadata = self._message_metadata(agent_response.tool_calls)
+        tool_metadata = self._message_metadata(
+            tool_calls=agent_response.tool_calls,
+            internal_calls=agent_response.internal_calls,
+            memory_operations=memory_operations,
+        )
         assistant_message = self.messages.create(
             conversation=locked_conversation,
             role="assistant",
@@ -224,6 +234,13 @@ class ConversationChatService:
             through_sequence_number=assistant_message.sequence_number,
         )
 
+        if memory_status == "completed":
+            memory_operations.append({
+                "sequence": 0,
+                "call_type": "memory_update",
+                "message": "Update conversation memory with new information",
+            })
+
         return user_message, assistant_message, memory_status
 
     @staticmethod
@@ -233,12 +250,29 @@ class ConversationChatService:
     @staticmethod
     def _message_metadata(
         tool_calls: Sequence[AgentToolExchange],
+        internal_calls: Sequence[AgentInternalCall] = (),
+        memory_operations: Sequence[dict] = (),
     ) -> dict | None:
-        if not tool_calls:
+        if not tool_calls and not internal_calls and not memory_operations:
             return None
 
-        return {
-            "tool_calls": [
+        metadata: dict = {}
+
+        if internal_calls or memory_operations:
+            metadata["internal_calls"] = [
+                *[
+                    {
+                        "sequence": index,
+                        "call_type": ic.call_type,
+                        "message": ic.message,
+                    }
+                    for index, ic in enumerate(internal_calls, start=1)
+                ],
+                *memory_operations,
+            ]
+
+        if tool_calls:
+            metadata["tool_calls"] = [
                 {
                     "sequence": index,
                     "id": exchange.call.id,
@@ -250,10 +284,19 @@ class ConversationChatService:
                     "arguments": exchange.call.arguments,
                     "result": exchange.result.content,
                     "is_error": exchange.result.is_error,
+                    "sub_calls": [
+                        {
+                            "agent": sub.specialist,
+                            "tool": sub.tool,
+                            "message": sub.message,
+                        }
+                        for sub in exchange.result.sub_calls
+                    ],
                 }
                 for index, exchange in enumerate(tool_calls, start=1)
             ]
-        }
+
+        return metadata
 
     @staticmethod
     def _title_from_message(content: str) -> str:

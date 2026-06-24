@@ -6,6 +6,7 @@ from app.agents.registry import SpecialistRegistry
 from app.domain.chat import ChatMessage
 from app.domain.orchestration import (
     AgentAnswerReview,
+    AgentInternalCall,
     AgentModelCallTrace,
     AgentModelResponse,
     AgentOrchestrationResponse,
@@ -18,6 +19,14 @@ from app.domain.orchestration import (
 from app.domain.progress import ProgressCallback, report_progress
 from app.exceptions import ChatServiceError
 from app.providers.base import ChatProvider
+
+INTERNAL_CALL_MESSAGES: dict[str, str] = {
+    "agent_tool_selection": "Analyze request and select specialist",
+    "agent_final_synthesis": "Consolidate findings into final response",
+    "answer_review": "Quality gate — verify answer against evidence",
+    "answer_revision": "Revise answer to meet quality standards",
+    "answer_revision_final": "Finalize revised answer",
+}
 
 
 class ReliabilityAgentOrchestrator:
@@ -62,6 +71,21 @@ class ReliabilityAgentOrchestrator:
         exchanges: list[AgentToolExchange] = []
         seen_calls: set[str] = set()
         tool_call_count = 0
+        internal_calls: list[AgentInternalCall] = []
+
+        def _collect(trace: AgentModelCallTrace) -> None:
+            internal_calls.append(
+                AgentInternalCall(
+                    call_type=trace.call_type,
+                    message=INTERNAL_CALL_MESSAGES.get(
+                        trace.call_type, trace.call_type
+                    ),
+                )
+            )
+            if model_call_observer is not None:
+                model_call_observer(trace)
+
+        observer = _collect
 
         report_progress(
             progress,
@@ -76,7 +100,7 @@ class ReliabilityAgentOrchestrator:
                 max_output_tokens=max_output_tokens,
                 tools=self.registry.definitions,
                 exchanges=exchanges,
-                observer=model_call_observer,
+                observer=observer,
             )
 
             if not response.tool_calls:
@@ -89,7 +113,8 @@ class ReliabilityAgentOrchestrator:
                         seen_calls=seen_calls,
                         tool_call_count=tool_call_count,
                         progress=progress,
-                        model_call_observer=model_call_observer,
+                        model_call_observer=observer,
+                        internal_calls=internal_calls,
                     )
 
                 raise ChatServiceError(
@@ -126,7 +151,7 @@ class ReliabilityAgentOrchestrator:
             max_output_tokens=max_output_tokens,
             tools=(),
             exchanges=exchanges,
-            observer=model_call_observer,
+            observer=observer,
         )
 
         if final_response.content:
@@ -138,7 +163,8 @@ class ReliabilityAgentOrchestrator:
                 seen_calls=seen_calls,
                 tool_call_count=tool_call_count,
                 progress=progress,
-                model_call_observer=model_call_observer,
+                model_call_observer=observer,
+                internal_calls=internal_calls,
             )
 
         raise ChatServiceError(
@@ -186,6 +212,7 @@ class ReliabilityAgentOrchestrator:
         tool_call_count: int,
         progress: ProgressCallback | None,
         model_call_observer: ModelCallObserver | None,
+        internal_calls: list[AgentInternalCall],
     ) -> AgentOrchestrationResponse:
         if exchanges:
             report_progress(
@@ -209,6 +236,7 @@ class ReliabilityAgentOrchestrator:
                 return AgentOrchestrationResponse(
                     content=current_answer,
                     tool_calls=tuple(exchanges),
+                    internal_calls=tuple(internal_calls),
                 )
 
             if loop_index >= self.max_quality_review_loops:
@@ -227,6 +255,7 @@ class ReliabilityAgentOrchestrator:
                         review,
                     ),
                     tool_calls=tuple(exchanges),
+                    internal_calls=tuple(internal_calls),
                 )
 
             report_progress(
@@ -252,6 +281,7 @@ class ReliabilityAgentOrchestrator:
         return AgentOrchestrationResponse(
             content=current_answer,
             tool_calls=tuple(exchanges),
+            internal_calls=tuple(internal_calls),
         )
 
     def _review_answer(

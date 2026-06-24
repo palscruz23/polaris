@@ -240,12 +240,12 @@ class DefectEliminationAgent:
         mtbf_metrics = self._calculate_mtbf(
             work_orders,
             bad_actor_limit,
-            None,
+            progress,
         )
         weibull_analysis = self._analyze_weibull(
             work_orders,
             bad_actor_limit,
-            None,
+            progress,
         )
         (
             rca_evidence_plans,

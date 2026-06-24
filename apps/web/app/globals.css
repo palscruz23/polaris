@@ -781,12 +781,6 @@ a {
   padding: 0.65rem 0.75rem;
   text-align: left;
   vertical-align: top;
-  width: 1%;
-}
-
-.data-table th:first-child,
-.data-table td:first-child {
-  white-space: nowrap;
 }
 
 .data-table th {
@@ -799,13 +793,15 @@ a {
   z-index: 1;
 }
 
+.data-table td {
+  max-width: 28rem;
+  min-width: 4rem;
+}
+
 .data-table-cell {
-  display: block;
-  max-width: min(42ch, 54vw);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: max-content;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .data-filter-row th {
@@ -1736,6 +1732,112 @@ a {
   padding: 0.45rem 0.75rem 0.75rem;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.agent-tool-call-details-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted-strong);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+}
+
+.agent-tool-call-details-toggle:hover,
+.agent-tool-call-details-toggle:focus-visible {
+  background: var(--accent-wash);
+  color: var(--heading);
+  outline: none;
+}
+
+.agent-tool-call-details-toggle::before {
+  content: "▶";
+  font-size: 0.55rem;
+  transition: transform 0.15s ease;
+}
+
+.agent-tool-call-details-toggle[aria-expanded="true"]::before {
+  transform: rotate(90deg);
+}
+
+.agent-tool-call-message {
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+}
+
+.agent-tool-call-message span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.72rem;
+  font-style: italic;
+}
+
+.agent-subcall-list {
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.agent-subcall {
+  background: #fafcfe;
+  border-bottom: 1px solid var(--border);
+}
+
+.agent-subcall:last-child {
+  border-bottom: 0;
+}
+
+.agent-subcall-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.agent-subcall-header span {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 0.68rem;
+  font-weight: 750;
+  padding: 0.12rem 0.4rem;
+}
+
+.agent-subcall-header strong {
+  color: var(--heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.agent-subcall-header code {
+  background: transparent;
+  border: 0;
+  color: var(--muted-strong);
+  font-size: 0.74rem;
+  padding: 0;
+}
+
+.agent-subcall-body {
+  padding: 0 0.75rem 0.6rem;
+}
+
+.agent-subcall-body span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.72rem;
+  font-style: italic;
 }
 
 .agent-message-user {

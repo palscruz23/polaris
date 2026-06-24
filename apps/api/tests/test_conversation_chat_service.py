@@ -221,6 +221,7 @@ def test_conversation_service_persists_agent_tool_metadata() -> None:
                     "arguments": {"equipment_numbers": ["P-101"]},
                     "result": '{"recommendation":"modify"}',
                     "is_error": False,
+                    "sub_calls": [],
                 }
             ]
         }

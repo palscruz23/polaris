@@ -12,6 +12,12 @@ type Message = {
   metadata?: AgentMessageMetadata | null;
 };
 
+type AgentSubCallMetadata = {
+  agent: string;
+  tool: string;
+  message: string;
+};
+
 type AgentToolCallMetadata = {
   sequence: number;
   id: string;
@@ -21,10 +27,18 @@ type AgentToolCallMetadata = {
   arguments: Record<string, unknown>;
   result: string;
   is_error: boolean;
+  sub_calls?: AgentSubCallMetadata[];
+};
+
+type AgentInternalCallMetadata = {
+  sequence: number;
+  call_type: string;
+  message: string;
 };
 
 type AgentMessageMetadata = {
   tool_calls?: AgentToolCallMetadata[];
+  internal_calls?: AgentInternalCallMetadata[];
 };
 
 type ApiMessage = Message & {
@@ -286,11 +300,131 @@ function formatMetadataValue(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
 
+function extractIntentLabel(toolCall: AgentToolCallMetadata): string | null {
+  const intent = toolCall.arguments?.intent;
+  if (typeof intent !== "string") {
+    return null;
+  }
+
+  return intent
+    .split("_")
+    .map(titleCaseWord)
+    .join(" ");
+}
+
+function ToolCallItem({ toolCall, sequenceNumber }: { toolCall: AgentToolCallMetadata; sequenceNumber: number }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const intentLabel = extractIntentLabel(toolCall);
+
+  return (
+    <li className="agent-tool-call">
+      <div className="agent-tool-call-header">
+        <span>#{sequenceNumber}</span>
+        <strong>{formatAgentName(toolCall.agent)}</strong>
+        {toolCall.target_agent ? (
+          <b aria-label="Target agent">
+            {formatAgentName(toolCall.target_agent)}
+          </b>
+        ) : null}
+        <code>
+          {intentLabel ?? formatToolName(toolCall.tool)}
+        </code>
+        {toolCall.is_error ? <em>error</em> : null}
+      </div>
+      {toolCall.sub_calls && toolCall.sub_calls.length > 0 ? (
+        <ol className="agent-subcall-list">
+          {toolCall.sub_calls.map((sub, subIndex) => (
+            <li
+              className="agent-subcall"
+              key={`${toolCall.id}-sub-${subIndex}`}
+            >
+              <div className="agent-subcall-header">
+                <span>#{sequenceNumber}.{subIndex + 1}</span>
+                <strong>{formatAgentName(sub.agent)}</strong>
+                <code>{formatToolName(sub.tool)}</code>
+              </div>
+              <div className="agent-subcall-body">
+                <span>{sub.message}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      <button
+        aria-expanded={detailsOpen}
+        className="agent-tool-call-details-toggle"
+        onClick={() => setDetailsOpen((open) => !open)}
+        type="button"
+      >
+        <span>{detailsOpen ? "Hide" : "Show"} details</span>
+      </button>
+      {detailsOpen ? (
+        <div className="agent-tool-call-body">
+          <div>
+            <span>Arguments</span>
+            <pre>{formatMetadataValue(toolCall.arguments)}</pre>
+          </div>
+          <div>
+            <span>Result</span>
+            <pre>{formatMetadataValue(toolCall.result)}</pre>
+          </div>
+        </div>
+      ) : null}
+    </li>
+  );
+}
+
+function InternalCallItem({ call, sequenceNumber }: { call: AgentInternalCallMetadata; sequenceNumber: number }) {
+  return (
+    <li className="agent-tool-call">
+      <div className="agent-tool-call-header">
+        <span>#{sequenceNumber}</span>
+        <strong>Reliability Agent</strong>
+        <code>{formatToolName(call.call_type)}</code>
+      </div>
+      <div className="agent-tool-call-message">
+        <span>{call.message}</span>
+      </div>
+    </li>
+  );
+}
+
+function interleaveCalls(
+  internalCalls: AgentInternalCallMetadata[],
+  toolCalls: AgentToolCallMetadata[],
+): Array<
+  | { kind: "internal"; data: AgentInternalCallMetadata }
+  | { kind: "tool"; data: AgentToolCallMetadata }
+> {
+  const beforeTools: AgentInternalCallMetadata[] = [];
+  const afterTools: AgentInternalCallMetadata[] = [];
+
+  for (const ic of internalCalls) {
+    if (ic.call_type === "agent_tool_selection") {
+      continue; // redundant — the specialist call that follows represents this
+    }
+    if (ic.call_type.startsWith("memory_")) {
+      beforeTools.push(ic);
+    } else {
+      afterTools.push(ic);
+    }
+  }
+
+  return [
+    ...beforeTools.map((ic) => ({ kind: "internal" as const, data: ic })),
+    ...toolCalls.map((tc) => ({ kind: "tool" as const, data: tc })),
+    ...afterTools.map((ic) => ({ kind: "internal" as const, data: ic })),
+  ];
+}
+
 function ToolCallMetadata({ metadata }: { metadata?: AgentMessageMetadata | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const toolCalls = metadata?.tool_calls ?? [];
+  const internalCalls = metadata?.internal_calls ?? [];
 
-  if (toolCalls.length === 0) {
+  const allItems = interleaveCalls(internalCalls, toolCalls);
+
+  if (allItems.length === 0) {
     return null;
   }
 
@@ -302,36 +436,30 @@ function ToolCallMetadata({ metadata }: { metadata?: AgentMessageMetadata | null
         onClick={() => setIsOpen((open) => !open)}
         type="button"
       >
-        <span>{isOpen ? "Hide" : "Show"} tool calls</span>
-        <span aria-hidden="true">{toolCalls.length}</span>
+        <span>{isOpen ? "Hide" : "Show"} agent process</span>
+        <span aria-hidden="true">{allItems.length}</span>
       </button>
       {isOpen ? (
         <ol className="agent-tool-call-list">
-          {toolCalls.map((toolCall) => (
-            <li className="agent-tool-call" key={`${toolCall.id}-${toolCall.sequence}`}>
-              <div className="agent-tool-call-header">
-                <span>#{toolCall.sequence}</span>
-                <strong>{formatAgentName(toolCall.agent)}</strong>
-                {toolCall.target_agent ? (
-                  <b aria-label="Target agent">
-                    {formatAgentName(toolCall.target_agent)}
-                  </b>
-                ) : null}
-                <code>{formatToolName(toolCall.tool)}</code>
-                {toolCall.is_error ? <em>error</em> : null}
-              </div>
-              <div className="agent-tool-call-body">
-                <div>
-                  <span>Arguments</span>
-                  <pre>{formatMetadataValue(toolCall.arguments)}</pre>
-                </div>
-                <div>
-                  <span>Result</span>
-                  <pre>{formatMetadataValue(toolCall.result)}</pre>
-                </div>
-              </div>
-            </li>
-          ))}
+          {allItems.map((item, index) => {
+            const seq = index + 1;
+            if (item.kind === "internal") {
+              return (
+                <InternalCallItem
+                  key={`internal-${item.data.sequence}`}
+                  call={item.data}
+                  sequenceNumber={seq}
+                />
+              );
+            }
+            return (
+              <ToolCallItem
+                key={`${item.data.id}-${item.data.sequence}`}
+                toolCall={item.data}
+                sequenceNumber={seq}
+              />
+            );
+          })}
         </ol>
       ) : null}
     </div>

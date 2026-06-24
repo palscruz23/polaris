@@ -17,11 +17,25 @@ class AgentToolCall:
 
 
 @dataclass(frozen=True)
+class SubToolCall:
+    specialist: str
+    tool: str
+    message: str
+
+
+@dataclass(frozen=True)
+class AgentInternalCall:
+    call_type: str
+    message: str
+
+
+@dataclass(frozen=True)
 class AgentToolResult:
     call_id: str
     tool_name: str
     content: str
     is_error: bool = False
+    sub_calls: tuple[SubToolCall, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -40,6 +54,7 @@ class AgentModelResponse:
 class AgentOrchestrationResponse:
     content: str
     tool_calls: tuple[AgentToolExchange, ...] = ()
+    internal_calls: tuple[AgentInternalCall, ...] = ()
 
 
 @dataclass(frozen=True)
