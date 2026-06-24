@@ -26,6 +26,12 @@ const specialistAgents: readonly SpecialistAgent[] = [
     purpose:
       "Reviews and optimizes maintenance strategies by checking PM effectiveness, failure mode coverage, OEM guidance, and strategy gaps.",
   },
+  {
+    id: "improvement",
+    title: "Reliability Improvement Agent",
+    purpose:
+      "Converts engineering findings into ranked opportunities, cost-benefit context, action plans, and reliability roadmaps.",
+  },
 ];
 
 const flowNodes = {
@@ -229,7 +235,7 @@ export default function Home() {
             </span>
 
             <article className="flow-node flow-node-manager flow-node-manager-review" tabIndex={0}>
-              <span className="flow-node-index">6</span>
+              <span className="flow-node-index">7</span>
               <h3>{flowNodes.managerReview.title}</h3>
             </article>
 
@@ -248,7 +254,7 @@ export default function Home() {
             </aside>
 
             <article className="flow-node flow-node-final-response" tabIndex={0}>
-              <span className="flow-node-index">7</span>
+              <span className="flow-node-index">8</span>
               <h3>{flowNodes.finalResponse.title}</h3>
             </article>
           </div>
