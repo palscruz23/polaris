@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -28,6 +28,11 @@ class MessageResponse(BaseModel):
     sequence_number: int
     provider: str | None
     model: str | None
+    metadata: dict[str, Any] | None = Field(
+        default=None,
+        validation_alias="metadata_",
+        serialization_alias="metadata",
+    )
     created_at: datetime
 
 

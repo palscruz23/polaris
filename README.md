@@ -8,9 +8,9 @@ conversations, message history, model-provider access, and conversation memory
 updates. The Reliability Agent can select and execute registered specialist
 capabilities through a bounded sequential multi-call loop.
 
-The Master Data, Defect Elimination, and Maintenance Strategy agents are
-implemented specialists in the broader multi-agent vision. Reliability
-Improvement remains planned.
+The Master Data, Defect Elimination, Maintenance Strategy, and Reliability
+Improvement agents are implemented specialists in the broader multi-agent
+vision.
 
 [Open Reliability Webpage](https://open-reliability.vercel.app)
 
@@ -18,88 +18,117 @@ Improvement remains planned.
 
 ![Open Reliability Demo](demo.gif)
 
-## Reliability Agent
+## Reliability Agent Workflow and Tooling
 
-The Reliability Agent is available at `/chat-with-reliability`.
-
-Capabilities:
-
-- Persistent reliability conversations that retain context across follow-up
-  questions and planning sessions.
-- Conversation history panel to review and switch between past reliability
-  discussions.
-- Automatic session titles summarised from the first reliability question.
-- Conversation memory that carries forward key reliability context.
-- Per-message model selection across approved OpenRouter models, with
-  higher-cost GPT and Claude options reserved for production use.
-- Specialist selection and coordination — the Reliability Agent chooses which
-  specialists to call, suppresses duplicate analysis, and limits to five
-  specialist calls before synthesising a final response.
-- Live progress updates while the agent coordinates specialist analysis.
-
-Specialists:
-
-- **Master Data Agent** — equipment discovery with text search, asset filters,
-  and paginated match summaries.
-- **Defect Elimination Agent** — bad actor ranking, repeat failure detection,
-  reliability summary metrics, MTBF calculation, Weibull analysis, RCA
-  evidence planning, 5 Whys
-  generation, RCA template construction, defect elimination charter generation,
-  and prioritised recommendations.
-- **Maintenance Strategy Agent** — maintenance task profile review, maintenance
-  mix breakdown, failure-mode coverage analysis, frequency risk assessment,
-  strategy gap identification, condition-monitoring opportunity review, and
-  evidence-backed recommendations.
-- **Reliability Improvement Agent** — planned value, action-plan, reporting, and
-  roadmap workflow.
-
-## Workflow and Tooling
-
-The Reliability Agent coordinates specialists through deterministic tools.
-Available tools by agent:
+The Reliability Agent coordinates specialists through deterministic tools and
+orchestration components. Available tools and components by agent:
 
 ### Reliability Agent tools
 
-- `SpecialistRouter` — selects the best specialist.
-- `MultiCallCoordinator` — runs up to five specialist calls.
-- `DuplicateCallGuard` — prevents repeated specialist calls.
-- `ProgressStreamer` — streams live analysis progress.
-- `ConversationMemoryUpdater` — saves context for follow-up questions.
+- `ReliabilityAgentOrchestrator` — coordinates specialist tool calls through
+  the configured model provider.
+- `SpecialistRegistry` — exposes the available specialist capabilities and
+  dispatches validated calls.
+- `DuplicateCallGuard` — suppresses repeated specialist calls with the same
+  arguments during one response loop.
+- `ProgressStreamer` — streams live review, specialist, tool, and synthesis
+  progress events.
+- `ContextBuilder` — builds bounded chat context from the system prompt,
+  memory, history, and the latest user request.
+- `MemoryService` — updates and compacts conversation memory for follow-up
+  questions.
+- `AnswerQualityGate` — reviews the draft answer for evidence support,
+  completeness, and honest limitations; allows up to three revision loops
+  before returning the best supported answer with clear caveats.
 
 ### Master Data Agent tools
 
-- `EquipmentSearch` — finds equipment using asset filters.
-- `EquipmentMatchSummary` — returns paginated matches and counts.
+- `EquipmentSearchTool` — searches stored equipment by text and asset filters,
+  returning paginated equipment records plus status and equipment-type counts.
 
 ### Defect Elimination Agent tools
 
-- `ReliabilityMetricsCalculator` — summarizes reliability performance.
-- `BadActorAnalyzer` — ranks high-impact equipment.
-- `RepeatFailureDetector` — finds recurring failure patterns.
-- `MTBFCalculator` — calculates mean time between failures.
-- `WeibullAnalyzer` — estimates failure behavior and life distribution.
-- `RCAEvidencePlanner` — identifies evidence needed for RCA.
-- `FiveWhysGenerator` — drafts a structured 5 Whys analysis.
-- `RCATemplateBuilder` — creates an RCA investigation worksheet.
-- `DefectEliminationCharterBuilder` — creates an improvement charter.
-- `RecommendationPrioritizer` — recommends evidence-backed next actions.
+- `ReliabilityMetricsTool` — summarizes work-order volume, activity mix, cost,
+  downtime, date range, and corrective-to-preventive ratio.
+- `BadActorAnalysisTool` — ranks high-impact equipment using corrective events,
+  downtime, cost, MTTR, and MTBF context.
+- `RepeatFailureDetectionTool` — finds recurring equipment and failure-mode
+  patterns from linked work orders.
+- `MTBFCalculationTool` — calculates asset-level mean time between corrective
+  repair events.
+- `WeibullAnalysisTool` — estimates failure behavior and life-distribution
+  indicators where enough interval history exists.
+- `RCAEvidencePlanningTool` — identifies evidence, interviews, records, and
+  containment actions needed for RCA.
+- `FiveWhysGeneratorTool` — drafts structured 5 Whys prompts for repeat
+  failures.
+- `RCATemplateBuilderTool` — creates RCA worksheet sections and starter
+  questions.
+- `DefectEliminationCharterGeneratorTool` — creates improvement charters with
+  impact, hypotheses, evidence needs, actions, success criteria, and
+  verification plans.
+
+Recommendation synthesis for Defect Elimination is implemented inside
+`DefectEliminationAgent` rather than as a separate tool class.
 
 ### Maintenance Strategy Agent tools
 
-- `MaintenanceTaskProfiler` — summarizes planned maintenance tasks.
-- `MaintenanceMixAnalyzer` — groups tasks by maintenance type.
-- `FailureModeCoverageAnalyzer` — finds covered and uncovered risks.
-- `FrequencyRiskAssessor` — flags weak maintenance intervals.
-- `StrategyGapDetector` — identifies missing or duplicated controls.
-- `ConditionMonitoringAdvisor` — finds PdM and CBM opportunities.
-- `StrategyRecommender` — recommends evidence-backed strategy changes.
+- `MaintenanceStrategyProfileBuilderTool` — summarizes existing maintenance
+  strategy tasks, active task count, task types, and frequency details.
+- `MaintenanceMixAnalyzerTool` — summarizes work-order mix, corrective to
+  preventive ratio, cost, and downtime.
+- `FailureModeCoverageAnalyzerTool` — compares observed failure modes with
+  active strategy task descriptions to classify coverage.
+- `FrequencyRiskAnalyzerTool` — compares task intervals with observed repeat
+  failure recurrence to flag weak intervals for review.
+- `MaintenanceStrategyGapDetectorTool` — identifies missing active strategies,
+  uncovered failure modes, and partial coverage gaps.
+- `ConditionMonitoringOpportunityAnalyzerTool` — suggests PdM or CBM methods
+  based on equipment type and observed failure modes.
+- `MaintenanceStrategyRecommendationBuilderTool` — returns bounded
+  `keep`, `modify`, `add`, and `engineering_review` recommendations from the
+  evidence produced by the preceding tools.
 
 ### Reliability Improvement Agent tools
 
-- `ValueEstimator` — Future: quantifies expected improvement value.
-- `ActionPlanBuilder` — Future: creates owners, milestones, and deliverables.
-- `OutcomeReporter` — Future: tracks benefits and reliability outcomes.
-- `RoadmapPlanner` — Future: sequences reliability initiatives.
+- `ValueEstimatorTool` — ranks improvement opportunities from corrective-like
+  work orders, downtime, cost, repeat failures, and criticality.
+- `ActionPlanBuilderTool` — creates draft owners, actions, milestones, and
+  deliverables for each opportunity.
+- `OutcomeReporterTool` — defines baseline measures, expected outcomes, and
+  reporting cadence.
+- `RoadmapPlannerTool` — sequences opportunities into `now`, `next`, and
+  `later` roadmap horizons.
+
+## Memory Architecture
+
+Conversation memory is a durable Markdown summary stored on each conversation,
+separate from the full message history. It preserves long-lived reliability
+context such as objectives, equipment identifiers, known facts, assumptions,
+decisions, recommended actions, and open questions.
+
+On each chat turn, `ConversationChatService` loads the conversation, previous
+messages, and current `memory_markdown`. `ContextBuilder` injects the memory as
+a system message alongside the Reliability Agent system prompt, the latest
+bounded conversation history, and the current user request. This keeps recent
+dialogue available while giving durable facts a predictable place in the model
+context.
+
+Memory is token-budgeted separately from chat history. The current implementation
+reserves up to one tenth of the provider context window for memory, one quarter
+for the response, and a small safety margin. If the memory exceeds its budget,
+`MemoryService` compacts it before the response is generated.
+
+After the assistant response is saved, `MemoryService` updates the Markdown
+memory from the previous memory, latest user message, and latest assistant
+response. Updates use fixed headings to keep confirmed facts, assumptions,
+decisions, recommended actions, and open questions distinct. Each saved memory
+state is also recorded as a `ConversationMemoryRevision` with the message
+sequence number it covers.
+
+Memory is concise and durable rather than a full
+transcript. Detailed history remains in persisted messages, while memory carries
+forward the stable context needed for follow-up reliability analysis.
 
 ## Apps
 

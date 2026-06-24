@@ -1,9 +1,11 @@
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
 from app.agents.registry import SpecialistRegistry
+from app.domain.orchestration import AgentToolExchange
 from app.domain.progress import ProgressCallback
 from app.exceptions import (
     ChatServiceError,
@@ -144,11 +146,12 @@ class ConversationChatService:
                     current_user_message=content,
                 )
 
-            assistant_content = self.orchestrator.respond(
+            agent_response = self.orchestrator.respond_with_metadata(
                 messages=context.messages,
                 max_output_tokens=context.max_output_tokens,
                 progress=progress,
             )
+            assistant_content = agent_response.content
         except Exception:
             self._clear_processing(conversation_id)
             raise
@@ -164,6 +167,7 @@ class ConversationChatService:
             content=assistant_content,
             provider=self.provider.name,
             model=self.provider.model,
+            metadata=self._message_metadata(agent_response.tool_calls),
         )
         self._clear_processing(conversation_id)
 
@@ -176,6 +180,31 @@ class ConversationChatService:
         )
 
         return user_message, assistant_message, memory_status
+
+    @staticmethod
+    def _message_metadata(
+        tool_calls: Sequence[AgentToolExchange],
+    ) -> dict | None:
+        if not tool_calls:
+            return None
+
+        return {
+            "tool_calls": [
+                {
+                    "sequence": index,
+                    "id": exchange.call.id,
+                    "agent": "reliability_agent",
+                    "target_agent": ReliabilityAgentOrchestrator._specialist_name(
+                        exchange.call.name
+                    ),
+                    "tool": exchange.call.name,
+                    "arguments": exchange.call.arguments,
+                    "result": exchange.result.content,
+                    "is_error": exchange.result.is_error,
+                }
+                for index, exchange in enumerate(tool_calls, start=1)
+            ]
+        }
 
     @staticmethod
     def _title_from_message(content: str) -> str:

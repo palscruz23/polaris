@@ -5,6 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.database import engine
 from app.domain.chat import ChatMessage
+from app.domain.orchestration import (
+    AgentOrchestrationResponse,
+    AgentToolCall,
+    AgentToolExchange,
+    AgentToolResult,
+)
 from app.providers.base import ChatProvider
 from app.repositories.conversation_repository import ConversationRepository
 from app.services.conversation_chat_service import ConversationChatService
@@ -56,6 +62,33 @@ class RecordingProvider(ChatProvider):
 
         self.response_number += 1
         return f"Assistant response {self.response_number}"
+
+
+class MetadataOrchestrator:
+    def respond_with_metadata(
+        self,
+        messages: Sequence[ChatMessage],
+        max_output_tokens: int,
+        progress=None,
+    ) -> AgentOrchestrationResponse:
+        del messages, max_output_tokens, progress
+        return AgentOrchestrationResponse(
+            content="Review complete.",
+            tool_calls=(
+                AgentToolExchange(
+                    call=AgentToolCall(
+                        id="call-1",
+                        name="review_maintenance_strategy",
+                        arguments={"equipment_numbers": ["P-101"]},
+                    ),
+                    result=AgentToolResult(
+                        call_id="call-1",
+                        tool_name="review_maintenance_strategy",
+                        content='{"recommendation":"modify"}',
+                    ),
+                ),
+            ),
+        )
 
 
 def test_conversation_service_persists_follow_up_context_and_memory() -> None:
@@ -129,6 +162,48 @@ def test_conversation_service_sets_summary_title_from_first_message() -> None:
 
         assert reloaded is not None
         assert reloaded.title == "Troubleshoot Repeated Failures Pump P-101"
+    finally:
+        session.close()
+        transaction.rollback()
+        connection.close()
+
+
+def test_conversation_service_persists_agent_tool_metadata() -> None:
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(
+        bind=connection,
+        join_transaction_mode="create_savepoint",
+    )
+
+    try:
+        provider = RecordingProvider()
+        conversation = ConversationRepository(session).create()
+        service = ConversationChatService(
+            session,
+            provider,
+            orchestrator=MetadataOrchestrator(),  # type: ignore[arg-type]
+        )
+
+        _, assistant_message, _ = service.respond(
+            conversation.id,
+            "Review P-101 strategy.",
+        )
+
+        assert assistant_message.metadata_ == {
+            "tool_calls": [
+                {
+                    "sequence": 1,
+                    "id": "call-1",
+                    "agent": "reliability_agent",
+                    "target_agent": "maintenance_strategy",
+                    "tool": "review_maintenance_strategy",
+                    "arguments": {"equipment_numbers": ["P-101"]},
+                    "result": '{"recommendation":"modify"}',
+                    "is_error": False,
+                }
+            ]
+        }
     finally:
         session.close()
         transaction.rollback()

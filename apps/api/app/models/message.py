@@ -7,6 +7,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    JSON,
     Text,
     UniqueConstraint,
     func,
@@ -72,6 +73,12 @@ class Message(Base):
 
     model: Mapped[str | None] = mapped_column(
         Text,
+        nullable=True,
+    )
+
+    metadata_: Mapped[dict | None] = mapped_column(
+        "metadata",
+        JSON,
         nullable=True,
     )
 

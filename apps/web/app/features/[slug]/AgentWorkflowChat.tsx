@@ -9,6 +9,22 @@ type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  metadata?: AgentMessageMetadata | null;
+};
+
+type AgentToolCallMetadata = {
+  sequence: number;
+  id: string;
+  agent: string | null;
+  target_agent?: string | null;
+  tool: string;
+  arguments: Record<string, unknown>;
+  result: string;
+  is_error: boolean;
+};
+
+type AgentMessageMetadata = {
+  tool_calls?: AgentToolCallMetadata[];
 };
 
 type ApiMessage = Message & {
@@ -16,6 +32,7 @@ type ApiMessage = Message & {
   sequence_number: number;
   provider: string | null;
   model: string | null;
+  metadata: AgentMessageMetadata | null;
   created_at: string;
 };
 
@@ -243,30 +260,117 @@ function AgentMark() {
   );
 }
 
-function AssistantMessage({ content }: { content: string }) {
+function formatAgentName(agent: string | null) {
+  if (!agent) {
+    return "Agent";
+  }
+
+  return agent
+    .split("_")
+    .map(titleCaseWord)
+    .join(" ");
+}
+
+function formatToolName(tool: string) {
+  return tool
+    .split("_")
+    .map(titleCaseWord)
+    .join(" ");
+}
+
+function formatMetadataValue(value: unknown) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function ToolCallMetadata({ metadata }: { metadata?: AgentMessageMetadata | null }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const toolCalls = metadata?.tool_calls ?? [];
+
+  if (toolCalls.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="agent-message-markdown">
-      <ReactMarkdown
-        components={{
-          a: ({ children, ...props }) => (
-            <a {...props} rel="noreferrer" target="_blank">
-              {children}
-            </a>
-          ),
-          table: ({ children, node, ...props }) => {
-            void node;
-            return (
-              <div className="agent-message-table-scroll">
-                <table {...props}>{children}</table>
-              </div>
-            );
-          },
-        }}
-        remarkPlugins={[remarkGfm]}
+    <div className="agent-tool-metadata">
+      <button
+        aria-expanded={isOpen}
+        className="agent-tool-metadata-toggle"
+        onClick={() => setIsOpen((open) => !open)}
+        type="button"
       >
-        {content}
-      </ReactMarkdown>
+        <span>{isOpen ? "Hide" : "Show"} tool calls</span>
+        <span aria-hidden="true">{toolCalls.length}</span>
+      </button>
+      {isOpen ? (
+        <ol className="agent-tool-call-list">
+          {toolCalls.map((toolCall) => (
+            <li className="agent-tool-call" key={`${toolCall.id}-${toolCall.sequence}`}>
+              <div className="agent-tool-call-header">
+                <span>#{toolCall.sequence}</span>
+                <strong>{formatAgentName(toolCall.agent)}</strong>
+                {toolCall.target_agent ? (
+                  <b aria-label="Target agent">
+                    {formatAgentName(toolCall.target_agent)}
+                  </b>
+                ) : null}
+                <code>{formatToolName(toolCall.tool)}</code>
+                {toolCall.is_error ? <em>error</em> : null}
+              </div>
+              <div className="agent-tool-call-body">
+                <div>
+                  <span>Arguments</span>
+                  <pre>{formatMetadataValue(toolCall.arguments)}</pre>
+                </div>
+                <div>
+                  <span>Result</span>
+                  <pre>{formatMetadataValue(toolCall.result)}</pre>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : null}
     </div>
+  );
+}
+
+function AssistantMessage({
+  content,
+  metadata,
+}: {
+  content: string;
+  metadata?: AgentMessageMetadata | null;
+}) {
+  return (
+    <>
+      <div className="agent-message-markdown">
+        <ReactMarkdown
+          components={{
+            a: ({ children, ...props }) => (
+              <a {...props} rel="noreferrer" target="_blank">
+                {children}
+              </a>
+            ),
+            table: ({ children, node, ...props }) => {
+              void node;
+              return (
+                <div className="agent-message-table-scroll">
+                  <table {...props}>{children}</table>
+                </div>
+              );
+            },
+          }}
+          remarkPlugins={[remarkGfm]}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+      <ToolCallMetadata metadata={metadata} />
+    </>
   );
 }
 
@@ -466,6 +570,7 @@ export default function AgentWorkflowChat() {
                 id: data.user_message.id,
                 role: data.user_message.role,
                 content: data.user_message.content,
+                metadata: data.user_message.metadata,
               }
             : message,
         ),
@@ -473,6 +578,7 @@ export default function AgentWorkflowChat() {
           id: data.assistant_message.id,
           role: data.assistant_message.role,
           content: data.assistant_message.content,
+          metadata: data.assistant_message.metadata,
         },
       ]);
       refreshConversations();
@@ -613,6 +719,7 @@ export default function AgentWorkflowChat() {
           id: message.id,
           role: message.role,
           content: message.content,
+          metadata: message.metadata,
         })),
       );
       window.localStorage.setItem(CONVERSATION_STORAGE_KEY, conversation.id);
@@ -768,7 +875,10 @@ export default function AgentWorkflowChat() {
                     {message.role === "assistant" ? "Reliability Agent" : "You"}
                   </span>
                   {message.role === "assistant" ? (
-                    <AssistantMessage content={message.content} />
+                    <AssistantMessage
+                      content={message.content}
+                      metadata={message.metadata}
+                    />
                   ) : (
                     <p>{message.content}</p>
                   )}

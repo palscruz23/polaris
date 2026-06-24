@@ -20,6 +20,7 @@ class MessageRepository:
         content: str,
         provider: str | None = None,
         model: str | None = None,
+        metadata: dict | None = None,
     ) -> Message:
         sequence_number = conversation.message_count + 1
 
@@ -30,6 +31,7 @@ class MessageRepository:
             sequence_number=sequence_number,
             provider=provider,
             model=model,
+            metadata_=metadata,
         )
 
         conversation.message_count = sequence_number

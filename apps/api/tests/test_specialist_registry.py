@@ -1,8 +1,9 @@
 from app.agents.registry import (
     DefectEliminationArguments,
     EquipmentSearchArguments,
-    SpecialistRegistry,
     MaintenanceStrategyReviewArguments,
+    ReliabilityImprovementArguments,
+    SpecialistRegistry,
 )
 from app.domain.orchestration import (
     AgentToolCall,
@@ -82,6 +83,7 @@ def test_default_registry_exposes_all_specialist_capabilities() -> None:
         "search_equipment_master",
         "analyze_defect_elimination",
         "review_maintenance_strategy",
+        "plan_reliability_improvement",
     ]
 
 
@@ -99,3 +101,10 @@ def test_maintenance_strategy_arguments_enforce_asset_limits() -> None:
 
     assert schema["properties"]["equipment_numbers"]["maxItems"] == 10
     assert schema["properties"]["maximum_assets"]["maximum"] == 10
+
+
+def test_reliability_improvement_arguments_enforce_opportunity_limits() -> None:
+    schema = ReliabilityImprovementArguments.model_json_schema()
+
+    assert schema["properties"]["opportunity_limit"]["maximum"] == 10
+    assert schema["properties"]["opportunity_limit"]["minimum"] == 1

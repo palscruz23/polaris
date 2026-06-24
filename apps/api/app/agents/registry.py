@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.agents.defect_elimination_agent import DefectEliminationAgent
 from app.agents.master_data_agent import MasterDataAgent
 from app.agents.maintenance_strategy_agent import MaintenanceStrategyAgent
+from app.agents.reliability_improvement_agent import ReliabilityImprovementAgent
 from app.domain.orchestration import (
     AgentToolCall,
     AgentToolDefinition,
@@ -16,6 +17,9 @@ from app.domain.progress import ProgressCallback
 from app.schemas.defect_elimination import DefectEliminationOverviewResponse
 from app.schemas.master_data import EquipmentSearchResponse
 from app.schemas.maintenance_strategy import MaintenanceStrategyReviewResponse
+from app.schemas.reliability_improvement import (
+    ReliabilityImprovementPlanResponse,
+)
 
 
 class Specialist(Protocol):
@@ -176,6 +180,47 @@ class MaintenanceStrategySpecialist:
         return response.model_dump_json()
 
 
+class ReliabilityImprovementArguments(BaseModel):
+    opportunity_limit: int = Field(default=5, ge=1, le=10)
+
+
+class ReliabilityImprovementSpecialist:
+    def __init__(self, session: Session):
+        self.agent = ReliabilityImprovementAgent(session)
+
+    @property
+    def definition(self) -> AgentToolDefinition:
+        return AgentToolDefinition(
+            name="plan_reliability_improvement",
+            description=(
+                "Convert stored reliability history into improvement "
+                "opportunities, rough value estimates, action plans, outcome "
+                "measures, and a sequenced roadmap. Use this when the user "
+                "asks what reliability improvements to prioritize, how to "
+                "turn findings into an action plan, or how to build a "
+                "reliability roadmap."
+            ),
+            input_schema=ReliabilityImprovementArguments.model_json_schema(),
+        )
+
+    def execute(
+        self,
+        arguments: dict[str, object],
+        progress: ProgressCallback | None = None,
+    ) -> str:
+        request = ReliabilityImprovementArguments.model_validate(arguments)
+        findings = self.agent.build_plan(
+            opportunity_limit=request.opportunity_limit,
+            progress=progress,
+        )
+        response = ReliabilityImprovementPlanResponse.model_validate(
+            findings,
+            from_attributes=True,
+        )
+
+        return response.model_dump_json()
+
+
 class SpecialistRegistry:
     def __init__(
         self,
@@ -189,6 +234,7 @@ class SpecialistRegistry:
                 MasterDataSpecialist(session),
                 DefectEliminationSpecialist(session),
                 MaintenanceStrategySpecialist(session),
+                ReliabilityImprovementSpecialist(session),
             )
         )
         self._specialists = {
