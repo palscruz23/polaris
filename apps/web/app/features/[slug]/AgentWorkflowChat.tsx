@@ -1004,7 +1004,7 @@ export default function AgentWorkflowChat() {
                 {message.role === "assistant" ? <AgentMark /> : null}
                 <div>
                   <span className="agent-message-role">
-                    {message.role === "assistant" ? "Reliability Agent" : "You"}
+                    {message.role === "assistant" ? "Polaris" : "You"}
                   </span>
                   {message.role === "assistant" ? (
                     <AssistantMessage
@@ -1024,7 +1024,7 @@ export default function AgentWorkflowChat() {
               >
                 <AgentMark />
                 <div>
-                  <span className="agent-message-role">Reliability Agent</span>
+                  <span className="agent-message-role">Polaris</span>
                   <p>{progressMessage}</p>
                 </div>
               </article>
