@@ -323,7 +323,7 @@ export default function Home() {
           <Link href="/" className="home-footer-brand">
             Polaris by Open Reliability
           </Link>
-          <p className="home-footer-status">Open for demo / collaboration</p>
+          <p className="home-footer-status">Open for Demo / Collaboration</p>
           <nav className="home-footer-links" aria-label="Footer">
             {footerLinks.map((link, index) => (
               <span className="home-footer-link-item" key={link.label}>
