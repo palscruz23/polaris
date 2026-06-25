@@ -11,7 +11,7 @@ Polaris Agent can select and execute registered specialist capabilities through 
 
 ## Sample Demo
 
-![Polaris Demo](demo.gif)
+![Polaris Demo](polaris-demo.gif)
 
 ## Reliability Agent Workflow and Tooling
 
