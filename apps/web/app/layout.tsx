@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Open Reliability Copilot",
+  title: "Polaris",
   description:
-    "A reliability engineering workspace with persistent Reliability Agent chat and planned data, strategy, knowledge, and improvement workflows.",
+    "Open Reliability's workspace powered by Polaris, AI Reliability Agent that guides engineers through persistent reliability conversations, defect elimination investigations, and maintenance strategy decisions.",
 };
 
 export default function RootLayout({

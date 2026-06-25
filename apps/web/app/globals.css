@@ -63,6 +63,58 @@ a {
   gap: 0.65rem;
 }
 
+.brand-mark {
+  border-radius: 6px;
+  display: block;
+  flex: 0 0 auto;
+  height: 2rem;
+  width: 2rem;
+}
+
+.hero-product-panel {
+  align-self: end;
+  display: grid;
+  gap: 1rem;
+}
+
+.hero-title-lockup {
+  align-items: center;
+  border-radius: 8px;
+  display: flex;
+  gap: 0.65rem;
+  max-width: 100%;
+  --hero-title-height: clamp(2.4rem, 4.5vw, 3.4rem);
+}
+
+.hero-title-lockup:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.hero-title-mark {
+  border-radius: 8px;
+  display: block;
+  flex: 0 0 auto;
+  height: var(--hero-title-height);
+  width: var(--hero-title-height);
+}
+
+.hero-title-image {
+  display: block;
+  flex: 1 1 auto;
+  height: var(--hero-title-height);
+  max-width: calc(100% - var(--hero-title-height) - 0.45rem);
+  min-width: 0;
+  object-fit: contain;
+  object-position: left center;
+  width: auto;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 0.65rem;
+}
+
 .architecture-section {
   background:
     linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 42%),
@@ -137,9 +189,12 @@ a {
 }
 
 .home-footer-brand {
+  align-items: center;
   color: #f8fbff;
+  display: inline-flex;
   font-size: 1rem;
   font-weight: 700;
+  gap: 0.55rem;
 }
 
 .home-footer-status {
@@ -1043,7 +1098,7 @@ a {
   color: #f8fbff;
   display: grid;
   grid-template-columns: minmax(12rem, 1fr) auto minmax(12rem, 1fr);
-  height: 5.25rem;
+  height: 4rem;
   left: 0;
   padding: 0 2rem;
   position: fixed;
@@ -1056,7 +1111,17 @@ a {
   font-size: 1.35rem;
   font-weight: 720;
   grid-column: 2;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+}
+
+.agent-chat-title-image {
+  display: block;
+  filter: brightness(0) invert(1);
+  grid-column: 2;
+  height: 2.15rem;
+  justify-self: center;
+  object-fit: contain;
+  width: auto;
 }
 
 .agent-chat-back,
@@ -2274,6 +2339,13 @@ a {
     font-size: 1rem;
     grid-column: 2;
     grid-row: 1;
+  }
+
+  .agent-chat-title-image {
+    grid-column: 2;
+    grid-row: 1;
+    height: 1.6rem;
+    max-width: 8rem;
   }
 
   .agent-chat-back {

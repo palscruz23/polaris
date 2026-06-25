@@ -1,31 +1,23 @@
-# Open Reliability
+# Polaris
 
+Open Reliability's workspace powered by Polaris, an AI Reliability Agent that guides engineers through data-driven analysis, maintenance strategy optimisation, and reliability decision-making.
 
-Open Reliability is a reliability-engineering assistant workspace. The current
-app ships a Reliability Agent chat experience for asking maintenance, asset
-reliability, and defect-elimination questions, backed by persistent
-conversations, message history, model-provider access, and conversation memory
-updates. The Reliability Agent can select and execute registered specialist
-capabilities through a bounded sequential multi-call loop.
+Polaris Agent can select and execute registered specialist capabilities through a bounded sequential multi-call loop. The Master Data, Defect Elimination, Maintenance Strategy, and Reliability Improvement agents are implemented specialists in the broader multi-agent vision.
 
-The Master Data, Defect Elimination, Maintenance Strategy, and Reliability
-Improvement agents are implemented specialists in the broader multi-agent
-vision.
-
-[Open Reliability Webpage](https://open-reliability.vercel.app)
+[Polaris Webpage](https://open-reliability.vercel.app)
 
 ## Sample Demo
 
-![Open Reliability Demo](demo.gif)
+![Polaris Demo](demo.gif)
 
 ## Reliability Agent Workflow and Tooling
 
-The Reliability Agent coordinates specialists through deterministic tools and
+Polaris Reliability Agent coordinates specialists through deterministic tools and
 orchestration components. Available tools and components by agent:
 
 ### Specialist routes and intents
 
-The Reliability Agent exposes one route per specialist agent. For specialist
+Polaris Reliability Agent exposes one route per specialist agent. For specialist
 routes with an `intent` argument, the Reliability Agent should choose the
 narrowest intent that satisfies the user request; the specialist then manages
 the internal deterministic tools required for that intent.
@@ -172,7 +164,7 @@ forward the stable context needed for follow-up reliability analysis.
 
 ## Apps
 
-- `apps/web` — Next.js frontend.
+- `apps/web` — Next.js frontend for Polaris.
 - `apps/api` — FastAPI backend for conversations, message persistence, memory updates, and model-provider access.
 
 ## Local setup
@@ -194,7 +186,7 @@ Update `apps/api/.env`:
 OPENROUTER_API_KEY=sk-or-v1-your-key
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_SITE_URL=http://localhost:3000
-OPENROUTER_APP_NAME=Open Reliability
+OPENROUTER_APP_NAME=Polaris
 FRONTEND_URL=http://localhost:3000
 
 DATABASE_URL=postgresql+psycopg://user:password@host:5432/open_reliability
@@ -221,7 +213,7 @@ The frontend expects:
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Open the app at:
+Open Polaris at:
 
 ```text
 http://localhost:3000/chat-with-reliability
@@ -258,5 +250,5 @@ npm run build
 
 ## License
 
-Open Reliability is licensed under the
+Polaris is licensed under the
 [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution information.

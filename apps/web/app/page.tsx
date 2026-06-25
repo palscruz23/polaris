@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 type SpecialistAgent = {
   id: string;
@@ -148,20 +149,47 @@ export default function Home() {
 
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
             <div className="max-w-3xl">
-              <h1 className="text-4xl font-semibold leading-[1.05] text-[var(--heading)] md:text-6xl">
-                Open Reliability Copilot
+              <h1 className="sr-only">
+                Polaris
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-                A reliability engineering workspace with persistent
-                conversations, defect elimination analysis, and maintenance
-                strategy review coordinated through the Reliability Agent.
-              </p>
+              <Link
+                aria-label="Chat with Polaris"
+                className="hero-title-lockup"
+                href="/chat-with-reliability"
+              >
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="hero-title-mark"
+                  height={1254}
+                  priority
+                  src="/brand/polaris-logo.png"
+                  width={1254}
+                />
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="hero-title-image"
+                  height={149}
+                  priority
+                  src="/brand/polaris-comp1.png"
+                  width={1285}
+                />
+              </Link>
+              <div className="hero-copy mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">
+                <p>
+                  Open Reliability&apos;s workspace powered by Polaris, an AI Reliability Agent that guides engineers through data-driven analysis, maintenance strategy optimisation, and reliability decision-making.
+                </p>
+                <p>
+                  Polaris serves as your North Star for reliability, helping teams uncover chronic issues, prioritize improvement opportunities, and improve asset performance.
+                </p>
+              </div>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   className="button button-primary"
                   href="/chat-with-reliability"
                 >
-                  Chat with Reliability Agent
+                  Ask Polaris
                 </Link>
                 <Link className="button button-secondary" href="/view-existing-data">
                   View synthetic data
@@ -169,14 +197,16 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="benefit-panel" aria-label="Open Reliability benefits">
-              <p className="panel-label">Why it matters</p>
-              {heroBenefits.map((benefit) => (
-                <article className="benefit-item" key={benefit.title}>
-                  <h2>{benefit.title}</h2>
-                  <p>{benefit.description}</p>
-                </article>
-              ))}
+            <div className="hero-product-panel">
+              <div className="benefit-panel" aria-label="Open Reliability Copilot benefits">
+                <p className="panel-label">Why it matters</p>
+                {heroBenefits.map((benefit) => (
+                  <article className="benefit-item" key={benefit.title}>
+                    <h2>{benefit.title}</h2>
+                    <p>{benefit.description}</p>
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -185,9 +215,9 @@ export default function Home() {
       <section className="architecture-section" id="agent-workflow">
         <div className="architecture-container mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-12">
         <div className="section-heading">
-          <h2>Agent Workflow</h2>
+          <h2>Polaris Workflow</h2>
           <p>
-            The Reliability Agent is the only user-visible agent. It coordinates
+            Polaris Reliability Agent is the only user-visible agent. It coordinates
             implemented specialist workflows for defect elimination and
             maintenance strategy review, with additional specialists added in
             practical stages.
@@ -263,14 +293,14 @@ export default function Home() {
       </section>
 
       <section className="feature-section border-t border-[var(--border)]" id="capability-roadmap">
-        <div className="mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-20">
+        <div className="mx-auto max-w-6xl px-6 py-14 md:px-8 md:py-8">
           <div className="section-heading">
             <h2>Capability roadmap</h2>
             <p>
-              These product capabilities define how Open Reliability will grow
-              from chat into a practical reliability engineering workspace.
-              Each capability will be designed and shipped one workflow at a
-              time.
+              These product capabilities define how Open Reliability Copilot
+              will grow from chat into a practical reliability engineering
+              workspace. Each capability will be designed and shipped one
+              workflow at a time.
             </p>
           </div>
 
@@ -291,9 +321,9 @@ export default function Home() {
       <footer className="home-footer">
         <div className="home-footer-container mx-auto max-w-6xl px-6 py-4 md:px-8">
           <Link href="/" className="home-footer-brand">
-            Open Reliability
+            Polaris by Open Reliability
           </Link>
-          <p className="home-footer-status">Open for demo / collab</p>
+          <p className="home-footer-status">Open for demo / collaboration</p>
           <nav className="home-footer-links" aria-label="Footer">
             {footerLinks.map((link, index) => (
               <span className="home-footer-link-item" key={link.label}>

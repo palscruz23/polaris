@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -279,10 +280,12 @@ function formatAgentName(agent: string | null) {
     return "Agent";
   }
 
-  return agent
+  const formattedAgent = agent
     .split("_")
     .map(titleCaseWord)
     .join(" ");
+
+  return formattedAgent === "Reliability Agent" ? "Polaris" : formattedAgent;
 }
 
 function formatToolName(tool: string) {
@@ -379,7 +382,7 @@ function InternalCallItem({ call, sequenceNumber }: { call: AgentInternalCallMet
     <li className="agent-tool-call">
       <div className="agent-tool-call-header">
         <span>#{sequenceNumber}</span>
-        <strong>Reliability Agent</strong>
+        <strong>Polaris</strong>
         <code>{formatToolName(call.call_type)}</code>
       </div>
       <div className="agent-tool-call-message">
@@ -888,14 +891,15 @@ export default function AgentWorkflowChat() {
           <ArrowLeftIcon />
           <span>Back to home</span>
         </Link>
-        <Link className="agent-chat-brand" href="/">
-          <span>Open Reliability</span>
-        </Link>
-        <h1>Reliability Agent</h1>
-        <div className="agent-chat-status" aria-label="Agent online">
-          <span aria-hidden="true" />
-          Agent online
-        </div>
+        <h1 className="sr-only">Polaris</h1>
+        <Image
+          alt="Polaris"
+          className="agent-chat-title-image"
+          height={149}
+          priority
+          src="/brand/polaris-word.png"
+          width={1285}
+        />
       </header>
 
       <button
