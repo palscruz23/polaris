@@ -1,4 +1,7 @@
-# Polaris
+<p align="center">
+  <img src="apps/web/public/brand/polaris-logo.png" alt="Polaris logo" width="48" height="48" />
+  <img src="apps/web/public/brand/polaris-comp1.png" alt="Polaris" width="340" />
+</p>
 
 Open Reliability's workspace powered by Polaris, an AI Reliability Agent that guides engineers through data-driven analysis, maintenance strategy optimisation, and reliability decision-making.
 
