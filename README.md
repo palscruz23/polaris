@@ -51,8 +51,9 @@ the internal deterministic tools required for that intent.
     guidance, optionally uses roadmap sequencing, and writes the user-facing
     answer.
   - Answer quality loop reviews and revises the draft answer through persisted
-    model call phases: `agent_tool_selection`, `agent_final_synthesis`,
-    `answer_review`, `answer_revision`, and `answer_revision_final`.
+    model call phases: `agent_tool_selection`, `agent_roadmap_planning`,
+    `agent_final_synthesis`, `answer_review`, `answer_revision`, and
+    `answer_revision_final`.
   - Roadmap sequencing helper uses `ROADMAP_PLANNER_TOOL_DEFINITION` as an
     optional final-synthesis tool definition, not a registered specialist
     capability. It is used only after specialist evidence has identified

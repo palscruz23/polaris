@@ -43,6 +43,7 @@ type AgentMessageMetadata = {
 };
 
 const VISIBLE_AGENT_PROCESS_CALL_TYPES = new Set([
+  "agent_roadmap_planning",
   "agent_final_synthesis",
   "answer_review",
   "answer_revision",
@@ -408,6 +409,7 @@ function interleaveCalls(
 > {
   const beforeTools: AgentInternalCallMetadata[] = [];
   const afterTools: AgentInternalCallMetadata[] = [];
+  const beforeRoadmap: AgentInternalCallMetadata[] = [];
 
   for (const ic of internalCalls) {
     if (ic.call_type === "agent_tool_selection") {
@@ -415,14 +417,39 @@ function interleaveCalls(
     }
     if (ic.call_type.startsWith("memory_")) {
       beforeTools.push(ic);
+    } else if (ic.call_type === "agent_roadmap_planning") {
+      beforeRoadmap.push(ic);
     } else if (VISIBLE_AGENT_PROCESS_CALL_TYPES.has(ic.call_type)) {
       afterTools.push(ic);
     }
   }
 
+  const roadmapIndex = toolCalls.findIndex((tc) => tc.tool === "roadmap_planner");
+  const toolItems =
+    roadmapIndex === -1
+      ? toolCalls.map((tc) => ({ kind: "tool" as const, data: tc }))
+      : [
+          ...toolCalls
+            .slice(0, roadmapIndex)
+            .map((tc) => ({ kind: "tool" as const, data: tc })),
+          ...beforeRoadmap.map((ic) => ({ kind: "internal" as const, data: ic })),
+          { kind: "tool" as const, data: toolCalls[roadmapIndex] },
+          ...toolCalls
+            .slice(roadmapIndex + 1)
+            .map((tc) => ({ kind: "tool" as const, data: tc })),
+        ];
+
   return [
     ...beforeTools.map((ic) => ({ kind: "internal" as const, data: ic })),
-    ...toolCalls.map((tc) => ({ kind: "tool" as const, data: tc })),
+    ...(roadmapIndex === -1
+      ? [
+          ...beforeRoadmap.map((ic) => ({
+            kind: "internal" as const,
+            data: ic,
+          })),
+          ...toolItems,
+        ]
+      : toolItems),
     ...afterTools.map((ic) => ({ kind: "internal" as const, data: ic })),
   ];
 }
@@ -603,6 +630,17 @@ export default function AgentWorkflowChat() {
       block: "end",
     });
   }, [latestMessageId, isLoading]);
+
+  useEffect(() => {
+    const input = composerInputRef.current;
+
+    if (!input) {
+      return;
+    }
+
+    input.style.height = "auto";
+    input.style.height = `${input.scrollHeight}px`;
+  }, [draft]);
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {

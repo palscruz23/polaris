@@ -384,6 +384,13 @@ def test_orchestrator_final_synthesis_can_sequence_roadmap() -> None:
     assert '"horizon": "now"' in roadmap_exchange.result.content
     assert '"horizon": "next"' in roadmap_exchange.result.content
     assert provider.tool_counts == [3, 3, 1, 0]
+    assert [call.call_type for call in response.internal_calls] == [
+        "agent_tool_selection",
+        "agent_tool_selection",
+        "agent_roadmap_planning",
+        "agent_final_synthesis",
+        "answer_review",
+    ]
 
 
 def test_orchestrator_final_synthesis_prioritizes_recommendations_by_urgency() -> None:

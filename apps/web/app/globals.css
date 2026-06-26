@@ -1491,6 +1491,8 @@ a {
 
 .agent-message > div {
   max-width: 41rem;
+  min-width: 0;
+  width: min(100%, 41rem);
 }
 
 .agent-message-role {
@@ -1504,12 +1506,16 @@ a {
 .agent-message p {
   font-size: 0.98rem;
   line-height: 1.75;
+  overflow-wrap: anywhere;
 }
 
 .agent-message-markdown {
   color: var(--foreground);
   font-size: 0.98rem;
   line-height: 1.7;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .agent-message-markdown > :first-child {
@@ -1587,6 +1593,7 @@ a {
   border-radius: 8px;
   color: #eaf3ff;
   margin: 0.8rem 0;
+  max-width: 100%;
   overflow-x: auto;
   padding: 1rem;
 }
@@ -1615,6 +1622,9 @@ a {
   margin: 0.9rem 0;
   max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .agent-message-markdown table {
@@ -1625,6 +1635,7 @@ a {
   font-size: 0.92rem;
   line-height: 1.5;
   min-width: 100%;
+  width: max-content;
   overflow: hidden;
   text-align: left;
 }
@@ -1914,6 +1925,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 14px 14px 4px 14px;
   padding: 0.9rem 1rem;
+  width: fit-content;
 }
 
 .agent-composer-dock {
@@ -2000,6 +2012,7 @@ a {
   border-radius: 14px;
   box-shadow: 0 14px 36px rgba(7, 34, 70, 0.12);
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin: 0 auto;
   max-width: 68rem;
@@ -2059,6 +2072,7 @@ a {
   max-height: 8rem;
   min-height: 2rem;
   outline: none;
+  overflow-y: auto;
   padding: 0.25rem;
   resize: none;
   width: 100%;
@@ -2330,7 +2344,7 @@ a {
   }
 
   .agent-chat-header {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
     height: 4.5rem;
     padding: 0 1rem;
   }
@@ -2345,6 +2359,7 @@ a {
     grid-column: 2;
     grid-row: 1;
     height: 1.6rem;
+    justify-self: center;
     max-width: 8rem;
   }
 
@@ -2361,7 +2376,7 @@ a {
 
   .agent-chat-content {
     min-height: calc(100dvh - 17rem);
-    padding: 2rem 1rem;
+    padding: 1.35rem 0.85rem;
   }
 
   .agent-history-tab {
@@ -2402,23 +2417,110 @@ a {
     min-height: 4.3rem;
   }
 
+  .agent-message-list {
+    gap: 1rem;
+    max-width: 100%;
+    padding: 0.75rem 0 3rem;
+  }
+
+  .agent-message {
+    gap: 0.55rem;
+    max-width: 100%;
+  }
+
+  .agent-message .agent-mark {
+    height: 2rem;
+    width: 2rem;
+  }
+
+  .agent-message .agent-mark svg {
+    height: 1rem;
+    width: 1rem;
+  }
+
+  .agent-message > div {
+    max-width: calc(100vw - 4.35rem);
+  }
+
+  .agent-message-user > div {
+    max-width: min(82vw, 22rem);
+    padding: 0.65rem 0.75rem;
+  }
+
+  .agent-message-role {
+    font-size: 0.74rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .agent-message p,
+  .agent-message-markdown {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .agent-message-markdown h1 {
+    font-size: 1.08rem;
+  }
+
+  .agent-message-markdown h2 {
+    font-size: 1rem;
+  }
+
+  .agent-message-markdown h3 {
+    font-size: 0.94rem;
+  }
+
+  .agent-message-markdown ul,
+  .agent-message-markdown ol {
+    padding-left: 1.05rem;
+  }
+
+  .agent-message-table-scroll {
+    margin-left: -2.55rem;
+    max-width: calc(100vw - 1.7rem);
+    width: calc(100vw - 1.7rem);
+  }
+
   .agent-composer-dock {
     padding: 0.85rem 0.75rem 0.75rem;
   }
 
   .agent-model-control {
-    max-width: 8rem;
+    align-self: flex-end;
+    background: var(--accent-wash);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    height: 2.75rem;
+    justify-content: center;
+    margin-left: 0;
+    max-width: none;
+    overflow: hidden;
+    width: 2.75rem;
   }
 
   .agent-model-control select {
-    max-width: 8rem;
-    padding-left: 0.4rem;
-    padding-right: 1.4rem;
+    color: transparent;
+    height: 100%;
+    max-width: none;
+    padding: 0;
+    text-shadow: 0 0 0 transparent;
+    width: 100%;
+  }
+
+  .agent-model-control svg {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 
   .agent-composer {
-    gap: 0.5rem;
+    align-items: flex-end;
+    gap: 0.45rem;
     padding: 0.55rem;
+  }
+
+  .agent-composer-input-wrap {
+    flex: 1 1 9rem;
   }
 
   .agent-composer-action,

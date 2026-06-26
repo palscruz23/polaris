@@ -30,6 +30,7 @@ from app.tools.reliability_improvement import (
 
 INTERNAL_CALL_MESSAGES: dict[str, str] = {
     "agent_tool_selection": "Analyze request and select specialist",
+    "agent_roadmap_planning": "Decide whether roadmap sequencing is needed",
     "agent_final_synthesis": "Consolidate findings into final response",
     "answer_review": "Quality gate — verify answer against evidence",
     "answer_revision": "Revise answer to meet quality standards",
@@ -333,7 +334,7 @@ class ReliabilityAgentOrchestrator:
     ) -> AgentModelResponse:
         synthesis_messages = self._with_recommendation_decision_matrix(messages)
         response = self._generate_with_tools(
-            call_type="agent_final_synthesis",
+            call_type="agent_roadmap_planning",
             messages=synthesis_messages,
             max_output_tokens=max_output_tokens,
             tools=(ROADMAP_PLANNER_TOOL_DEFINITION,),
