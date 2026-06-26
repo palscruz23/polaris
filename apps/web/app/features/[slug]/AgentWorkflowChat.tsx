@@ -638,6 +638,11 @@ export default function AgentWorkflowChat() {
       return;
     }
 
+    if (!draft) {
+      input.style.height = "";
+      return;
+    }
+
     input.style.height = "auto";
     input.style.height = `${input.scrollHeight}px`;
   }, [draft]);
