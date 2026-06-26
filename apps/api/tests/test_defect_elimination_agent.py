@@ -8,15 +8,9 @@ from app.models import Equipment, WorkOrder
 from app.services.reliability_seed_loader import load_clean_reliability_seed_data
 from app.tools.defect_elimination import (
     BadActorAnalysisTool,
-    DefectEliminationCharterGeneratorTool,
-    FailureInvestigationFinding,
-    FiveWhysGeneratorTool,
-    MTBFCalculationTool,
-    RCAEvidencePlanningTool,
-    RCATemplateBuilderTool,
+    FailureModeBadActorAnalysisTool,
     ReliabilityMetricsTool,
     RepeatFailureDetectionTool,
-    WeibullAnalysisTool,
 )
 
 
@@ -59,17 +53,9 @@ def test_defect_elimination_tools_analyze_seeded_work_orders() -> None:
     summary = ReliabilityMetricsTool().summarize(work_orders)
     bad_actors = BadActorAnalysisTool().run(work_orders, limit=5)
     repeat_failures = RepeatFailureDetectionTool().run(work_orders, limit=5)
-    mtbf_metrics = MTBFCalculationTool().run(work_orders, limit=5)
-    weibull_analysis = WeibullAnalysisTool().run(work_orders, limit=5)
-    evidence_plans = RCAEvidencePlanningTool().run(repeat_failures, limit=2)
-    five_whys = FiveWhysGeneratorTool().run(repeat_failures, limit=2)
-    rca_templates = RCATemplateBuilderTool().run(repeat_failures, limit=2)
-    charters = DefectEliminationCharterGeneratorTool().run(
-        repeat_failures=repeat_failures,
-        mtbf_metrics=mtbf_metrics,
-        evidence_plans=evidence_plans,
-        five_whys=five_whys,
-        limit=2,
+    failure_mode_bad_actors = FailureModeBadActorAnalysisTool().run(
+        repeat_failures,
+        limit=5,
     )
 
     assert summary.total_work_orders == 1000
@@ -85,26 +71,9 @@ def test_defect_elimination_tools_analyze_seeded_work_orders() -> None:
     assert len(repeat_failures) == 5
     assert repeat_failures[0].work_order_count >= 2
     assert repeat_failures[0].evidence.startswith("WO-")
-    assert len(mtbf_metrics) == 5
-    assert mtbf_metrics[0].corrective_event_count >= 2
-    assert mtbf_metrics[0].mtbf_days is not None
-    assert len(weibull_analysis) == 5
-    assert weibull_analysis[0].failure_count >= 3
-    assert weibull_analysis[0].shape_beta is not None
-    assert weibull_analysis[0].scale_eta_days is not None
-    assert weibull_analysis[0].failure_behavior
-    assert len(evidence_plans) == 2
-    assert evidence_plans[0].evidence_to_collect
-    assert len(five_whys) == 2
-    assert len(five_whys[0].whys) == 5
-    assert len(rca_templates) == 2
-    assert "Root cause statement" in rca_templates[0].sections
-    assert len(charters) == 2
-    assert charters[0].title.startswith("Defect Elimination Charter")
-    assert charters[0].problem_statement
-    assert charters[0].business_impact
-    assert charters[0].required_evidence
-    assert charters[0].success_criteria
+    assert len(failure_mode_bad_actors) == 5
+    assert failure_mode_bad_actors[0].repeat_work_order_count >= 2
+    assert failure_mode_bad_actors[0].failure_mode
 
 
 def test_defect_elimination_agent_returns_structured_findings() -> None:
@@ -120,21 +89,16 @@ def test_defect_elimination_agent_returns_structured_findings() -> None:
     assert findings.summary.total_work_orders == 1000
     assert len(findings.bad_actors) == 3
     assert len(findings.repeat_failures) == 4
-    assert len(findings.mtbf_metrics) == 3
-    assert len(findings.weibull_analysis) == 3
-    assert len(findings.rca_evidence_plans) == 4
-    assert len(findings.five_whys) == 4
-    assert len(findings.rca_templates) == 4
-    assert len(findings.charters) == 3
+    assert len(findings.failure_mode_bad_actors) == 3
     assert findings.recommendations
     assert "defect elimination review" in findings.recommendations[0]
     assert any(
-        "MTBF" in recommendation or "Weibull" in recommendation
+        "recurring failure mode" in recommendation
         for recommendation in findings.recommendations
     )
 
 
-def test_defect_elimination_agent_runs_focused_mtbf_path_for_specific_equipment() -> None:
+def test_defect_elimination_agent_runs_focused_failure_mode_bad_actor_path() -> None:
     target_asset = Equipment(
         equipment_number="PUMP-001",
         description="Target pump",
@@ -146,121 +110,76 @@ def test_defect_elimination_agent_runs_focused_mtbf_path_for_specific_equipment(
         equipment_type="pump",
     )
     session = FakeSession()
+    seal_leak = _failure_mode("Seal leak")
+    bearing_failure = _failure_mode("Bearing failure")
     session.added.extend(
         [
-            _work_order("WO-1", target_asset, "corrective", "2026-01-01", 2),
-            _work_order("WO-2", target_asset, "emergency", "2026-01-31", 3),
-            _work_order("WO-3", other_asset, "corrective", "2026-01-01", 4),
-            _work_order("WO-4", other_asset, "corrective", "2026-04-01", 5),
+            _work_order(
+                "WO-1",
+                target_asset,
+                "corrective",
+                "2026-01-01",
+                2,
+                seal_leak,
+            ),
+            _work_order(
+                "WO-2",
+                target_asset,
+                "emergency",
+                "2026-01-31",
+                3,
+                seal_leak,
+            ),
+            _work_order(
+                "WO-3",
+                other_asset,
+                "corrective",
+                "2026-01-01",
+                4,
+                bearing_failure,
+            ),
+            _work_order(
+                "WO-4",
+                other_asset,
+                "corrective",
+                "2026-04-01",
+                5,
+                bearing_failure,
+            ),
+            _work_order(
+                "WO-5",
+                other_asset,
+                "corrective",
+                "2026-05-01",
+                6,
+                bearing_failure,
+            ),
         ]
     )
     progress_events = []
     agent = DefectEliminationAgent(session)  # type: ignore[arg-type]
 
     findings = agent.analyze(
-        intent="calculate_mtbf",
+        intent="rank_failure_mode_bad_actors",
         equipment_numbers=["PUMP-001"],
         bad_actor_limit=5,
         progress=progress_events.append,
     )
 
     assert findings.summary.total_work_orders == 2
-    assert [finding.equipment_number for finding in findings.mtbf_metrics] == [
-        "PUMP-001"
-    ]
-    assert findings.mtbf_metrics[0].mtbf_days == Decimal("30.00")
+    assert [
+        finding.equipment_number
+        for finding in findings.failure_mode_bad_actors
+    ] == ["PUMP-001"]
+    assert findings.failure_mode_bad_actors[0].failure_mode == "Seal leak"
+    assert findings.failure_mode_bad_actors[0].repeat_work_order_count == 2
     assert findings.bad_actors == []
-    assert findings.repeat_failures == []
-    assert findings.weibull_analysis == []
-    assert findings.rca_evidence_plans == []
+    assert findings.repeat_failures
     assert [event.tool for event in progress_events] == [
         "reliability_metrics",
-        "mtbf_calculation",
+        "repeat_failure_detection",
+        "failure_mode_bad_actor_analysis",
     ]
-
-
-def test_five_whys_generator_supports_specific_failure() -> None:
-    analysis = FiveWhysGeneratorTool().run_for_failure(
-        equipment_number="PUMP-101",
-        equipment_description="Process water pump",
-        equipment_type="pump",
-        failure_mode="seal leakage",
-        evidence="WO-101",
-    )
-
-    assert analysis.equipment_number == "PUMP-101"
-    assert analysis.failure_mode == "seal leakage"
-    assert analysis.problem_statement == (
-        "PUMP-101 has a seal leakage failure event requiring RCA. "
-        "Evidence: WO-101."
-    )
-    assert len(analysis.whys) == 5
-    assert analysis.whys[0] == "Why did the pump experience seal leakage?"
-
-
-def test_five_whys_generator_accepts_failure_investigation_findings() -> None:
-    failures = [
-        FailureInvestigationFinding(
-            equipment_number="CONV-201",
-            equipment_description="Transfer conveyor",
-            equipment_type="conveyor",
-            failure_mode="belt tracking issue",
-            work_order_count=1,
-            evidence="Operator report",
-        )
-    ]
-
-    analyses = FiveWhysGeneratorTool().run(failures)
-
-    assert len(analyses) == 1
-    assert analyses[0].problem_statement == (
-        "CONV-201 has a belt tracking issue failure event requiring RCA. "
-        "Evidence: Operator report."
-    )
-
-
-def test_rca_template_builder_supports_specific_failure() -> None:
-    template = RCATemplateBuilderTool().run_for_failure(
-        equipment_number="PUMP-101",
-        equipment_description="Process water pump",
-        equipment_type="pump",
-        failure_mode="seal leakage",
-        evidence="WO-101",
-    )
-
-    assert template.equipment_number == "PUMP-101"
-    assert template.failure_mode == "seal leakage"
-    assert template.title == "RCA - PUMP-101 seal leakage"
-    assert "Problem statement" in template.sections
-    assert (
-        "What changed before the pump experienced seal leakage?"
-        in template.starter_questions
-    )
-    assert (
-        "Were previous corrective actions completed and verified effective?"
-        not in template.starter_questions
-    )
-
-
-def test_rca_template_builder_accepts_failure_investigation_findings() -> None:
-    failures = [
-        FailureInvestigationFinding(
-            equipment_number="CONV-201",
-            equipment_description="Transfer conveyor",
-            equipment_type="conveyor",
-            failure_mode="belt tracking issue",
-            work_order_count=1,
-            evidence="Operator report",
-        )
-    ]
-
-    templates = RCATemplateBuilderTool().run(failures)
-
-    assert len(templates) == 1
-    assert templates[0].title == "RCA - CONV-201 belt tracking issue"
-    assert templates[0].starter_questions[0] == (
-        "What changed before the conveyor experienced belt tracking issue?"
-    )
 
 
 def test_bad_actor_analysis_ranks_shortest_mtbf_first() -> None:
@@ -317,14 +236,21 @@ def _work_orders(session: FakeSession) -> list[WorkOrder]:
     ]
 
 
+def _failure_mode(name: str):
+    from app.models import FailureMode
+
+    return FailureMode(name=name)
+
+
 def _work_order(
     order_number: str,
     equipment: Equipment,
     activity_type: str,
     finished_date: str,
     downtime_hours: int,
+    failure_mode=None,
 ) -> WorkOrder:
-    return WorkOrder(
+    work_order = WorkOrder(
         order_number=order_number,
         equipment=equipment,
         maintenance_activity_type=activity_type,
@@ -332,52 +258,11 @@ def _work_order(
         total_cost=Decimal("1000.00"),
         downtime_hours=Decimal(downtime_hours),
     )
+    if failure_mode is not None:
+        from app.models import WorkOrderFailureMode
 
+        work_order.failure_mode_links = [
+            WorkOrderFailureMode(failure_mode=failure_mode, source="test")
+        ]
 
-def test_weibull_analysis_identifies_wear_out_pattern() -> None:
-    asset = Equipment(
-        equipment_number="PUMP-004",
-        description="Wear out pump",
-        equipment_type="pump",
-    )
-    work_orders = [
-        _work_order("WO-W1", asset, "corrective", "2026-01-01", 2),
-        _work_order("WO-W2", asset, "corrective", "2026-01-06", 2),
-        _work_order("WO-W3", asset, "corrective", "2026-01-16", 2),
-        _work_order("WO-W4", asset, "corrective", "2026-02-05", 2),
-        _work_order("WO-W5", asset, "corrective", "2026-03-17", 2),
-    ]
-
-    finding = WeibullAnalysisTool().run(work_orders, limit=1)[0]
-
-    assert finding.equipment_number == "PUMP-004"
-    assert finding.failure_count == 5
-    assert finding.interval_count == 4
-    assert finding.shape_beta is not None
-    assert finding.shape_beta > Decimal("1.10")
-    assert finding.scale_eta_days is not None
-    assert finding.mean_time_between_failures_days is not None
-    assert finding.failure_behavior == "wear-out or age-related pattern"
-    assert finding.confidence == "directional"
-
-
-def test_weibull_analysis_requires_three_failure_intervals() -> None:
-    asset = Equipment(
-        equipment_number="PUMP-005",
-        description="Sparse history pump",
-        equipment_type="pump",
-    )
-    work_orders = [
-        _work_order("WO-S1", asset, "corrective", "2026-01-01", 2),
-        _work_order("WO-S2", asset, "corrective", "2026-01-06", 2),
-        _work_order("WO-S3", asset, "corrective", "2026-01-16", 2),
-    ]
-
-    finding = WeibullAnalysisTool().run(work_orders, limit=1)[0]
-
-    assert finding.failure_count == 3
-    assert finding.interval_count == 2
-    assert finding.shape_beta is None
-    assert finding.scale_eta_days is None
-    assert finding.failure_behavior == "insufficient interval history"
-    assert finding.confidence == "insufficient"
+    return work_order

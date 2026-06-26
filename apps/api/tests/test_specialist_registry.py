@@ -2,7 +2,6 @@ from app.agents.registry import (
     DefectEliminationArguments,
     EquipmentSearchArguments,
     MaintenanceStrategyReviewArguments,
-    ReliabilityImprovementArguments,
     SpecialistRegistry,
 )
 from app.domain.orchestration import (
@@ -79,9 +78,7 @@ def test_defect_elimination_arguments_enforce_bounded_limits() -> None:
         "overview",
         "rank_bad_actors",
         "find_repeat_failures",
-        "calculate_mtbf",
-        "analyze_weibull",
-        "prepare_rca",
+        "rank_failure_mode_bad_actors",
     }
 
 
@@ -92,7 +89,6 @@ def test_default_registry_exposes_all_specialist_capabilities() -> None:
         "search_equipment_master",
         "analyze_defect_elimination",
         "review_maintenance_strategy",
-        "plan_reliability_improvement",
     ]
 
 
@@ -117,20 +113,4 @@ def test_maintenance_strategy_arguments_enforce_asset_limits() -> None:
         "check_coverage",
         "assess_frequency",
         "detect_gaps",
-        "find_monitoring_opportunities",
-    }
-
-
-def test_reliability_improvement_arguments_enforce_opportunity_limits() -> None:
-    schema = ReliabilityImprovementArguments.model_json_schema()
-
-    assert schema["properties"]["opportunity_limit"]["maximum"] == 10
-    assert schema["properties"]["opportunity_limit"]["minimum"] == 1
-    assert schema["properties"]["equipment_numbers"]["maxItems"] == 10
-    assert set(schema["properties"]["intent"]["enum"]) == {
-        "full_improvement_plan",
-        "estimate_opportunities",
-        "build_action_plans",
-        "define_outcomes",
-        "plan_roadmap",
     }

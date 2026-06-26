@@ -7,9 +7,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.domain.progress import ProgressCallback, report_progress
 from app.models import Equipment, WorkOrder, WorkOrderFailureMode
+from app.tools.defect_elimination import RepeatFailureDetectionTool
 from app.tools.maintenance_strategy import (
-    ConditionMonitoringOpportunity,
-    ConditionMonitoringOpportunityAnalyzerTool,
     FailureModeCoverage,
     FailureModeCoverageAnalyzerTool,
     FrequencyRisk,
@@ -51,9 +50,6 @@ class AssetMaintenanceStrategyReview:
     failure_mode_coverage: list[FailureModeCoverage]
     frequency_risks: list[FrequencyRisk]
     strategy_gaps: list[MaintenanceStrategyGap]
-    condition_monitoring_opportunities: list[
-        ConditionMonitoringOpportunity
-    ]
     recommendations: list[MaintenanceStrategyRecommendation]
 
 
@@ -73,7 +69,6 @@ MaintenanceStrategyIntent = Literal[
     "check_coverage",
     "assess_frequency",
     "detect_gaps",
-    "find_monitoring_opportunities",
 ]
 
 
@@ -85,11 +80,10 @@ class MaintenanceStrategyAgent:
         session: Session,
         profile_tool: MaintenanceStrategyProfileBuilderTool | None = None,
         maintenance_mix_tool: MaintenanceMixAnalyzerTool | None = None,
+        repeat_failure_tool: RepeatFailureDetectionTool | None = None,
         coverage_tool: FailureModeCoverageAnalyzerTool | None = None,
         frequency_tool: FrequencyRiskAnalyzerTool | None = None,
         gap_tool: MaintenanceStrategyGapDetectorTool | None = None,
-        monitoring_tool: ConditionMonitoringOpportunityAnalyzerTool
-        | None = None,
         recommendation_tool: MaintenanceStrategyRecommendationBuilderTool
         | None = None,
     ):
@@ -100,14 +94,14 @@ class MaintenanceStrategyAgent:
         self.maintenance_mix_tool = (
             maintenance_mix_tool or MaintenanceMixAnalyzerTool()
         )
+        self.repeat_failure_tool = (
+            repeat_failure_tool or RepeatFailureDetectionTool()
+        )
         self.coverage_tool = (
             coverage_tool or FailureModeCoverageAnalyzerTool()
         )
         self.frequency_tool = frequency_tool or FrequencyRiskAnalyzerTool()
         self.gap_tool = gap_tool or MaintenanceStrategyGapDetectorTool()
-        self.monitoring_tool = (
-            monitoring_tool or ConditionMonitoringOpportunityAnalyzerTool()
-        )
         self.recommendation_tool = (
             recommendation_tool
             or MaintenanceStrategyRecommendationBuilderTool()
@@ -230,12 +224,31 @@ class MaintenanceStrategyAgent:
             progress,
             stage="tool_started",
             specialist="maintenance_strategy",
+            tool="repeat_failure_detection",
+            message=(
+                "Maintenance Strategy Agent is checking repeat failures for "
+                "coverage context."
+            ),
+        )
+        repeat_failures = self.repeat_failure_tool.run(
+            work_orders,
+            limit=max(len(work_orders), 1),
+        )
+
+        report_progress(
+            progress,
+            stage="tool_started",
+            specialist="maintenance_strategy",
             tool="failure_mode_coverage_analyzer",
             message=(
                 "Maintenance Strategy Agent is checking failure-mode coverage."
             ),
         )
-        coverage = self.coverage_tool.run(strategies, work_orders)
+        coverage = self.coverage_tool.run(
+            strategies,
+            work_orders,
+            repeat_failures=repeat_failures,
+        )
 
         if intent == "check_coverage":
             return self._asset_review(
@@ -278,21 +291,6 @@ class MaintenanceStrategyAgent:
                 strategy_gaps=gaps,
             )
 
-        opportunities = self.monitoring_tool.run(
-            equipment.equipment_type,
-            coverage,
-        )
-
-        if intent == "find_monitoring_opportunities":
-            return self._asset_review(
-                profile=profile,
-                maintenance_mix=maintenance_mix,
-                failure_mode_coverage=coverage,
-                frequency_risks=frequency_risks,
-                strategy_gaps=gaps,
-                condition_monitoring_opportunities=opportunities,
-            )
-
         report_progress(
             progress,
             stage="tool_started",
@@ -306,10 +304,10 @@ class MaintenanceStrategyAgent:
         )
         recommendations = self.recommendation_tool.run(
             profile=profile,
+            equipment_type=equipment.equipment_type,
             coverage=coverage,
             frequency_risks=frequency_risks,
             gaps=gaps,
-            opportunities=opportunities,
         )
 
         return AssetMaintenanceStrategyReview(
@@ -318,7 +316,6 @@ class MaintenanceStrategyAgent:
             failure_mode_coverage=coverage,
             frequency_risks=frequency_risks,
             strategy_gaps=gaps,
-            condition_monitoring_opportunities=opportunities,
             recommendations=recommendations,
         )
 
@@ -330,9 +327,6 @@ class MaintenanceStrategyAgent:
         failure_mode_coverage: list[FailureModeCoverage] | None = None,
         frequency_risks: list[FrequencyRisk] | None = None,
         strategy_gaps: list[MaintenanceStrategyGap] | None = None,
-        condition_monitoring_opportunities: list[
-            ConditionMonitoringOpportunity
-        ] | None = None,
         recommendations: list[MaintenanceStrategyRecommendation] | None = None,
     ) -> AssetMaintenanceStrategyReview:
         return AssetMaintenanceStrategyReview(
@@ -352,9 +346,6 @@ class MaintenanceStrategyAgent:
             failure_mode_coverage=failure_mode_coverage or [],
             frequency_risks=frequency_risks or [],
             strategy_gaps=strategy_gaps or [],
-            condition_monitoring_opportunities=(
-                condition_monitoring_opportunities or []
-            ),
             recommendations=recommendations or [],
         )
 

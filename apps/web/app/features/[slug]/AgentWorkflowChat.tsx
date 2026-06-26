@@ -42,6 +42,13 @@ type AgentMessageMetadata = {
   internal_calls?: AgentInternalCallMetadata[];
 };
 
+const VISIBLE_AGENT_PROCESS_CALL_TYPES = new Set([
+  "agent_final_synthesis",
+  "answer_review",
+  "answer_revision",
+  "answer_revision_final",
+]);
+
 type ApiMessage = Message & {
   conversation_id: string;
   sequence_number: number;
@@ -408,7 +415,7 @@ function interleaveCalls(
     }
     if (ic.call_type.startsWith("memory_")) {
       beforeTools.push(ic);
-    } else {
+    } else if (VISIBLE_AGENT_PROCESS_CALL_TYPES.has(ic.call_type)) {
       afterTools.push(ic);
     }
   }

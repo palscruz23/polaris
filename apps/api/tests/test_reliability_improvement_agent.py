@@ -1,9 +1,7 @@
-import json
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from app.agents.registry import ReliabilityImprovementSpecialist
 from app.agents.reliability_improvement_agent import (
     ReliabilityImprovementAgent,
 )
@@ -96,25 +94,6 @@ def test_reliability_improvement_agent_runs_focused_opportunity_path() -> None:
     assert findings.outcome_reports == []
     assert findings.roadmap == []
     assert [event.tool for event in progress_events] == ["value_estimator"]
-
-
-def test_reliability_improvement_specialist_returns_json_for_orchestration() -> None:
-    specialist = ReliabilityImprovementSpecialist(
-        FakeSession(_improvement_work_orders())  # type: ignore[arg-type]
-    )
-
-    result = json.loads(
-        specialist.execute(
-            {
-                "opportunity_limit": 1,
-            }
-        )
-    )
-
-    assert len(result["opportunities"]) == 1
-    assert result["opportunities"][0]["equipment_number"] == "P-101"
-    assert result["action_plans"][0]["equipment_number"] == "P-101"
-    assert result["roadmap"][0]["horizon"] == "now"
 
 
 def _improvement_work_orders() -> list[WorkOrder]:

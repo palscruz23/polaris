@@ -30,8 +30,9 @@ const specialistAgents: readonly SpecialistAgent[] = [
   {
     id: "improvement",
     title: "Reliability Improvement Agent",
+    status: "future",
     purpose:
-      "Converts engineering findings into ranked opportunities, cost-benefit context, action plans, and reliability roadmaps.",
+      "Future workflow for turning validated engineering findings into ranked opportunities, action plans, outcome measures, and reliability roadmaps.",
   },
 ];
 

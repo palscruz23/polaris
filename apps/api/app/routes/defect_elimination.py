@@ -40,11 +40,6 @@ def get_defect_elimination_overview(
         summary=findings.summary,
         bad_actors=findings.bad_actors,
         repeat_failures=findings.repeat_failures,
-        mtbf_metrics=findings.mtbf_metrics,
-        weibull_analysis=findings.weibull_analysis,
-        rca_evidence_plans=findings.rca_evidence_plans,
-        five_whys=findings.five_whys,
-        rca_templates=findings.rca_templates,
-        charters=findings.charters,
+        failure_mode_bad_actors=findings.failure_mode_bad_actors,
         recommendations=findings.recommendations,
     )

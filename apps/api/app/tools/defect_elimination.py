@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from math import exp, gamma, log
 
 from app.models import Equipment, WorkOrder
 
@@ -15,7 +14,6 @@ REPAIR_ACTIVITY_TYPES = {
     "corrective",
     "emergency",
 }
-MINIMUM_WEIBULL_INTERVALS = 3
 PREVENTIVE_ACTIVITY_TYPES = {
     "preventive",
     "inspection",
@@ -73,86 +71,18 @@ class RepeatFailureFinding:
 
 
 @dataclass(frozen=True)
-class FailureInvestigationFinding:
+class FailureModeBadActorFinding:
     equipment_number: str
     equipment_description: str | None
     failure_mode: str
     equipment_type: str | None
-    work_order_count: int
-    evidence: str | None = None
-
-
-@dataclass(frozen=True)
-class MTBFFinding:
-    equipment_number: str
-    equipment_description: str | None
-    equipment_type: str | None
-    corrective_event_count: int
-    observation_days: Decimal | None
-    mtbf_days: Decimal | None
-    first_event_at: datetime | None
-    last_event_at: datetime | None
-
-
-@dataclass(frozen=True)
-class WeibullAnalysisFinding:
-    equipment_number: str
-    equipment_description: str | None
-    equipment_type: str | None
-    failure_count: int
-    interval_count: int
-    shape_beta: Decimal | None
-    scale_eta_days: Decimal | None
-    characteristic_life_days: Decimal | None
-    mean_time_between_failures_days: Decimal | None
-    failure_behavior: str
-    confidence: str
-    first_event_at: datetime | None
-    last_event_at: datetime | None
-
-
-@dataclass(frozen=True)
-class RCAEvidencePlan:
-    equipment_number: str
-    failure_mode: str
-    evidence_to_collect: list[str]
-    people_to_interview: list[str]
-    records_to_review: list[str]
-    immediate_containment_actions: list[str]
-
-
-@dataclass(frozen=True)
-class FiveWhysAnalysis:
-    equipment_number: str
-    failure_mode: str
-    problem_statement: str
-    whys: list[str]
-    likely_root_cause_theme: str
-
-
-@dataclass(frozen=True)
-class RCATemplate:
-    equipment_number: str
-    failure_mode: str
-    title: str
-    sections: list[str]
-    starter_questions: list[str]
-
-
-@dataclass(frozen=True)
-class DefectEliminationCharter:
-    equipment_number: str
-    failure_mode: str
-    title: str
-    problem_statement: str
-    business_impact: str
-    asset_context: str
-    failure_pattern_summary: str
-    hypotheses: list[str]
-    required_evidence: list[str]
-    recommended_actions: list[str]
-    success_criteria: list[str]
-    verification_plan: list[str]
+    repeat_work_order_count: int
+    total_cost: Decimal
+    total_downtime_hours: Decimal
+    first_seen_at: datetime | None
+    last_seen_at: datetime | None
+    evidence: str
+    score: Decimal
 
 
 class BadActorAnalysisTool:
@@ -309,6 +239,40 @@ class RepeatFailureDetectionTool:
         )
 
 
+class FailureModeBadActorAnalysisTool:
+    def run(
+        self,
+        repeat_failures: list[RepeatFailureFinding],
+        limit: int = 10,
+    ) -> list[FailureModeBadActorFinding]:
+        findings = [
+            FailureModeBadActorFinding(
+                equipment_number=finding.equipment_number,
+                equipment_description=finding.equipment_description,
+                failure_mode=finding.failure_mode,
+                equipment_type=finding.equipment_type,
+                repeat_work_order_count=finding.work_order_count,
+                total_cost=finding.total_cost,
+                total_downtime_hours=finding.total_downtime_hours,
+                first_seen_at=finding.first_seen_at,
+                last_seen_at=finding.last_seen_at,
+                evidence=finding.evidence,
+                score=_failure_mode_bad_actor_score(finding),
+            )
+            for finding in repeat_failures
+        ]
+
+        return sorted(
+            findings,
+            key=lambda finding: (
+                finding.repeat_work_order_count,
+                finding.total_downtime_hours,
+                finding.total_cost,
+            ),
+            reverse=True,
+        )[:limit]
+
+
 class ReliabilityMetricsTool:
     def summarize(
         self,
@@ -349,507 +313,6 @@ class ReliabilityMetricsTool:
                 Decimal(corrective_like_count),
                 preventive_count,
             ),
-        )
-
-
-class MTBFCalculationTool:
-    def run(
-        self,
-        work_orders: list[WorkOrder],
-        limit: int = 10,
-    ) -> list[MTBFFinding]:
-        grouped: dict[str, list[WorkOrder]] = {}
-
-        for work_order in work_orders:
-            if work_order.maintenance_activity_type not in REPAIR_ACTIVITY_TYPES:
-                continue
-
-            equipment_number = _equipment_number(work_order)
-            if equipment_number is None:
-                continue
-
-            grouped.setdefault(equipment_number, []).append(work_order)
-
-        findings = [
-            self._build_finding(equipment_number, equipment_work_orders)
-            for equipment_number, equipment_work_orders in grouped.items()
-        ]
-
-        return sorted(
-            findings,
-            key=lambda finding: (
-                finding.mtbf_days is not None,
-                finding.mtbf_days or Decimal("0"),
-            ),
-        )[:limit]
-
-    def _build_finding(
-        self,
-        equipment_number: str,
-        work_orders: list[WorkOrder],
-    ) -> MTBFFinding:
-        first_work_order = work_orders[0]
-        equipment = first_work_order.equipment
-        dates = _repair_event_dates(work_orders)
-        observation_days = _observation_days(dates)
-        mtbf_days = None
-
-        if observation_days is not None:
-            mtbf_days = _safe_divide_decimal(
-                observation_days,
-                Decimal(len(dates) - 1),
-            )
-
-        return MTBFFinding(
-            equipment_number=equipment_number,
-            equipment_description=_equipment_description(equipment),
-            equipment_type=_equipment_type(equipment),
-            corrective_event_count=len(work_orders),
-            observation_days=observation_days,
-            mtbf_days=mtbf_days,
-            first_event_at=dates[0] if dates else None,
-            last_event_at=dates[-1] if dates else None,
-        )
-
-
-class WeibullAnalysisTool:
-    def run(
-        self,
-        work_orders: list[WorkOrder],
-        limit: int = 10,
-    ) -> list[WeibullAnalysisFinding]:
-        grouped: dict[str, list[WorkOrder]] = {}
-
-        for work_order in work_orders:
-            if work_order.maintenance_activity_type not in REPAIR_ACTIVITY_TYPES:
-                continue
-
-            equipment_number = _equipment_number(work_order)
-            if equipment_number is None:
-                continue
-
-            grouped.setdefault(equipment_number, []).append(work_order)
-
-        findings = [
-            self._build_finding(equipment_number, equipment_work_orders)
-            for equipment_number, equipment_work_orders in grouped.items()
-        ]
-
-        return sorted(
-            findings,
-            key=lambda finding: (
-                finding.shape_beta is not None,
-                finding.interval_count,
-                -(finding.shape_beta or Decimal("0")),
-            ),
-            reverse=True,
-        )[:limit]
-
-    def _build_finding(
-        self,
-        equipment_number: str,
-        work_orders: list[WorkOrder],
-    ) -> WeibullAnalysisFinding:
-        first_work_order = work_orders[0]
-        equipment = first_work_order.equipment
-        dates = _repair_event_dates(work_orders)
-        intervals = _failure_intervals_days(dates)
-        shape_beta = None
-        scale_eta = None
-        mean_time_between_failures = None
-
-        if len(intervals) >= MINIMUM_WEIBULL_INTERVALS:
-            shape_beta, scale_eta = _fit_weibull(intervals)
-            if shape_beta is not None and scale_eta is not None:
-                mean_time_between_failures = Decimal(
-                    str(float(scale_eta) * gamma(1 + (1 / float(shape_beta))))
-                ).quantize(Decimal("0.01"))
-
-        return WeibullAnalysisFinding(
-            equipment_number=equipment_number,
-            equipment_description=_equipment_description(equipment),
-            equipment_type=_equipment_type(equipment),
-            failure_count=len(dates),
-            interval_count=len(intervals),
-            shape_beta=shape_beta,
-            scale_eta_days=scale_eta,
-            characteristic_life_days=scale_eta,
-            mean_time_between_failures_days=mean_time_between_failures,
-            failure_behavior=_weibull_failure_behavior(shape_beta),
-            confidence=_weibull_confidence(len(intervals)),
-            first_event_at=dates[0] if dates else None,
-            last_event_at=dates[-1] if dates else None,
-        )
-
-
-class RCAEvidencePlanningTool:
-    def run(
-        self,
-        repeat_failures: list[RepeatFailureFinding],
-        limit: int = 5,
-    ) -> list[RCAEvidencePlan]:
-        return [
-            self._build_plan(repeat_failure)
-            for repeat_failure in repeat_failures[:limit]
-        ]
-
-    def _build_plan(
-        self,
-        repeat_failure: RepeatFailureFinding,
-    ) -> RCAEvidencePlan:
-        equipment_type = repeat_failure.equipment_type or "equipment"
-
-        return RCAEvidencePlan(
-            equipment_number=repeat_failure.equipment_number,
-            failure_mode=repeat_failure.failure_mode,
-            evidence_to_collect=[
-                f"Photos or inspection notes showing {repeat_failure.failure_mode}.",
-                f"Operating conditions before each {equipment_type} failure event.",
-                "Maintenance execution notes, parts replaced, and measured condition.",
-                "Recent alarms, trips, vibration, temperature, or process trend data.",
-            ],
-            people_to_interview=[
-                "Operator who observed the failure or abnormal condition.",
-                "Maintainer who completed the repair.",
-                "Reliability or maintenance engineer responsible for the asset.",
-                "Planner or scheduler if maintenance timing may be a contributor.",
-            ],
-            records_to_review=[
-                f"Linked work orders: {repeat_failure.evidence}.",
-                "Preventive maintenance history and skipped/deferred tasks.",
-                "OEM manual or site maintenance standard for the failure mode.",
-                "Spares history and component replacement records.",
-            ],
-            immediate_containment_actions=[
-                "Confirm the asset is safe to continue operating.",
-                "Check whether sister assets have the same symptoms.",
-                "Raise a short-term inspection or monitoring task until root cause is known.",
-            ],
-        )
-
-
-class FiveWhysGeneratorTool:
-    def run(
-        self,
-        failures: list[FailureInvestigationFinding | RepeatFailureFinding],
-        limit: int = 5,
-    ) -> list[FiveWhysAnalysis]:
-        return [
-            self._build_analysis(self._to_investigation(failure))
-            for failure in failures[:limit]
-        ]
-
-    def run_for_failure(
-        self,
-        equipment_number: str,
-        failure_mode: str,
-        equipment_type: str | None = None,
-        equipment_description: str | None = None,
-        work_order_count: int = 1,
-        evidence: str | None = None,
-    ) -> FiveWhysAnalysis:
-        return self._build_analysis(
-            FailureInvestigationFinding(
-                equipment_number=equipment_number,
-                equipment_description=equipment_description,
-                failure_mode=failure_mode,
-                equipment_type=equipment_type,
-                work_order_count=work_order_count,
-                evidence=evidence,
-            )
-        )
-
-    def _build_analysis(
-        self,
-        failure: FailureInvestigationFinding,
-    ) -> FiveWhysAnalysis:
-        equipment_type = failure.equipment_type or "asset"
-        failure_mode = failure.failure_mode
-
-        return FiveWhysAnalysis(
-            equipment_number=failure.equipment_number,
-            failure_mode=failure_mode,
-            problem_statement=self._problem_statement(failure),
-            whys=[
-                f"Why did the {equipment_type} experience {failure_mode}?",
-                "Why was the failure mechanism not detected or corrected earlier?",
-                "Why did the current maintenance strategy not prevent recurrence?",
-                "Why were operating, installation, or maintenance conditions allowed to persist?",
-                "Why is there no effective control that verifies the root cause has been removed?",
-            ],
-            likely_root_cause_theme=(
-                "Likely theme to validate: maintenance strategy gap, operating "
-                "condition issue, installation/quality issue, or ineffective "
-                "previous corrective action."
-            ),
-        )
-
-    def _to_investigation(
-        self,
-        failure: FailureInvestigationFinding | RepeatFailureFinding,
-    ) -> FailureInvestigationFinding:
-        if isinstance(failure, FailureInvestigationFinding):
-            return failure
-
-        return FailureInvestigationFinding(
-            equipment_number=failure.equipment_number,
-            equipment_description=failure.equipment_description,
-            failure_mode=failure.failure_mode,
-            equipment_type=failure.equipment_type,
-            work_order_count=failure.work_order_count,
-            evidence=failure.evidence,
-        )
-
-    def _problem_statement(
-        self,
-        failure: FailureInvestigationFinding,
-    ) -> str:
-        if failure.work_order_count > 1:
-            return (
-                f"{failure.equipment_number} has repeated {failure.failure_mode} "
-                f"events across {failure.work_order_count} work orders."
-            )
-
-        if failure.evidence:
-            return (
-                f"{failure.equipment_number} has a {failure.failure_mode} "
-                f"failure event requiring RCA. Evidence: {failure.evidence}."
-            )
-
-        return (
-            f"{failure.equipment_number} has a {failure.failure_mode} "
-            "failure event requiring RCA."
-        )
-
-
-class RCATemplateBuilderTool:
-    def run(
-        self,
-        failures: list[FailureInvestigationFinding | RepeatFailureFinding],
-        limit: int = 5,
-    ) -> list[RCATemplate]:
-        return [
-            self._build_template(self._to_investigation(failure))
-            for failure in failures[:limit]
-        ]
-
-    def run_for_failure(
-        self,
-        equipment_number: str,
-        failure_mode: str,
-        equipment_type: str | None = None,
-        equipment_description: str | None = None,
-        work_order_count: int = 1,
-        evidence: str | None = None,
-    ) -> RCATemplate:
-        return self._build_template(
-            FailureInvestigationFinding(
-                equipment_number=equipment_number,
-                equipment_description=equipment_description,
-                failure_mode=failure_mode,
-                equipment_type=equipment_type,
-                work_order_count=work_order_count,
-                evidence=evidence,
-            )
-        )
-
-    def _build_template(
-        self,
-        failure: FailureInvestigationFinding,
-    ) -> RCATemplate:
-        return RCATemplate(
-            equipment_number=failure.equipment_number,
-            failure_mode=failure.failure_mode,
-            title=(
-                "RCA - "
-                f"{failure.equipment_number} "
-                f"{failure.failure_mode}"
-            ),
-            sections=[
-                "Problem statement",
-                "Asset and operating context",
-                "Event timeline",
-                "Failure mode and consequence",
-                "Evidence collected",
-                "5 Whys or causal analysis",
-                "Root cause statement",
-                "Corrective and preventive actions",
-                "Verification plan",
-                "Owner, due date, and closeout criteria",
-            ],
-            starter_questions=self._starter_questions(failure),
-        )
-
-    def _to_investigation(
-        self,
-        failure: FailureInvestigationFinding | RepeatFailureFinding,
-    ) -> FailureInvestigationFinding:
-        if isinstance(failure, FailureInvestigationFinding):
-            return failure
-
-        return FailureInvestigationFinding(
-            equipment_number=failure.equipment_number,
-            equipment_description=failure.equipment_description,
-            failure_mode=failure.failure_mode,
-            equipment_type=failure.equipment_type,
-            work_order_count=failure.work_order_count,
-            evidence=failure.evidence,
-        )
-
-    def _starter_questions(
-        self,
-        failure: FailureInvestigationFinding,
-    ) -> list[str]:
-        equipment_type = failure.equipment_type or "asset"
-        first_question = (
-            "What changed before the first event in the repeat pattern?"
-            if failure.work_order_count > 1
-            else (
-                f"What changed before the {equipment_type} "
-                f"experienced {failure.failure_mode}?"
-            )
-        )
-
-        questions = [
-            first_question,
-            "What evidence confirms the failure mode rather than only the symptom?",
-            "Which current PM or condition-monitoring task should have detected this?",
-        ]
-
-        if failure.work_order_count > 1:
-            questions.append(
-                "Were previous corrective actions completed and verified effective?"
-            )
-
-        questions.append("What permanent control will prevent recurrence?")
-        return questions
-
-
-class DefectEliminationCharterGeneratorTool:
-    def run(
-        self,
-        repeat_failures: list[RepeatFailureFinding],
-        mtbf_metrics: list[MTBFFinding],
-        evidence_plans: list[RCAEvidencePlan],
-        five_whys: list[FiveWhysAnalysis],
-        limit: int = 3,
-    ) -> list[DefectEliminationCharter]:
-        mtbf_by_equipment = {
-            finding.equipment_number: finding for finding in mtbf_metrics
-        }
-        evidence_by_pattern = {
-            (plan.equipment_number, plan.failure_mode): plan
-            for plan in evidence_plans
-        }
-        five_whys_by_pattern = {
-            (analysis.equipment_number, analysis.failure_mode): analysis
-            for analysis in five_whys
-        }
-
-        return [
-            self._build_charter(
-                repeat_failure=repeat_failure,
-                mtbf=mtbf_by_equipment.get(repeat_failure.equipment_number),
-                evidence_plan=evidence_by_pattern.get(
-                    (
-                        repeat_failure.equipment_number,
-                        repeat_failure.failure_mode,
-                    )
-                ),
-                five_whys=five_whys_by_pattern.get(
-                    (
-                        repeat_failure.equipment_number,
-                        repeat_failure.failure_mode,
-                    )
-                ),
-            )
-            for repeat_failure in repeat_failures[:limit]
-        ]
-
-    def _build_charter(
-        self,
-        repeat_failure: RepeatFailureFinding,
-        mtbf: MTBFFinding | None,
-        evidence_plan: RCAEvidencePlan | None,
-        five_whys: FiveWhysAnalysis | None,
-    ) -> DefectEliminationCharter:
-        mtbf_context = (
-            f" Estimated MTBF is {mtbf.mtbf_days} days across "
-            f"{mtbf.corrective_event_count} repair events."
-            if mtbf is not None and mtbf.mtbf_days is not None
-            else " MTBF could not be calculated from the available event dates."
-        )
-        required_evidence = (
-            evidence_plan.evidence_to_collect
-            if evidence_plan is not None
-            else ["Confirm failure mode evidence from work order history."]
-        )
-        root_cause_theme = (
-            five_whys.likely_root_cause_theme
-            if five_whys is not None
-            else (
-                "Likely theme to validate: maintenance strategy gap, operating "
-                "condition issue, installation/quality issue, or ineffective "
-                "previous corrective action."
-            )
-        )
-
-        return DefectEliminationCharter(
-            equipment_number=repeat_failure.equipment_number,
-            failure_mode=repeat_failure.failure_mode,
-            title=(
-                "Defect Elimination Charter - "
-                f"{repeat_failure.equipment_number} "
-                f"{repeat_failure.failure_mode}"
-            ),
-            problem_statement=(
-                f"{repeat_failure.equipment_number} has repeated "
-                f"{repeat_failure.failure_mode} across "
-                f"{repeat_failure.work_order_count} work orders between "
-                f"{_format_datetime(repeat_failure.first_seen_at)} and "
-                f"{_format_datetime(repeat_failure.last_seen_at)}."
-            ),
-            business_impact=(
-                f"The repeat pattern has accumulated "
-                f"{repeat_failure.total_downtime_hours} downtime hours and "
-                f"{repeat_failure.total_cost} in recorded maintenance cost."
-                f"{mtbf_context}"
-            ),
-            asset_context=(
-                f"Equipment: {repeat_failure.equipment_number}. "
-                f"Description: {repeat_failure.equipment_description or 'Not recorded'}. "
-                f"Equipment type: {repeat_failure.equipment_type or 'Not recorded'}."
-            ),
-            failure_pattern_summary=(
-                f"Repeat pattern: {repeat_failure.failure_mode}. Evidence work "
-                f"orders: {repeat_failure.evidence}."
-            ),
-            hypotheses=[
-                "The current maintenance strategy does not control the dominant failure mode.",
-                "Operating conditions may be accelerating the failure mechanism.",
-                "Previous corrective actions may have restored function without removing root cause.",
-                root_cause_theme,
-            ],
-            required_evidence=required_evidence,
-            recommended_actions=[
-                "Assign an owner for the defect elimination investigation.",
-                "Validate the failure mode with physical evidence and work order history.",
-                "Complete RCA using the evidence plan and 5 Whys prompts.",
-                "Define corrective actions that remove or control the verified root cause.",
-                "Add a verification check to confirm recurrence has reduced after implementation.",
-            ],
-            success_criteria=[
-                "No recurrence of the same failure mode for the agreed monitoring period.",
-                "Corrective work order count decreases for the target asset.",
-                "Downtime and maintenance cost trend down after actions are implemented.",
-                "Updated PM, operating, or condition-monitoring control is documented and owned.",
-            ],
-            verification_plan=[
-                "Review new work orders weekly for recurrence of the same failure mode.",
-                "Track downtime, cost, and repair count for the target asset.",
-                "Confirm corrective actions are completed and effectiveness is checked.",
-                "Close the charter only after recurrence criteria are met.",
-            ],
         )
 
 
@@ -926,6 +389,16 @@ def _mtbf_bad_actor_score(
     )
 
 
+def _failure_mode_bad_actor_score(
+    finding: RepeatFailureFinding,
+) -> Decimal:
+    return (
+        (Decimal(finding.work_order_count) * Decimal("100"))
+        + finding.total_downtime_hours
+        + (finding.total_cost / Decimal("1000"))
+    ).quantize(Decimal("0.01"))
+
+
 def _safe_divide(
     numerator: Decimal,
     denominator: int,
@@ -944,79 +417,3 @@ def _safe_divide_decimal(
         return None
 
     return (numerator / denominator).quantize(Decimal("0.01"))
-
-
-def _failure_intervals_days(dates: list[datetime]) -> list[Decimal]:
-    intervals: list[Decimal] = []
-
-    for previous, current in zip(dates, dates[1:]):
-        elapsed_seconds = Decimal(str((current - previous).total_seconds()))
-        if elapsed_seconds > 0:
-            intervals.append(
-                (elapsed_seconds / Decimal("86400")).quantize(Decimal("0.01"))
-            )
-
-    return intervals
-
-
-def _fit_weibull(intervals: list[Decimal]) -> tuple[Decimal | None, Decimal | None]:
-    ordered = sorted(float(interval) for interval in intervals if interval > 0)
-    count = len(ordered)
-    if count < MINIMUM_WEIBULL_INTERVALS:
-        return None, None
-
-    x_values = [log(value) for value in ordered]
-    y_values = [
-        log(-log(1 - ((rank - 0.3) / (count + 0.4))))
-        for rank in range(1, count + 1)
-    ]
-    mean_x = sum(x_values) / count
-    mean_y = sum(y_values) / count
-    denominator = sum((x_value - mean_x) ** 2 for x_value in x_values)
-    if denominator == 0:
-        return None, None
-
-    beta = sum(
-        (x_value - mean_x) * (y_value - mean_y)
-        for x_value, y_value in zip(x_values, y_values)
-    ) / denominator
-    if beta <= 0:
-        return None, None
-
-    intercept = mean_y - (beta * mean_x)
-    eta = exp(-intercept / beta)
-
-    return (
-        Decimal(str(beta)).quantize(Decimal("0.01")),
-        Decimal(str(eta)).quantize(Decimal("0.01")),
-    )
-
-
-def _weibull_failure_behavior(shape_beta: Decimal | None) -> str:
-    if shape_beta is None:
-        return "insufficient interval history"
-
-    if shape_beta < Decimal("0.90"):
-        return "early-life or infant mortality pattern"
-
-    if shape_beta <= Decimal("1.10"):
-        return "random failure pattern"
-
-    return "wear-out or age-related pattern"
-
-
-def _weibull_confidence(interval_count: int) -> str:
-    if interval_count >= 8:
-        return "moderate"
-
-    if interval_count >= MINIMUM_WEIBULL_INTERVALS:
-        return "directional"
-
-    return "insufficient"
-
-
-def _format_datetime(value: datetime | None) -> str:
-    if value is None:
-        return "an unknown date"
-
-    return value.date().isoformat()

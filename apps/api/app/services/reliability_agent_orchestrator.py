@@ -1,6 +1,9 @@
 import json
 from collections.abc import Sequence
+from dataclasses import asdict
+from decimal import Decimal
 from time import perf_counter
+from typing import Any
 
 from app.agents.registry import SpecialistRegistry
 from app.domain.chat import ChatMessage
@@ -19,6 +22,11 @@ from app.domain.orchestration import (
 from app.domain.progress import ProgressCallback, report_progress
 from app.exceptions import ChatServiceError
 from app.providers.base import ChatProvider
+from app.tools.reliability_improvement import (
+    ReliabilityImprovementActionPlan,
+    ReliabilityImprovementOpportunity,
+    RoadmapPlannerTool,
+)
 
 INTERNAL_CALL_MESSAGES: dict[str, str] = {
     "agent_tool_selection": "Analyze request and select specialist",
@@ -27,6 +35,135 @@ INTERNAL_CALL_MESSAGES: dict[str, str] = {
     "answer_revision": "Revise answer to meet quality standards",
     "answer_revision_final": "Finalize revised answer",
 }
+
+RECOMMENDATION_DECISION_MATRIX = """
+When consolidating Defect Elimination and Maintenance Strategy recommendations,
+make an explicit decision between investigation and strategy improvement when
+the evidence supports both options:
+- High or critical equipment criticality: prefer a formal defect-elimination
+  investigation before or alongside strategy changes.
+- Medium equipment criticality: first assess whether the maintenance strategy
+  recommendation is likely sufficient to prevent recurrence. If coverage,
+  frequency, or condition-monitoring improvements appear sufficient, recommend
+  strategy improvement with verification. If repeat failures, high downtime,
+  unclear cause, or weak strategy evidence remain, recommend investigation.
+- Low equipment criticality: prefer maintenance strategy improvement and
+  monitoring unless the evidence shows exceptional risk, cost, downtime, or
+  safety concern.
+Always explain the decision using available evidence such as criticality,
+repeat-failure pattern, bad-actor ranking, strategy coverage, frequency risk,
+downtime, and cost. Do not claim strategy improvement is sufficient when the
+specialist evidence does not support that conclusion.
+""".strip()
+
+ROADMAP_PLANNER_TOOL_DEFINITION = AgentToolDefinition(
+    name="roadmap_planner",
+    description=(
+        "Sequence candidate reliability improvement opportunities into now, "
+        "next, and later roadmap horizons during final synthesis. Use this "
+        "only after specialist evidence has identified opportunities or "
+        "recommended actions that need ordering. When sequencing "
+        "recommendations, set priority from the urgency of the issue."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "recommendations": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "equipment_number": {"type": "string"},
+                        "title": {"type": "string"},
+                        "recommendation": {"type": "string"},
+                        "suggestion": {"type": "string"},
+                        "reason": {"type": "string"},
+                        "urgency": {"type": "string"},
+                        "priority": {
+                            "type": "string",
+                            "enum": ["low", "medium", "high"],
+                        },
+                        "estimated_annual_value": {
+                            "type": ["number", "string"]
+                        },
+                        "value_basis": {"type": "string"},
+                        "failure_mode": {"type": ["string", "null"]},
+                        "evidence": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                    },
+                    "required": ["equipment_number"],
+                },
+            },
+            "opportunities": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "equipment_number": {"type": "string"},
+                        "equipment_description": {
+                            "type": ["string", "null"]
+                        },
+                        "equipment_type": {"type": ["string", "null"]},
+                        "criticality": {"type": ["string", "null"]},
+                        "opportunity_type": {"type": "string"},
+                        "priority": {
+                            "type": "string",
+                            "enum": ["low", "medium", "high"],
+                        },
+                        "estimated_annual_value": {
+                            "type": ["number", "string"]
+                        },
+                        "value_basis": {"type": "string"},
+                        "evidence": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                    },
+                    "required": [
+                        "equipment_number",
+                        "priority",
+                        "estimated_annual_value",
+                        "value_basis",
+                    ],
+                },
+            },
+            "action_plans": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "equipment_number": {"type": "string"},
+                        "title": {"type": "string"},
+                        "owner_role": {"type": "string"},
+                        "priority": {
+                            "type": "string",
+                            "enum": ["low", "medium", "high"],
+                        },
+                        "actions": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                        "milestones": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                        "deliverables": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                    },
+                    "required": ["equipment_number", "title"],
+                },
+            },
+        },
+        "anyOf": [
+            {"required": ["recommendations"]},
+            {"required": ["opportunities"]},
+        ],
+    },
+)
 
 
 class ReliabilityAgentOrchestrator:
@@ -105,6 +242,21 @@ class ReliabilityAgentOrchestrator:
 
             if not response.tool_calls:
                 if response.content:
+                    if exchanges:
+                        final_response = self._final_synthesis(
+                            messages=messages,
+                            max_output_tokens=max_output_tokens,
+                            exchanges=exchanges,
+                            progress=progress,
+                            observer=observer,
+                        )
+                        if not final_response.content:
+                            raise ChatServiceError(
+                                "The Reliability Agent could not produce a "
+                                "final response."
+                            )
+                        response = final_response
+
                     return self._review_and_revise(
                         messages=messages,
                         max_output_tokens=max_output_tokens,
@@ -145,12 +297,11 @@ class ReliabilityAgentOrchestrator:
             stage="synthesizing",
             message="Reliability Agent is consolidating the findings.",
         )
-        final_response = self._generate_with_tools(
-            call_type="agent_final_synthesis",
+        final_response = self._final_synthesis(
             messages=messages,
             max_output_tokens=max_output_tokens,
-            tools=(),
             exchanges=exchanges,
+            progress=progress,
             observer=observer,
         )
 
@@ -170,6 +321,55 @@ class ReliabilityAgentOrchestrator:
         raise ChatServiceError(
             "The Reliability Agent could not produce a final response."
         )
+
+    def _final_synthesis(
+        self,
+        *,
+        messages: Sequence[ChatMessage],
+        max_output_tokens: int,
+        exchanges: list[AgentToolExchange],
+        progress: ProgressCallback | None,
+        observer: ModelCallObserver | None,
+    ) -> AgentModelResponse:
+        synthesis_messages = self._with_recommendation_decision_matrix(messages)
+        response = self._generate_with_tools(
+            call_type="agent_final_synthesis",
+            messages=synthesis_messages,
+            max_output_tokens=max_output_tokens,
+            tools=(ROADMAP_PLANNER_TOOL_DEFINITION,),
+            exchanges=exchanges,
+            observer=observer,
+        )
+
+        if response.tool_calls:
+            for call in response.tool_calls:
+                report_progress(
+                    progress,
+                    stage="tool_started",
+                    specialist="reliability_agent",
+                    tool=call.name,
+                    message=(
+                        "Reliability Agent is sequencing opportunities into "
+                        "a roadmap."
+                    ),
+                )
+                exchanges.append(
+                    AgentToolExchange(
+                        call=call,
+                        result=self._execute_final_synthesis_tool(call),
+                    )
+                )
+
+            response = self._generate_with_tools(
+                call_type="agent_final_synthesis",
+                messages=synthesis_messages,
+                max_output_tokens=max_output_tokens,
+                tools=(),
+                exchanges=exchanges,
+                observer=observer,
+            )
+
+        return response
 
     def _execute(
         self,
@@ -200,6 +400,180 @@ class ReliabilityAgentOrchestrator:
 
         seen_calls.add(signature)
         return self.registry.execute(call, progress)
+
+    def _execute_final_synthesis_tool(
+        self,
+        call: AgentToolCall,
+    ) -> AgentToolResult:
+        if call.name != ROADMAP_PLANNER_TOOL_DEFINITION.name:
+            return AgentToolResult(
+                call_id=call.id,
+                tool_name=call.name,
+                content=f"Unknown final synthesis tool: {call.name}.",
+                is_error=True,
+            )
+
+        try:
+            recommendation_payloads = self._list_argument(
+                call.arguments,
+                "recommendations",
+            )
+            recommendation_opportunities = [
+                self._opportunity_from_recommendation_payload(payload)
+                for payload in recommendation_payloads
+            ]
+            recommendation_action_plans = [
+                self._action_plan_from_recommendation_payload(payload)
+                for payload in recommendation_payloads
+            ]
+            opportunities = recommendation_opportunities + [
+                self._opportunity_from_payload(payload)
+                for payload in self._list_argument(
+                    call.arguments,
+                    "opportunities",
+                )
+            ]
+            opportunities = sorted(
+                opportunities,
+                key=lambda item: (
+                    _priority_score(item.priority),
+                    item.estimated_annual_value,
+                ),
+                reverse=True,
+            )
+            action_plans = recommendation_action_plans + [
+                self._action_plan_from_payload(payload)
+                for payload in self._list_argument(
+                    call.arguments,
+                    "action_plans",
+                )
+            ]
+            roadmap = RoadmapPlannerTool().run(opportunities, action_plans)
+        except (ArithmeticError, KeyError, TypeError, ValueError) as error:
+            return AgentToolResult(
+                call_id=call.id,
+                tool_name=call.name,
+                content=(
+                    "RoadmapPlannerTool could not sequence the supplied "
+                    f"opportunities: {error}."
+                ),
+                is_error=True,
+            )
+
+        return AgentToolResult(
+            call_id=call.id,
+            tool_name=call.name,
+            content=json.dumps(
+                [asdict(item) for item in roadmap],
+                default=str,
+            ),
+        )
+
+    @staticmethod
+    def _list_argument(
+        arguments: dict[str, Any],
+        key: str,
+    ) -> list[dict[str, Any]]:
+        value = arguments.get(key, [])
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise TypeError(f"{key} must be a list.")
+        if not all(isinstance(item, dict) for item in value):
+            raise TypeError(f"{key} must contain objects.")
+        return value
+
+    @staticmethod
+    def _opportunity_from_payload(
+        payload: dict[str, Any],
+    ) -> ReliabilityImprovementOpportunity:
+        return ReliabilityImprovementOpportunity(
+            equipment_number=str(payload["equipment_number"]),
+            equipment_description=_optional_string(
+                payload.get("equipment_description")
+            ),
+            equipment_type=_optional_string(payload.get("equipment_type")),
+            criticality=_optional_string(payload.get("criticality")),
+            opportunity_type=str(
+                payload.get("opportunity_type")
+                or "reliability_improvement"
+            ),
+            priority=_priority(payload.get("priority")),
+            estimated_annual_value=Decimal(
+                str(payload["estimated_annual_value"])
+            ),
+            value_basis=str(payload["value_basis"]),
+            evidence=_string_list(payload.get("evidence")),
+        )
+
+    @staticmethod
+    def _opportunity_from_recommendation_payload(
+        payload: dict[str, Any],
+    ) -> ReliabilityImprovementOpportunity:
+        recommendation = _recommendation_text(payload)
+        priority = _priority(payload.get("priority") or payload.get("urgency"))
+        value_basis = str(
+            payload.get("value_basis")
+            or payload.get("reason")
+            or recommendation
+        )
+        failure_mode = _optional_string(payload.get("failure_mode"))
+        opportunity_type = (
+            f"recommendation:{failure_mode}"
+            if failure_mode
+            else "recommendation"
+        )
+
+        return ReliabilityImprovementOpportunity(
+            equipment_number=str(payload["equipment_number"]),
+            equipment_description=None,
+            equipment_type=None,
+            criticality=None,
+            opportunity_type=opportunity_type,
+            priority=priority,
+            estimated_annual_value=Decimal(
+                str(payload.get("estimated_annual_value") or "0")
+            ),
+            value_basis=value_basis,
+            evidence=_string_list(payload.get("evidence")),
+        )
+
+    @staticmethod
+    def _action_plan_from_payload(
+        payload: dict[str, Any],
+    ) -> ReliabilityImprovementActionPlan:
+        priority = _priority(payload.get("priority"))
+        return ReliabilityImprovementActionPlan(
+            equipment_number=str(payload["equipment_number"]),
+            title=str(payload["title"]),
+            owner_role=str(payload.get("owner_role") or "Reliability Engineer"),
+            priority=priority,
+            actions=_string_list(payload.get("actions")),
+            milestones=_string_list(payload.get("milestones")),
+            deliverables=_string_list(payload.get("deliverables")),
+        )
+
+    @staticmethod
+    def _action_plan_from_recommendation_payload(
+        payload: dict[str, Any],
+    ) -> ReliabilityImprovementActionPlan:
+        recommendation = _recommendation_text(payload)
+        return ReliabilityImprovementActionPlan(
+            equipment_number=str(payload["equipment_number"]),
+            title=str(payload.get("title") or recommendation),
+            owner_role="Reliability Engineer",
+            priority=_priority(payload.get("priority") or payload.get("urgency")),
+            actions=[recommendation],
+            milestones=[
+                "Confirm urgency and supporting evidence.",
+                "Assign owner and implementation window.",
+                "Verify the recommendation reduced the issue urgency.",
+            ],
+            deliverables=[
+                "Prioritized recommendation with owner and due date.",
+                "Post-action verification against the original issue.",
+            ],
+        )
 
     def _review_and_revise(
         self,
@@ -380,6 +754,9 @@ class ReliabilityAgentOrchestrator:
                 ),
             ),
         ]
+        revision_messages = self._with_recommendation_decision_matrix(
+            revision_messages
+        )
 
         while tool_call_count < self.max_tool_calls:
             response = self._generate_with_tools(
@@ -576,6 +953,18 @@ class ReliabilityAgentOrchestrator:
         )
 
     @staticmethod
+    def _with_recommendation_decision_matrix(
+        messages: Sequence[ChatMessage],
+    ) -> list[ChatMessage]:
+        return [
+            *messages,
+            ChatMessage(
+                role="system",
+                content=RECOMMENDATION_DECISION_MATRIX,
+            ),
+        ]
+
+    @staticmethod
     def _exchanges_summary(exchanges: Sequence[AgentToolExchange]) -> str:
         if not exchanges:
             return "No specialist evidence was used."
@@ -594,7 +983,6 @@ class ReliabilityAgentOrchestrator:
             "search_equipment_master": "master_data",
             "analyze_defect_elimination": "defect_elimination",
             "review_maintenance_strategy": "maintenance_strategy",
-            "plan_reliability_improvement": "reliability_improvement",
         }.get(tool_name)
 
     @staticmethod
@@ -611,11 +999,59 @@ class ReliabilityAgentOrchestrator:
                 "Reliability Agent is coordinating with the Maintenance "
                 "Strategy Agent."
             ),
-            "plan_reliability_improvement": (
-                "Reliability Agent is coordinating with the Reliability "
-                "Improvement Agent."
-            ),
         }.get(
             tool_name,
             "Reliability Agent is coordinating specialist analysis.",
         )
+
+
+def _optional_string(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    return str(value)
+
+
+def _priority(value: Any) -> str:
+    priority = str(value or "medium").lower().replace(" ", "_")
+    priority = {
+        "critical": "high",
+        "immediate": "high",
+        "urgent": "high",
+        "asap": "high",
+        "soon": "medium",
+        "normal": "medium",
+        "next": "medium",
+        "deferred": "low",
+        "later": "low",
+    }.get(priority, priority)
+    if priority not in {"low", "medium", "high"}:
+        raise ValueError(f"Unsupported priority: {priority}.")
+
+    return priority
+
+
+def _priority_score(priority: str) -> int:
+    return {
+        "high": 3,
+        "medium": 2,
+        "low": 1,
+    }[priority]
+
+
+def _recommendation_text(payload: dict[str, Any]) -> str:
+    for key in ("recommendation", "suggestion", "title", "reason"):
+        value = payload.get(key)
+        if value:
+            return str(value)
+
+    return f"Prioritize recommendation for {payload['equipment_number']}."
+
+
+def _string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise TypeError("Expected a list of strings.")
+
+    return [str(item) for item in value]

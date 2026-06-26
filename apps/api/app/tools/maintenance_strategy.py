@@ -6,6 +6,10 @@ from decimal import Decimal
 from typing import Literal
 
 from app.models import Equipment, MaintenanceStrategy, WorkOrder
+from app.tools.defect_elimination import (
+    RepeatFailureDetectionTool,
+    RepeatFailureFinding,
+)
 
 CORRECTIVE_TYPES = {"corrective", "emergency", "condition_monitoring"}
 TOKEN_STOP_WORDS = {
@@ -74,6 +78,11 @@ class FailureModeCoverage:
     matched_task_descriptions: list[str]
     confidence: Literal["low", "medium", "high"]
     evidence_work_orders: list[str]
+    is_repeat_failure: bool
+    repeat_failure_work_order_count: int | None
+    repeat_failure_total_cost: Decimal | None
+    repeat_failure_total_downtime_hours: Decimal | None
+    repeat_failure_evidence: str | None
 
 
 @dataclass(frozen=True)
@@ -94,14 +103,6 @@ class MaintenanceStrategyGap:
     severity: RiskLevel
     evidence: str
     recommendation: str
-
-
-@dataclass(frozen=True)
-class ConditionMonitoringOpportunity:
-    failure_mode: str
-    monitoring_method: str
-    rationale: str
-    priority: RiskLevel
 
 
 @dataclass(frozen=True)
@@ -183,14 +184,28 @@ class FailureModeCoverageAnalyzerTool:
         self,
         strategies: list[MaintenanceStrategy],
         work_orders: list[WorkOrder],
+        repeat_failures: list[RepeatFailureFinding] | None = None,
+        repeat_failure_tool: RepeatFailureDetectionTool | None = None,
     ) -> list[FailureModeCoverage]:
+        if repeat_failures is None:
+            repeat_failures = (
+                repeat_failure_tool or RepeatFailureDetectionTool()
+            ).run(
+                work_orders,
+                limit=max(len(work_orders), 1),
+            )
+
         failures = _group_failure_work_orders(work_orders)
+        repeat_failures_by_mode = {
+            finding.failure_mode: finding for finding in repeat_failures
+        }
         active_strategies = [
             strategy for strategy in strategies if strategy.status == "active"
         ]
         findings: list[FailureModeCoverage] = []
 
         for failure_mode, related_work_orders in failures.items():
+            repeat_failure = repeat_failures_by_mode.get(failure_mode)
             matches = [
                 strategy
                 for strategy in active_strategies
@@ -235,6 +250,27 @@ class FailureModeCoverageAnalyzerTool:
                         work_order.order_number
                         for work_order in related_work_orders[:5]
                     ],
+                    is_repeat_failure=repeat_failure is not None,
+                    repeat_failure_work_order_count=(
+                        repeat_failure.work_order_count
+                        if repeat_failure is not None
+                        else None
+                    ),
+                    repeat_failure_total_cost=(
+                        repeat_failure.total_cost
+                        if repeat_failure is not None
+                        else None
+                    ),
+                    repeat_failure_total_downtime_hours=(
+                        repeat_failure.total_downtime_hours
+                        if repeat_failure is not None
+                        else None
+                    ),
+                    repeat_failure_evidence=(
+                        repeat_failure.evidence
+                        if repeat_failure is not None
+                        else None
+                    ),
                 )
             )
 
@@ -243,6 +279,7 @@ class FailureModeCoverageAnalyzerTool:
             key=lambda finding: (
                 finding.coverage == "uncovered",
                 finding.coverage == "partial",
+                finding.is_repeat_failure,
                 finding.occurrence_count,
             ),
             reverse=True,
@@ -358,15 +395,8 @@ class MaintenanceStrategyGapDetectorTool:
                     MaintenanceStrategyGap(
                         gap_type="uncovered_failure_mode",
                         failure_mode=finding.failure_mode,
-                        severity=(
-                            "high"
-                            if finding.occurrence_count >= 2
-                            else "medium"
-                        ),
-                        evidence=(
-                            f"{finding.occurrence_count} observed event(s): "
-                            f"{', '.join(finding.evidence_work_orders)}."
-                        ),
+                        severity=_coverage_gap_severity(finding),
+                        evidence=_coverage_gap_evidence(finding),
                         recommendation=(
                             "Add or revise a preventive, inspection, or "
                             "condition-monitoring control."
@@ -381,11 +411,10 @@ class MaintenanceStrategyGapDetectorTool:
                     MaintenanceStrategyGap(
                         gap_type="partial_failure_mode_coverage",
                         failure_mode=finding.failure_mode,
-                        severity="medium",
-                        evidence=(
-                            "Existing task wording only partially addresses "
-                            f"{finding.failure_mode}."
+                        severity=(
+                            "high" if finding.is_repeat_failure else "medium"
                         ),
+                        evidence=_partial_coverage_gap_evidence(finding),
                         recommendation=(
                             "Review task method, acceptance limits, and "
                             "follow-up actions."
@@ -396,51 +425,75 @@ class MaintenanceStrategyGapDetectorTool:
         return gaps
 
 
-class ConditionMonitoringOpportunityAnalyzerTool:
-    def run(
-        self,
-        equipment_type: str | None,
-        coverage: list[FailureModeCoverage],
-    ) -> list[ConditionMonitoringOpportunity]:
-        opportunities: list[ConditionMonitoringOpportunity] = []
+def _coverage_gap_severity(finding: FailureModeCoverage) -> RiskLevel:
+    if finding.is_repeat_failure or finding.occurrence_count >= 2:
+        return "high"
 
-        for finding in coverage:
-            method = _monitoring_method(
-                equipment_type,
-                finding.failure_mode,
-            )
-            if method is None:
-                continue
+    return "medium"
 
-            opportunities.append(
-                ConditionMonitoringOpportunity(
-                    failure_mode=finding.failure_mode,
-                    monitoring_method=method,
-                    rationale=(
-                        f"{finding.failure_mode} appears in "
-                        f"{finding.occurrence_count} work order(s); {method} "
-                        "may provide earlier warning."
-                    ),
-                    priority=(
-                        "high"
-                        if finding.occurrence_count >= 2
-                        and finding.coverage != "covered"
-                        else "medium"
-                    ),
-                )
-            )
 
-        return opportunities
+def _coverage_gap_evidence(finding: FailureModeCoverage) -> str:
+    evidence = (
+        f"{finding.occurrence_count} observed event(s): "
+        f"{', '.join(finding.evidence_work_orders)}."
+    )
+    repeat_evidence = _repeat_failure_evidence(finding)
+
+    if repeat_evidence:
+        return f"{evidence} {repeat_evidence}"
+
+    return evidence
+
+
+def _partial_coverage_gap_evidence(finding: FailureModeCoverage) -> str:
+    evidence = (
+        "Existing task wording only partially addresses "
+        f"{finding.failure_mode}."
+    )
+    repeat_evidence = _repeat_failure_evidence(finding)
+
+    if repeat_evidence:
+        return f"{evidence} {repeat_evidence}"
+
+    return evidence
+
+
+def _repeat_failure_evidence(finding: FailureModeCoverage) -> str:
+    if not finding.is_repeat_failure:
+        return ""
+
+    details = [
+        (
+            f"{finding.repeat_failure_work_order_count} repeat work order(s)"
+            if finding.repeat_failure_work_order_count is not None
+            else "repeat failure pattern"
+        )
+    ]
+
+    if finding.repeat_failure_total_downtime_hours is not None:
+        details.append(
+            f"{finding.repeat_failure_total_downtime_hours} downtime hours"
+        )
+
+    if finding.repeat_failure_total_cost is not None:
+        details.append(f"{finding.repeat_failure_total_cost} recorded cost")
+
+    evidence = f"Repeat failure context: {', '.join(details)}."
+
+    if finding.repeat_failure_evidence:
+        evidence += f" Evidence: {finding.repeat_failure_evidence}."
+
+    return evidence
 
 
 class MaintenanceStrategyRecommendationBuilderTool:
     def run(
         self,
         profile: MaintenanceStrategyProfile,
+        equipment_type: str | None,
         coverage: list[FailureModeCoverage],
         frequency_risks: list[FrequencyRisk],
         gaps: list[MaintenanceStrategyGap],
-        opportunities: list[ConditionMonitoringOpportunity],
     ) -> list[MaintenanceStrategyRecommendation]:
         recommendations = [
             MaintenanceStrategyRecommendation(
@@ -449,7 +502,7 @@ class MaintenanceStrategyRecommendationBuilderTool:
                 failure_mode=gap.failure_mode,
                 priority=gap.severity,
                 reason=gap.evidence,
-                suggestion=gap.recommendation,
+                suggestion=_gap_recommendation_suggestion(gap),
             )
             for gap in gaps
         ]
@@ -510,23 +563,28 @@ class MaintenanceStrategyRecommendationBuilderTool:
             recommendation.failure_mode
             for recommendation in recommendations
         }
-        for opportunity in opportunities:
-            if opportunity.failure_mode in existing_failure_modes:
+        for finding in coverage:
+            if finding.failure_mode in existing_failure_modes:
+                continue
+
+            method = _monitoring_method(equipment_type, finding.failure_mode)
+            if method is None:
                 continue
 
             recommendations.append(
                 MaintenanceStrategyRecommendation(
                     action="add",
                     task_number=None,
-                    failure_mode=opportunity.failure_mode,
-                    priority=opportunity.priority,
-                    reason=opportunity.rationale,
+                    failure_mode=finding.failure_mode,
+                    priority=_monitoring_priority(finding),
+                    reason=_monitoring_reason(finding, method),
                     suggestion=(
-                        f"Evaluate {opportunity.monitoring_method} and define "
+                        f"Evaluate {method} and define "
                         "alarm or intervention criteria."
                     ),
                 )
             )
+            existing_failure_modes.add(finding.failure_mode)
 
         if not recommendations and profile.active_task_count:
             recommendations.append(
@@ -547,6 +605,49 @@ class MaintenanceStrategyRecommendationBuilderTool:
             )
 
         return recommendations
+
+
+def _gap_recommendation_suggestion(
+    gap: MaintenanceStrategyGap,
+) -> str:
+    if (
+        gap.severity == "high"
+        and "Repeat failure context:" in gap.evidence
+        and gap.failure_mode is not None
+    ):
+        return (
+            f"Treat {gap.failure_mode} as a high-priority repeat failure gap. "
+            f"{gap.recommendation}"
+        )
+
+    return gap.recommendation
+
+
+def _monitoring_priority(finding: FailureModeCoverage) -> RiskLevel:
+    if finding.is_repeat_failure or (
+        finding.occurrence_count >= 2
+        and finding.coverage != "covered"
+    ):
+        return "high"
+
+    return "medium"
+
+
+def _monitoring_reason(
+    finding: FailureModeCoverage,
+    method: str,
+) -> str:
+    reason = (
+        f"{finding.failure_mode} appears in "
+        f"{finding.occurrence_count} work order(s); {method} may provide "
+        "earlier warning."
+    )
+    repeat_evidence = _repeat_failure_evidence(finding)
+
+    if repeat_evidence:
+        return f"{reason} {repeat_evidence}"
+
+    return reason
 
 
 def _frequency_days(

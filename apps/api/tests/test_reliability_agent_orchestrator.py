@@ -1,3 +1,4 @@
+import json
 import math
 from collections.abc import Sequence
 
@@ -32,6 +33,7 @@ class ScriptedProvider(ChatProvider):
         self.exchange_counts: list[int] = []
         self.tool_counts: list[int] = []
         self.review_messages: list[Sequence[ChatMessage]] = []
+        self.tool_messages: list[Sequence[ChatMessage]] = []
 
     @property
     def name(self) -> str:
@@ -70,7 +72,8 @@ class ScriptedProvider(ChatProvider):
         tools: Sequence[AgentToolDefinition],
         exchanges: Sequence[AgentToolExchange] = (),
     ) -> AgentModelResponse:
-        del messages, max_output_tokens
+        del max_output_tokens
+        self.tool_messages.append(messages)
         self.exchange_counts.append(len(exchanges))
         self.tool_counts.append(len(tools))
 
@@ -94,11 +97,6 @@ class RecordingRegistry:
             AgentToolDefinition(
                 name="review_maintenance_strategy",
                 description="Review maintenance strategy.",
-                input_schema={"type": "object", "properties": {}},
-            ),
-            AgentToolDefinition(
-                name="plan_reliability_improvement",
-                description="Plan reliability improvements.",
                 input_schema={"type": "object", "properties": {}},
             ),
         )
@@ -150,6 +148,7 @@ def test_orchestrator_executes_dependent_specialists_sequentially() -> None:
         [
             AgentModelResponse(content=None, tool_calls=(defect_call,)),
             AgentModelResponse(content=None, tool_calls=(strategy_call,)),
+            AgentModelResponse(content="Draft answer."),
             AgentModelResponse(content="Prioritize P-101 and revise its PM."),
         ]
     )
@@ -168,8 +167,8 @@ def test_orchestrator_executes_dependent_specialists_sequentially() -> None:
 
     assert response == "Prioritize P-101 and revise its PM."
     assert registry.calls == [defect_call, strategy_call]
-    assert provider.exchange_counts == [0, 1, 2]
-    assert provider.tool_counts == [4, 4, 4]
+    assert provider.exchange_counts == [0, 1, 2, 2]
+    assert provider.tool_counts == [3, 3, 3, 1]
 
 
 def test_orchestrator_reports_master_data_progress() -> None:
@@ -181,6 +180,7 @@ def test_orchestrator_reports_master_data_progress() -> None:
     provider = ScriptedProvider(
         [
             AgentModelResponse(content=None, tool_calls=(equipment_call,)),
+            AgentModelResponse(content="Draft pump list."),
             AgentModelResponse(content="I found the matching pumps."),
         ]
     )
@@ -218,6 +218,7 @@ def test_orchestrator_reports_natural_language_specialist_progress() -> None:
     provider = ScriptedProvider(
         [
             AgentModelResponse(content=None, tool_calls=(strategy_call,)),
+            AgentModelResponse(content="Draft review."),
             AgentModelResponse(content="Review complete."),
         ]
     )
@@ -263,6 +264,7 @@ def test_orchestrator_reports_duplicate_calls_without_reexecuting() -> None:
         [
             AgentModelResponse(content=None, tool_calls=(first_call,)),
             AgentModelResponse(content=None, tool_calls=(duplicate_call,)),
+            AgentModelResponse(content="Draft answer."),
             AgentModelResponse(content="Using the first analysis result."),
         ]
     )
@@ -308,7 +310,189 @@ def test_orchestrator_forces_final_response_at_tool_call_limit() -> None:
 
     assert response == "Final answer after bounded analysis."
     assert registry.calls == calls[:2]
-    assert provider.tool_counts == [4, 4, 0]
+    assert provider.tool_counts == [3, 3, 1]
+
+
+def test_orchestrator_final_synthesis_can_sequence_roadmap() -> None:
+    defect_call = AgentToolCall(
+        id="call-1",
+        name="analyze_defect_elimination",
+        arguments={"bad_actor_limit": 1},
+    )
+    roadmap_call = AgentToolCall(
+        id="call-roadmap",
+        name="roadmap_planner",
+        arguments={
+            "opportunities": [
+                {
+                    "equipment_number": "P-101",
+                    "priority": "high",
+                    "estimated_annual_value": "52000",
+                    "value_basis": "Repeat seal leakage with downtime.",
+                    "evidence": ["WO-101", "WO-102"],
+                },
+                {
+                    "equipment_number": "P-102",
+                    "priority": "medium",
+                    "estimated_annual_value": "8000",
+                    "value_basis": "Pump bearing failures.",
+                    "evidence": ["WO-103"],
+                },
+                {
+                    "equipment_number": "CV-201",
+                    "priority": "medium",
+                    "estimated_annual_value": "7000",
+                    "value_basis": "Recurring belt slippage.",
+                    "evidence": ["WO-201"],
+                },
+            ],
+            "action_plans": [
+                {
+                    "equipment_number": "P-101",
+                    "title": "Reliability improvement plan - P-101",
+                },
+                {
+                    "equipment_number": "P-102",
+                    "title": "Reliability improvement plan - P-102",
+                },
+                {
+                    "equipment_number": "CV-201",
+                    "title": "Reliability improvement plan - CV-201",
+                },
+            ],
+        },
+    )
+    provider = ScriptedProvider(
+        [
+            AgentModelResponse(content=None, tool_calls=(defect_call,)),
+            AgentModelResponse(content="Draft answer."),
+            AgentModelResponse(content=None, tool_calls=(roadmap_call,)),
+            AgentModelResponse(content="P-101 belongs in now; CV-201 is next."),
+        ]
+    )
+    registry = RecordingRegistry()
+    orchestrator = ReliabilityAgentOrchestrator(provider, registry)
+
+    response = orchestrator.respond_with_metadata(
+        messages=[ChatMessage(role="user", content="Prioritize the work.")],
+        max_output_tokens=500,
+    )
+    roadmap_exchange = response.tool_calls[-1]
+
+    assert response.content == "P-101 belongs in now; CV-201 is next."
+    assert roadmap_exchange.call.name == "roadmap_planner"
+    assert '"horizon": "now"' in roadmap_exchange.result.content
+    assert '"horizon": "next"' in roadmap_exchange.result.content
+    assert provider.tool_counts == [3, 3, 1, 0]
+
+
+def test_orchestrator_final_synthesis_prioritizes_recommendations_by_urgency() -> None:
+    strategy_call = AgentToolCall(
+        id="call-1",
+        name="review_maintenance_strategy",
+        arguments={"maximum_assets": 1},
+    )
+    roadmap_call = AgentToolCall(
+        id="call-roadmap",
+        name="roadmap_planner",
+        arguments={
+            "recommendations": [
+                {
+                    "equipment_number": "CV-201",
+                    "suggestion": "Keep the current inspection task.",
+                    "urgency": "low",
+                    "reason": "Current strategy covers observed demand.",
+                },
+                {
+                    "equipment_number": "P-101",
+                    "suggestion": "Add a seal failure control task.",
+                    "urgency": "urgent",
+                    "reason": "Repeat failures are causing high downtime.",
+                    "estimated_annual_value": "45000",
+                    "evidence": ["WO-101", "WO-102"],
+                },
+                {
+                    "equipment_number": "P-102",
+                    "suggestion": "Modify the bearing inspection interval.",
+                    "urgency": "medium",
+                    "reason": "Recurrence is close to the task interval.",
+                    "estimated_annual_value": "12000",
+                },
+            ]
+        },
+    )
+    provider = ScriptedProvider(
+        [
+            AgentModelResponse(content=None, tool_calls=(strategy_call,)),
+            AgentModelResponse(content="Draft recommendation summary."),
+            AgentModelResponse(content=None, tool_calls=(roadmap_call,)),
+            AgentModelResponse(content="P-101 is the most urgent item."),
+        ]
+    )
+    registry = RecordingRegistry()
+    orchestrator = ReliabilityAgentOrchestrator(provider, registry)
+
+    response = orchestrator.respond_with_metadata(
+        messages=[ChatMessage(role="user", content="Sequence the recommendations.")],
+        max_output_tokens=500,
+    )
+    roadmap = json.loads(response.tool_calls[-1].result.content)
+
+    assert response.content == "P-101 is the most urgent item."
+    assert roadmap[0]["equipment_number"] == "P-101"
+    assert roadmap[0]["priority"] == "high"
+    assert roadmap[0]["horizon"] == "now"
+    assert roadmap[2]["equipment_number"] == "CV-201"
+    assert roadmap[2]["priority"] == "low"
+
+
+def test_orchestrator_final_synthesis_includes_investigation_decision_matrix() -> None:
+    defect_call = AgentToolCall(
+        id="call-1",
+        name="analyze_defect_elimination",
+        arguments={"equipment_numbers": ["P-101"]},
+    )
+    strategy_call = AgentToolCall(
+        id="call-2",
+        name="review_maintenance_strategy",
+        arguments={"equipment_numbers": ["P-101"]},
+    )
+    provider = ScriptedProvider(
+        [
+            AgentModelResponse(
+                content=None,
+                tool_calls=(defect_call, strategy_call),
+            ),
+            AgentModelResponse(content="Draft combined recommendation."),
+            AgentModelResponse(
+                content=(
+                    "P-101 is critical, so run an investigation before "
+                    "strategy changes."
+                ),
+            ),
+        ]
+    )
+    registry = RecordingRegistry()
+    orchestrator = ReliabilityAgentOrchestrator(provider, registry)
+
+    response = orchestrator.respond_with_metadata(
+        messages=[
+            ChatMessage(
+                role="user",
+                content="Review recommendations for P-101.",
+            )
+        ],
+        max_output_tokens=500,
+    )
+    final_synthesis_messages = provider.tool_messages[2]
+
+    assert "run an investigation" in response.content
+    assert any(
+        "High or critical equipment criticality" in message.content
+        and "Medium equipment criticality" in message.content
+        and "Low equipment criticality" in message.content
+        for message in final_synthesis_messages
+    )
 
 
 def test_orchestrator_revises_answer_after_failed_quality_review() -> None:
@@ -346,35 +530,35 @@ def test_orchestrator_revises_answer_after_failed_quality_review() -> None:
 
 
 def test_orchestrator_revision_can_call_additional_specialist() -> None:
-    improvement_call = AgentToolCall(
-        id="call-improvement",
-        name="plan_reliability_improvement",
-        arguments={"opportunity_limit": 2},
+    strategy_call = AgentToolCall(
+        id="call-strategy",
+        name="review_maintenance_strategy",
+        arguments={"maximum_assets": 1},
     )
     provider = ScriptedProvider(
         [
-            AgentModelResponse(content="Draft answer without roadmap."),
-            AgentModelResponse(content=None, tool_calls=(improvement_call,)),
-            AgentModelResponse(content="Revised answer with roadmap evidence."),
+            AgentModelResponse(content="Draft answer without strategy evidence."),
+            AgentModelResponse(content=None, tool_calls=(strategy_call,)),
+            AgentModelResponse(content="Revised answer with strategy evidence."),
         ],
         review_responses=[
             (
-                '{"accepted": false, "reason": "Need improvement roadmap.", '
-                '"revision_guidance": "Call Reliability Improvement if needed."}'
+                '{"accepted": false, "reason": "Need strategy evidence.", '
+                '"revision_guidance": "Call Maintenance Strategy if needed."}'
             ),
-            '{"accepted": true, "reason": "Roadmap included.", "revision_guidance": null}',
+            '{"accepted": true, "reason": "Strategy included.", "revision_guidance": null}',
         ],
     )
     registry = RecordingRegistry()
     orchestrator = ReliabilityAgentOrchestrator(provider, registry)
 
     response = orchestrator.respond(
-        messages=[ChatMessage(role="user", content="Build an action roadmap.")],
+        messages=[ChatMessage(role="user", content="Review maintenance strategy.")],
         max_output_tokens=500,
     )
 
-    assert response == "Revised answer with roadmap evidence."
-    assert registry.calls == [improvement_call]
+    assert response == "Revised answer with strategy evidence."
+    assert registry.calls == [strategy_call]
     assert provider.exchange_counts == [0, 0, 1]
 
 

@@ -54,6 +54,11 @@ class FailureModeCoverageResponse(BaseModel):
     matched_task_descriptions: list[str]
     confidence: Literal["low", "medium", "high"]
     evidence_work_orders: list[str]
+    is_repeat_failure: bool
+    repeat_failure_work_order_count: int | None
+    repeat_failure_total_cost: Decimal | None
+    repeat_failure_total_downtime_hours: Decimal | None
+    repeat_failure_evidence: str | None
 
 
 class FrequencyRiskResponse(BaseModel):
@@ -78,15 +83,6 @@ class MaintenanceStrategyGapResponse(BaseModel):
     recommendation: str
 
 
-class ConditionMonitoringOpportunityResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    failure_mode: str
-    monitoring_method: str
-    rationale: str
-    priority: Literal["low", "medium", "high", "unknown"]
-
-
 class MaintenanceStrategyRecommendationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -106,9 +102,6 @@ class AssetMaintenanceStrategyReviewResponse(BaseModel):
     failure_mode_coverage: list[FailureModeCoverageResponse]
     frequency_risks: list[FrequencyRiskResponse]
     strategy_gaps: list[MaintenanceStrategyGapResponse]
-    condition_monitoring_opportunities: list[
-        ConditionMonitoringOpportunityResponse
-    ]
     recommendations: list[MaintenanceStrategyRecommendationResponse]
 
 

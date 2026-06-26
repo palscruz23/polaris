@@ -11,10 +11,6 @@ from app.agents.defect_elimination_agent import (
 from app.agents.master_data_agent import MasterDataAgent
 from app.agents.maintenance_strategy_agent import MaintenanceStrategyAgent
 from app.agents.maintenance_strategy_agent import MaintenanceStrategyIntent
-from app.agents.reliability_improvement_agent import (
-    ReliabilityImprovementAgent,
-    ReliabilityImprovementIntent,
-)
 from app.domain.orchestration import (
     AgentToolCall,
     AgentToolDefinition,
@@ -24,9 +20,6 @@ from app.domain.progress import ProgressCallback, ToolCallCollector
 from app.schemas.defect_elimination import DefectEliminationOverviewResponse
 from app.schemas.master_data import EquipmentSearchResponse
 from app.schemas.maintenance_strategy import MaintenanceStrategyReviewResponse
-from app.schemas.reliability_improvement import (
-    ReliabilityImprovementPlanResponse,
-)
 
 
 class Specialist(Protocol):
@@ -60,12 +53,12 @@ class DefectEliminationSpecialist:
             name="analyze_defect_elimination",
             description=(
                 "Analyze stored work-order data for bad actors, repeat "
-                "failures, MTBF patterns, RCA preparation, defect elimination "
-                "charters, and prioritized recommendations. Choose the narrowest "
+                "failures, failure-mode bad actors, and prioritized "
+                "recommendations. Choose the narrowest "
                 "intent that satisfies the request: overview, rank_bad_actors, "
-                "find_repeat_failures, calculate_mtbf, analyze_weibull, or "
-                "prepare_rca. Use this when the user asks about actual equipment "
-                "or failure history in the reliability dataset."
+                "find_repeat_failures, or rank_failure_mode_bad_actors. Use "
+                "this when the user asks about actual equipment or failure "
+                "history in the reliability dataset."
             ),
             input_schema=DefectEliminationArguments.model_json_schema(),
         )
@@ -167,11 +160,10 @@ class MaintenanceStrategySpecialist:
                 "criticality, work-order history, costs, downtime, and "
                 "observed failure modes. Identify supported tasks, weak "
                 "failure-mode coverage, frequency risks, strategy gaps, and "
-                "condition-monitoring opportunities. Choose the narrowest "
+                "maintenance strategy recommendations. Choose the narrowest "
                 "intent that satisfies the request: full_strategy_review, "
                 "summarize_strategy_profile, maintenance_mix, check_coverage, "
-                "assess_frequency, detect_gaps, or "
-                "find_monitoring_opportunities. Use this when the user asks "
+                "assess_frequency, or detect_gaps. Use this when the user asks "
                 "whether maintenance plans are adequate or how they should "
                 "change."
             ),
@@ -199,53 +191,6 @@ class MaintenanceStrategySpecialist:
         return response.model_dump_json()
 
 
-class ReliabilityImprovementArguments(BaseModel):
-    intent: ReliabilityImprovementIntent = "full_improvement_plan"
-    equipment_numbers: list[str] = Field(default_factory=list, max_length=10)
-    opportunity_limit: int = Field(default=5, ge=1, le=10)
-
-
-class ReliabilityImprovementSpecialist:
-    def __init__(self, session: Session):
-        self.agent = ReliabilityImprovementAgent(session)
-
-    @property
-    def definition(self) -> AgentToolDefinition:
-        return AgentToolDefinition(
-            name="plan_reliability_improvement",
-            description=(
-                "Convert stored reliability history into improvement "
-                "opportunities, rough value estimates, action plans, outcome "
-                "measures, and a sequenced roadmap. Choose the narrowest "
-                "intent that satisfies the request: full_improvement_plan, "
-                "estimate_opportunities, build_action_plans, define_outcomes, "
-                "or plan_roadmap. Use this when the user asks what reliability "
-                "improvements to prioritize, how to turn findings into an "
-                "action plan, or how to build a reliability roadmap."
-            ),
-            input_schema=ReliabilityImprovementArguments.model_json_schema(),
-        )
-
-    def execute(
-        self,
-        arguments: dict[str, object],
-        progress: ProgressCallback | None = None,
-    ) -> str:
-        request = ReliabilityImprovementArguments.model_validate(arguments)
-        findings = self.agent.analyze(
-            intent=request.intent,
-            equipment_numbers=request.equipment_numbers,
-            opportunity_limit=request.opportunity_limit,
-            progress=progress,
-        )
-        response = ReliabilityImprovementPlanResponse.model_validate(
-            findings,
-            from_attributes=True,
-        )
-
-        return response.model_dump_json()
-
-
 class SpecialistRegistry:
     def __init__(
         self,
@@ -259,7 +204,6 @@ class SpecialistRegistry:
                 MasterDataSpecialist(session),
                 DefectEliminationSpecialist(session),
                 MaintenanceStrategySpecialist(session),
-                ReliabilityImprovementSpecialist(session),
             )
         )
         self._specialists = {
