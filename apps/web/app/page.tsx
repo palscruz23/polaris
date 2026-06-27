@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import HomeAuthButton from "./HomeAuthButton";
 import HomeFeedbackButton from "./HomeFeedbackButton";
+import HomeSyntheticDataButton from "./HomeSyntheticDataButton";
 
 type SpecialistAgent = {
   id: string;
@@ -195,9 +196,7 @@ export default function Home() {
                 >
                   Ask Polaris
                 </Link>
-                <Link className="button button-secondary" href="/view-existing-data">
-                  View synthetic data
-                </Link>
+                <HomeSyntheticDataButton />
               </div>
             </div>
 

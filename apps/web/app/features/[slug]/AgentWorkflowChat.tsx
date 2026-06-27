@@ -773,7 +773,7 @@ export default function AgentWorkflowChat() {
     const assistantMessageCount = nextMessages.filter(
       (message) => message.role === "assistant",
     ).length;
-    if (assistantMessageCount >= 2) {
+    if (assistantMessageCount >= 3) {
       setFeedbackIsOpen(true);
     }
   }

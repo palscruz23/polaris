@@ -69,6 +69,7 @@ export default function HomeAuthButton() {
       // The homepage should still return to the signed-out state if logout fails.
     }
     window.localStorage.removeItem("open-reliability-conversation-id");
+    window.dispatchEvent(new Event("polaris-auth-changed"));
     setUser(null);
     setAuthState("signed-out");
   }

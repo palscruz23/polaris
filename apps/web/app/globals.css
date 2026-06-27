@@ -2479,8 +2479,16 @@ a {
   font-size: 0.8rem;
   font-weight: 680;
   gap: 0.5rem;
+  justify-content: flex-start;
   min-height: 2.2rem;
   padding: 0.45rem 0.55rem;
+  text-align: left;
+}
+
+.feedback-checkbox-field label span {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
 }
 
 .feedback-checkbox-field input {
@@ -2854,9 +2862,9 @@ a {
   }
 
   .agent-chat-header {
-    grid-template-columns: 2.75rem minmax(0, 1fr) 5.05rem;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 4.65rem;
     height: 4.5rem;
-    padding: 0 1rem;
+    padding: 0 0.75rem;
   }
 
   .agent-chat-header h1 {
@@ -2887,15 +2895,23 @@ a {
   }
 
   .agent-chat-header-actions {
-    gap: 0.35rem;
+    gap: 0.25rem;
     grid-column: 3;
   }
 
   .agent-chat-sign-out,
   .agent-chat-feedback {
-    min-height: 2.35rem;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.2rem;
     padding: 0;
-    width: 2.35rem;
+    width: 2.2rem;
+  }
+
+  .agent-chat-sign-out svg,
+  .agent-chat-feedback svg {
+    height: 0.95rem;
+    width: 0.95rem;
   }
 
   .feedback-modal-backdrop {

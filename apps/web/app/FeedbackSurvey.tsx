@@ -36,7 +36,7 @@ const futureFeatureOptions = [
   ["knowledge_base", "Knowledge base"],
   [
     "configure_subagent_model_selection",
-    "Configure subagent model selection",
+    "Subagent model selection",
   ],
   ["upload_data", "Upload data"],
   ["additional_subagent", "Additional subagent"],
