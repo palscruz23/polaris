@@ -23,7 +23,6 @@ class EquipmentRecordResponse(BaseModel):
     system: str | None
     criticality: str | None
     status: str
-    parent_equipment_number: str | None
     parent_functional_location: str | None
 
 

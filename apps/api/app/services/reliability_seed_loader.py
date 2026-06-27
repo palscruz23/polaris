@@ -148,10 +148,6 @@ class ReliabilitySeedLoader:
 
             equipment.functional_location = _optional(row, "functional_location")
             equipment.description = _optional(row, "description")
-            equipment.parent_equipment_number = _optional(
-                row,
-                "parent_equipment_number",
-            )
             equipment.parent_functional_location = _optional(
                 row,
                 "parent_functional_location",
@@ -213,6 +209,8 @@ class ReliabilitySeedLoader:
             strategy_number = _optional(row, "strategy_number")
             equipment = _resolve_equipment(row, equipment_by_number)
             functional_location = _optional(row, "functional_location")
+            if functional_location is None and equipment is not None:
+                functional_location = equipment.functional_location
 
             if equipment is None and functional_location is None:
                 raise SeedLoadError(

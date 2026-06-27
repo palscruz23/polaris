@@ -120,6 +120,9 @@ def _display_columns_for_table(table: Table) -> list[str]:
 
 
 def _column_lookup_for_table(table: Table) -> ColumnLookup:
+    if table.name == "maintenance_strategies":
+        return _maintenance_strategy_columns(table)
+
     if table.name != "work_order_failure_modes":
         return _move_id_column_to_end(
             {column.name: column for column in table.columns}
@@ -142,6 +145,30 @@ def _column_lookup_for_table(table: Table) -> ColumnLookup:
     }
 
 
+def _maintenance_strategy_columns(table: Table) -> ColumnLookup:
+    equipment = Base.metadata.tables["equipment"]
+
+    return {
+        "strategy_number": table.c.strategy_number,
+        "task_number": table.c.task_number,
+        "equipment_number": equipment.c.equipment_number.label("equipment_number"),
+        "functional_location": func.coalesce(
+            table.c.functional_location,
+            equipment.c.functional_location,
+        ).label("functional_location"),
+        "task_description": table.c.task_description,
+        "strategy_type": table.c.strategy_type,
+        "frequency_value": table.c.frequency_value,
+        "frequency_unit": table.c.frequency_unit,
+        "status": table.c.status,
+        "equipment_id": table.c.equipment_id,
+        "import_batch_id": table.c.import_batch_id,
+        "created_at": table.c.created_at,
+        "updated_at": table.c.updated_at,
+        "id": table.c.id,
+    }
+
+
 def _move_id_column_to_end(columns: ColumnLookup) -> ColumnLookup:
     if "id" not in columns:
         return columns
@@ -158,6 +185,14 @@ def _move_id_column_to_end(columns: ColumnLookup) -> ColumnLookup:
 
 
 def _row_source_for_table(table: Table) -> FromClause:
+    if table.name == "maintenance_strategies":
+        equipment = Base.metadata.tables["equipment"]
+
+        return table.outerjoin(
+            equipment,
+            table.c.equipment_id == equipment.c.id,
+        )
+
     if table.name != "work_order_failure_modes":
         return table
 

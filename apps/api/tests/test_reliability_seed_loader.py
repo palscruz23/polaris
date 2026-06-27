@@ -54,6 +54,41 @@ def test_clean_reliability_seed_loader_loads_sample_data() -> None:
     assert _count_added(session, WorkOrderFailureMode) == 653
 
 
+def test_sample_maintenance_strategies_include_functional_locations() -> None:
+    with Path("sample_data/reliability/maintenance_strategies.csv").open(
+        newline="",
+        encoding="utf-8",
+    ) as file:
+        rows = list(csv.DictReader(file))
+
+    assert rows
+    assert all(row["functional_location"] for row in rows)
+
+
+def test_clean_reliability_seed_loader_defaults_strategy_location_from_equipment(
+    tmp_path: Path,
+) -> None:
+    session = FakeSession()
+    _write_required_seed_files(
+        tmp_path,
+        work_orders=(
+            "order_number,notification_number,equipment_number,functional_location,"
+            "order_type,status,priority,maintenance_activity_type,short_text,"
+            "long_text,created_at_source,required_by_at,started_at,finished_at,"
+            "total_cost,downtime_hours\n"
+            "WO-1,,P-101,PLANT/PUMP,CM,closed,high,corrective,Repair pump,"
+            ",2025-01-01T00:00:00,,,,,\n"
+        ),
+    )
+
+    load_clean_reliability_seed_data(session, tmp_path)
+
+    strategies = [
+        item for item in session.added if isinstance(item, MaintenanceStrategy)
+    ]
+    assert strategies[0].functional_location == "PLANT/PUMP"
+
+
 def test_sample_work_orders_cover_three_calendar_years() -> None:
     with Path("sample_data/reliability/work_orders.csv").open(
         newline="",
@@ -97,9 +132,9 @@ def _write_required_seed_files(
 ) -> None:
     (directory / "equipment.csv").write_text(
         "equipment_number,functional_location,description,"
-        "parent_equipment_number,parent_functional_location,equipment_type,"
+        "parent_functional_location,equipment_type,"
         "system,criticality,status,install_date\n"
-        "P-101,PLANT/PUMP,Primary pump,,,pump,cooling,A,active,2020-01-01\n",
+        "P-101,PLANT/PUMP,Primary pump,,pump,cooling,A,active,2020-01-01\n",
         encoding="utf-8",
     )
     (directory / "failure_modes.csv").write_text(

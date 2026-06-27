@@ -1,101 +1,101 @@
 strategy_number,task_number,equipment_number,functional_location,task_description,strategy_type,frequency_value,frequency_unit,status
-PM-PUMP-P-101,P-101-TASK-01,P-101,,Inspect vibration and bearing temperature,inspection,4,weeks,active
-PM-PUMP-P-101,P-101-TASK-02,P-101,,Inspect mechanical seal leakage,condition_based,4,weeks,active
-PM-MOTOR-M-102,M-102-TASK-01,M-102,,Clean cooling fins and inspect fan cover,inspection,8,weeks,active
-PM-MOTOR-M-102,M-102-TASK-02,M-102,,Check motor current and terminal condition,condition_based,8,weeks,active
-PM-CONVEYOR-CV-103,CV-103-TASK-01,CV-103,,Inspect belt tracking and edge wear,inspection,12,weeks,active
-PM-CONVEYOR-CV-103,CV-103-TASK-02,CV-103,,Inspect pulley bearings and guards,condition_based,12,weeks,active
-PM-VALVE-V-104,V-104-TASK-01,V-104,,Stroke test valve and actuator,inspection,4,weeks,active
-PM-VALVE-V-104,V-104-TASK-02,V-104,,Inspect packing and external leakage,condition_based,4,weeks,active
-PM-COMPRESSOR-C-105,C-105-TASK-01,C-105,,Inspect oil level and separator condition,inspection,8,weeks,active
-PM-COMPRESSOR-C-105,C-105-TASK-02,C-105,,Check discharge temperature and vibration,condition_based,8,weeks,active
-PM-FAN-F-106,F-106-TASK-01,F-106,,Inspect fan vibration and belt tension,inspection,12,weeks,active
-PM-FAN-F-106,F-106-TASK-02,F-106,,Inspect bearing temperature and lubrication,condition_based,12,weeks,active
-PM-HEAT-EXCHANGER-HX-107,HX-107-TASK-01,HX-107,,Inspect temperature approach and pressure drop,inspection,4,weeks,active
-PM-HEAT-EXCHANGER-HX-107,HX-107-TASK-02,HX-107,,Inspect for external leakage and corrosion,condition_based,4,weeks,active
-PM-PUMP-P-108,P-108-TASK-01,P-108,,Inspect vibration and bearing temperature,inspection,8,weeks,active
-PM-PUMP-P-108,P-108-TASK-02,P-108,,Inspect mechanical seal leakage,condition_based,8,weeks,active
-PM-MOTOR-M-109,M-109-TASK-01,M-109,,Clean cooling fins and inspect fan cover,inspection,12,weeks,active
-PM-MOTOR-M-109,M-109-TASK-02,M-109,,Check motor current and terminal condition,condition_based,12,weeks,active
-PM-CONVEYOR-CV-110,CV-110-TASK-01,CV-110,,Inspect belt tracking and edge wear,inspection,4,weeks,active
-PM-CONVEYOR-CV-110,CV-110-TASK-02,CV-110,,Inspect pulley bearings and guards,condition_based,4,weeks,active
-PM-VALVE-V-111,V-111-TASK-01,V-111,,Stroke test valve and actuator,inspection,8,weeks,active
-PM-VALVE-V-111,V-111-TASK-02,V-111,,Inspect packing and external leakage,condition_based,8,weeks,active
-PM-COMPRESSOR-C-112,C-112-TASK-01,C-112,,Inspect oil level and separator condition,inspection,12,weeks,active
-PM-COMPRESSOR-C-112,C-112-TASK-02,C-112,,Check discharge temperature and vibration,condition_based,12,weeks,active
-PM-FAN-F-113,F-113-TASK-01,F-113,,Inspect fan vibration and belt tension,inspection,4,weeks,active
-PM-FAN-F-113,F-113-TASK-02,F-113,,Inspect bearing temperature and lubrication,condition_based,4,weeks,active
-PM-HEAT-EXCHANGER-HX-114,HX-114-TASK-01,HX-114,,Inspect temperature approach and pressure drop,inspection,8,weeks,active
-PM-HEAT-EXCHANGER-HX-114,HX-114-TASK-02,HX-114,,Inspect for external leakage and corrosion,condition_based,8,weeks,active
-PM-PUMP-P-115,P-115-TASK-01,P-115,,Inspect vibration and bearing temperature,inspection,12,weeks,active
-PM-PUMP-P-115,P-115-TASK-02,P-115,,Inspect mechanical seal leakage,condition_based,12,weeks,active
-PM-MOTOR-M-116,M-116-TASK-01,M-116,,Clean cooling fins and inspect fan cover,inspection,4,weeks,active
-PM-MOTOR-M-116,M-116-TASK-02,M-116,,Check motor current and terminal condition,condition_based,4,weeks,active
-PM-CONVEYOR-CV-117,CV-117-TASK-01,CV-117,,Inspect belt tracking and edge wear,inspection,8,weeks,active
-PM-CONVEYOR-CV-117,CV-117-TASK-02,CV-117,,Inspect pulley bearings and guards,condition_based,8,weeks,active
-PM-VALVE-V-118,V-118-TASK-01,V-118,,Stroke test valve and actuator,inspection,12,weeks,active
-PM-VALVE-V-118,V-118-TASK-02,V-118,,Inspect packing and external leakage,condition_based,12,weeks,active
-PM-COMPRESSOR-C-119,C-119-TASK-01,C-119,,Inspect oil level and separator condition,inspection,4,weeks,active
-PM-COMPRESSOR-C-119,C-119-TASK-02,C-119,,Check discharge temperature and vibration,condition_based,4,weeks,active
-PM-FAN-F-120,F-120-TASK-01,F-120,,Inspect fan vibration and belt tension,inspection,8,weeks,active
-PM-FAN-F-120,F-120-TASK-02,F-120,,Inspect bearing temperature and lubrication,condition_based,8,weeks,active
-PM-HEAT-EXCHANGER-HX-121,HX-121-TASK-01,HX-121,,Inspect temperature approach and pressure drop,inspection,12,weeks,active
-PM-HEAT-EXCHANGER-HX-121,HX-121-TASK-02,HX-121,,Inspect for external leakage and corrosion,condition_based,12,weeks,active
-PM-PUMP-P-122,P-122-TASK-01,P-122,,Inspect vibration and bearing temperature,inspection,4,weeks,active
-PM-PUMP-P-122,P-122-TASK-02,P-122,,Inspect mechanical seal leakage,condition_based,4,weeks,active
-PM-MOTOR-M-123,M-123-TASK-01,M-123,,Clean cooling fins and inspect fan cover,inspection,8,weeks,active
-PM-MOTOR-M-123,M-123-TASK-02,M-123,,Check motor current and terminal condition,condition_based,8,weeks,active
-PM-CONVEYOR-CV-124,CV-124-TASK-01,CV-124,,Inspect belt tracking and edge wear,inspection,12,weeks,active
-PM-CONVEYOR-CV-124,CV-124-TASK-02,CV-124,,Inspect pulley bearings and guards,condition_based,12,weeks,active
-PM-VALVE-V-125,V-125-TASK-01,V-125,,Stroke test valve and actuator,inspection,4,weeks,active
-PM-VALVE-V-125,V-125-TASK-02,V-125,,Inspect packing and external leakage,condition_based,4,weeks,active
-PM-COMPRESSOR-C-126,C-126-TASK-01,C-126,,Inspect oil level and separator condition,inspection,8,weeks,active
-PM-COMPRESSOR-C-126,C-126-TASK-02,C-126,,Check discharge temperature and vibration,condition_based,8,weeks,active
-PM-FAN-F-127,F-127-TASK-01,F-127,,Inspect fan vibration and belt tension,inspection,12,weeks,active
-PM-FAN-F-127,F-127-TASK-02,F-127,,Inspect bearing temperature and lubrication,condition_based,12,weeks,active
-PM-HEAT-EXCHANGER-HX-128,HX-128-TASK-01,HX-128,,Inspect temperature approach and pressure drop,inspection,4,weeks,active
-PM-HEAT-EXCHANGER-HX-128,HX-128-TASK-02,HX-128,,Inspect for external leakage and corrosion,condition_based,4,weeks,active
-PM-PUMP-P-129,P-129-TASK-01,P-129,,Inspect vibration and bearing temperature,inspection,8,weeks,active
-PM-PUMP-P-129,P-129-TASK-02,P-129,,Inspect mechanical seal leakage,condition_based,8,weeks,active
-PM-MOTOR-M-130,M-130-TASK-01,M-130,,Clean cooling fins and inspect fan cover,inspection,12,weeks,active
-PM-MOTOR-M-130,M-130-TASK-02,M-130,,Check motor current and terminal condition,condition_based,12,weeks,active
-PM-CONVEYOR-CV-131,CV-131-TASK-01,CV-131,,Inspect belt tracking and edge wear,inspection,4,weeks,active
-PM-CONVEYOR-CV-131,CV-131-TASK-02,CV-131,,Inspect pulley bearings and guards,condition_based,4,weeks,active
-PM-VALVE-V-132,V-132-TASK-01,V-132,,Stroke test valve and actuator,inspection,8,weeks,active
-PM-VALVE-V-132,V-132-TASK-02,V-132,,Inspect packing and external leakage,condition_based,8,weeks,active
-PM-COMPRESSOR-C-133,C-133-TASK-01,C-133,,Inspect oil level and separator condition,inspection,12,weeks,active
-PM-COMPRESSOR-C-133,C-133-TASK-02,C-133,,Check discharge temperature and vibration,condition_based,12,weeks,active
-PM-FAN-F-134,F-134-TASK-01,F-134,,Inspect fan vibration and belt tension,inspection,4,weeks,active
-PM-FAN-F-134,F-134-TASK-02,F-134,,Inspect bearing temperature and lubrication,condition_based,4,weeks,active
-PM-HEAT-EXCHANGER-HX-135,HX-135-TASK-01,HX-135,,Inspect temperature approach and pressure drop,inspection,8,weeks,active
-PM-HEAT-EXCHANGER-HX-135,HX-135-TASK-02,HX-135,,Inspect for external leakage and corrosion,condition_based,8,weeks,active
-PM-PUMP-P-136,P-136-TASK-01,P-136,,Inspect vibration and bearing temperature,inspection,12,weeks,active
-PM-PUMP-P-136,P-136-TASK-02,P-136,,Inspect mechanical seal leakage,condition_based,12,weeks,active
-PM-MOTOR-M-137,M-137-TASK-01,M-137,,Clean cooling fins and inspect fan cover,inspection,4,weeks,active
-PM-MOTOR-M-137,M-137-TASK-02,M-137,,Check motor current and terminal condition,condition_based,4,weeks,active
-PM-CONVEYOR-CV-138,CV-138-TASK-01,CV-138,,Inspect belt tracking and edge wear,inspection,8,weeks,active
-PM-CONVEYOR-CV-138,CV-138-TASK-02,CV-138,,Inspect pulley bearings and guards,condition_based,8,weeks,active
-PM-VALVE-V-139,V-139-TASK-01,V-139,,Stroke test valve and actuator,inspection,12,weeks,active
-PM-VALVE-V-139,V-139-TASK-02,V-139,,Inspect packing and external leakage,condition_based,12,weeks,active
-PM-COMPRESSOR-C-140,C-140-TASK-01,C-140,,Inspect oil level and separator condition,inspection,4,weeks,active
-PM-COMPRESSOR-C-140,C-140-TASK-02,C-140,,Check discharge temperature and vibration,condition_based,4,weeks,active
-PM-FAN-F-141,F-141-TASK-01,F-141,,Inspect fan vibration and belt tension,inspection,8,weeks,active
-PM-FAN-F-141,F-141-TASK-02,F-141,,Inspect bearing temperature and lubrication,condition_based,8,weeks,active
-PM-HEAT-EXCHANGER-HX-142,HX-142-TASK-01,HX-142,,Inspect temperature approach and pressure drop,inspection,12,weeks,active
-PM-HEAT-EXCHANGER-HX-142,HX-142-TASK-02,HX-142,,Inspect for external leakage and corrosion,condition_based,12,weeks,active
-PM-PUMP-P-143,P-143-TASK-01,P-143,,Inspect vibration and bearing temperature,inspection,4,weeks,active
-PM-PUMP-P-143,P-143-TASK-02,P-143,,Inspect mechanical seal leakage,condition_based,4,weeks,active
-PM-MOTOR-M-144,M-144-TASK-01,M-144,,Clean cooling fins and inspect fan cover,inspection,8,weeks,active
-PM-MOTOR-M-144,M-144-TASK-02,M-144,,Check motor current and terminal condition,condition_based,8,weeks,active
-PM-CONVEYOR-CV-145,CV-145-TASK-01,CV-145,,Inspect belt tracking and edge wear,inspection,12,weeks,active
-PM-CONVEYOR-CV-145,CV-145-TASK-02,CV-145,,Inspect pulley bearings and guards,condition_based,12,weeks,active
-PM-VALVE-V-146,V-146-TASK-01,V-146,,Stroke test valve and actuator,inspection,4,weeks,active
-PM-VALVE-V-146,V-146-TASK-02,V-146,,Inspect packing and external leakage,condition_based,4,weeks,active
-PM-COMPRESSOR-C-147,C-147-TASK-01,C-147,,Inspect oil level and separator condition,inspection,8,weeks,active
-PM-COMPRESSOR-C-147,C-147-TASK-02,C-147,,Check discharge temperature and vibration,condition_based,8,weeks,active
-PM-FAN-F-148,F-148-TASK-01,F-148,,Inspect fan vibration and belt tension,inspection,12,weeks,active
-PM-FAN-F-148,F-148-TASK-02,F-148,,Inspect bearing temperature and lubrication,condition_based,12,weeks,active
-PM-HEAT-EXCHANGER-HX-149,HX-149-TASK-01,HX-149,,Inspect temperature approach and pressure drop,inspection,4,weeks,active
-PM-HEAT-EXCHANGER-HX-149,HX-149-TASK-02,HX-149,,Inspect for external leakage and corrosion,condition_based,4,weeks,active
-PM-PUMP-P-150,P-150-TASK-01,P-150,,Inspect vibration and bearing temperature,inspection,8,weeks,active
-PM-PUMP-P-150,P-150-TASK-02,P-150,,Inspect mechanical seal leakage,condition_based,8,weeks,active
+PM-PUMP-P-101,P-101-TASK-01,P-101,PLANT-A/AREA-1/PUMP-1,Inspect vibration and bearing temperature,inspection,4,weeks,active
+PM-PUMP-P-101,P-101-TASK-02,P-101,PLANT-A/AREA-1/PUMP-1,Inspect mechanical seal leakage,condition_based,4,weeks,active
+PM-MOTOR-M-102,M-102-TASK-01,M-102,PLANT-A/AREA-2/MOTOR-1,Clean cooling fins and inspect fan cover,inspection,8,weeks,active
+PM-MOTOR-M-102,M-102-TASK-02,M-102,PLANT-A/AREA-2/MOTOR-1,Check motor current and terminal condition,condition_based,8,weeks,active
+PM-CONVEYOR-CV-103,CV-103-TASK-01,CV-103,PLANT-A/AREA-3/CONVEYOR-1,Inspect belt tracking and edge wear,inspection,12,weeks,active
+PM-CONVEYOR-CV-103,CV-103-TASK-02,CV-103,PLANT-A/AREA-3/CONVEYOR-1,Inspect pulley bearings and guards,condition_based,12,weeks,active
+PM-VALVE-V-104,V-104-TASK-01,V-104,PLANT-A/AREA-4/VALVE-1,Stroke test valve and actuator,inspection,4,weeks,active
+PM-VALVE-V-104,V-104-TASK-02,V-104,PLANT-A/AREA-4/VALVE-1,Inspect packing and external leakage,condition_based,4,weeks,active
+PM-COMPRESSOR-C-105,C-105-TASK-01,C-105,PLANT-A/AREA-5/COMPRESSOR-1,Inspect oil level and separator condition,inspection,8,weeks,active
+PM-COMPRESSOR-C-105,C-105-TASK-02,C-105,PLANT-A/AREA-5/COMPRESSOR-1,Check discharge temperature and vibration,condition_based,8,weeks,active
+PM-FAN-F-106,F-106-TASK-01,F-106,PLANT-A/AREA-1/FAN-2,Inspect fan vibration and belt tension,inspection,12,weeks,active
+PM-FAN-F-106,F-106-TASK-02,F-106,PLANT-A/AREA-1/FAN-2,Inspect bearing temperature and lubrication,condition_based,12,weeks,active
+PM-HEAT-EXCHANGER-HX-107,HX-107-TASK-01,HX-107,PLANT-A/AREA-2/HEAT-EXCHANGER-2,Inspect temperature approach and pressure drop,inspection,4,weeks,active
+PM-HEAT-EXCHANGER-HX-107,HX-107-TASK-02,HX-107,PLANT-A/AREA-2/HEAT-EXCHANGER-2,Inspect for external leakage and corrosion,condition_based,4,weeks,active
+PM-PUMP-P-108,P-108-TASK-01,P-108,PLANT-A/AREA-3/PUMP-2,Inspect vibration and bearing temperature,inspection,8,weeks,active
+PM-PUMP-P-108,P-108-TASK-02,P-108,PLANT-A/AREA-3/PUMP-2,Inspect mechanical seal leakage,condition_based,8,weeks,active
+PM-MOTOR-M-109,M-109-TASK-01,M-109,PLANT-A/AREA-4/MOTOR-2,Clean cooling fins and inspect fan cover,inspection,12,weeks,active
+PM-MOTOR-M-109,M-109-TASK-02,M-109,PLANT-A/AREA-4/MOTOR-2,Check motor current and terminal condition,condition_based,12,weeks,active
+PM-CONVEYOR-CV-110,CV-110-TASK-01,CV-110,PLANT-A/AREA-5/CONVEYOR-2,Inspect belt tracking and edge wear,inspection,4,weeks,active
+PM-CONVEYOR-CV-110,CV-110-TASK-02,CV-110,PLANT-A/AREA-5/CONVEYOR-2,Inspect pulley bearings and guards,condition_based,4,weeks,active
+PM-VALVE-V-111,V-111-TASK-01,V-111,PLANT-A/AREA-1/VALVE-3,Stroke test valve and actuator,inspection,8,weeks,active
+PM-VALVE-V-111,V-111-TASK-02,V-111,PLANT-A/AREA-1/VALVE-3,Inspect packing and external leakage,condition_based,8,weeks,active
+PM-COMPRESSOR-C-112,C-112-TASK-01,C-112,PLANT-A/AREA-2/COMPRESSOR-3,Inspect oil level and separator condition,inspection,12,weeks,active
+PM-COMPRESSOR-C-112,C-112-TASK-02,C-112,PLANT-A/AREA-2/COMPRESSOR-3,Check discharge temperature and vibration,condition_based,12,weeks,active
+PM-FAN-F-113,F-113-TASK-01,F-113,PLANT-A/AREA-3/FAN-3,Inspect fan vibration and belt tension,inspection,4,weeks,active
+PM-FAN-F-113,F-113-TASK-02,F-113,PLANT-A/AREA-3/FAN-3,Inspect bearing temperature and lubrication,condition_based,4,weeks,active
+PM-HEAT-EXCHANGER-HX-114,HX-114-TASK-01,HX-114,PLANT-A/AREA-4/HEAT-EXCHANGER-3,Inspect temperature approach and pressure drop,inspection,8,weeks,active
+PM-HEAT-EXCHANGER-HX-114,HX-114-TASK-02,HX-114,PLANT-A/AREA-4/HEAT-EXCHANGER-3,Inspect for external leakage and corrosion,condition_based,8,weeks,active
+PM-PUMP-P-115,P-115-TASK-01,P-115,PLANT-A/AREA-5/PUMP-3,Inspect vibration and bearing temperature,inspection,12,weeks,active
+PM-PUMP-P-115,P-115-TASK-02,P-115,PLANT-A/AREA-5/PUMP-3,Inspect mechanical seal leakage,condition_based,12,weeks,active
+PM-MOTOR-M-116,M-116-TASK-01,M-116,PLANT-A/AREA-1/MOTOR-4,Clean cooling fins and inspect fan cover,inspection,4,weeks,active
+PM-MOTOR-M-116,M-116-TASK-02,M-116,PLANT-A/AREA-1/MOTOR-4,Check motor current and terminal condition,condition_based,4,weeks,active
+PM-CONVEYOR-CV-117,CV-117-TASK-01,CV-117,PLANT-A/AREA-2/CONVEYOR-4,Inspect belt tracking and edge wear,inspection,8,weeks,active
+PM-CONVEYOR-CV-117,CV-117-TASK-02,CV-117,PLANT-A/AREA-2/CONVEYOR-4,Inspect pulley bearings and guards,condition_based,8,weeks,active
+PM-VALVE-V-118,V-118-TASK-01,V-118,PLANT-A/AREA-3/VALVE-4,Stroke test valve and actuator,inspection,12,weeks,active
+PM-VALVE-V-118,V-118-TASK-02,V-118,PLANT-A/AREA-3/VALVE-4,Inspect packing and external leakage,condition_based,12,weeks,active
+PM-COMPRESSOR-C-119,C-119-TASK-01,C-119,PLANT-A/AREA-4/COMPRESSOR-4,Inspect oil level and separator condition,inspection,4,weeks,active
+PM-COMPRESSOR-C-119,C-119-TASK-02,C-119,PLANT-A/AREA-4/COMPRESSOR-4,Check discharge temperature and vibration,condition_based,4,weeks,active
+PM-FAN-F-120,F-120-TASK-01,F-120,PLANT-A/AREA-5/FAN-4,Inspect fan vibration and belt tension,inspection,8,weeks,active
+PM-FAN-F-120,F-120-TASK-02,F-120,PLANT-A/AREA-5/FAN-4,Inspect bearing temperature and lubrication,condition_based,8,weeks,active
+PM-HEAT-EXCHANGER-HX-121,HX-121-TASK-01,HX-121,PLANT-A/AREA-1/HEAT-EXCHANGER-5,Inspect temperature approach and pressure drop,inspection,12,weeks,active
+PM-HEAT-EXCHANGER-HX-121,HX-121-TASK-02,HX-121,PLANT-A/AREA-1/HEAT-EXCHANGER-5,Inspect for external leakage and corrosion,condition_based,12,weeks,active
+PM-PUMP-P-122,P-122-TASK-01,P-122,PLANT-A/AREA-2/PUMP-5,Inspect vibration and bearing temperature,inspection,4,weeks,active
+PM-PUMP-P-122,P-122-TASK-02,P-122,PLANT-A/AREA-2/PUMP-5,Inspect mechanical seal leakage,condition_based,4,weeks,active
+PM-MOTOR-M-123,M-123-TASK-01,M-123,PLANT-A/AREA-3/MOTOR-5,Clean cooling fins and inspect fan cover,inspection,8,weeks,active
+PM-MOTOR-M-123,M-123-TASK-02,M-123,PLANT-A/AREA-3/MOTOR-5,Check motor current and terminal condition,condition_based,8,weeks,active
+PM-CONVEYOR-CV-124,CV-124-TASK-01,CV-124,PLANT-A/AREA-4/CONVEYOR-5,Inspect belt tracking and edge wear,inspection,12,weeks,active
+PM-CONVEYOR-CV-124,CV-124-TASK-02,CV-124,PLANT-A/AREA-4/CONVEYOR-5,Inspect pulley bearings and guards,condition_based,12,weeks,active
+PM-VALVE-V-125,V-125-TASK-01,V-125,PLANT-A/AREA-5/VALVE-5,Stroke test valve and actuator,inspection,4,weeks,active
+PM-VALVE-V-125,V-125-TASK-02,V-125,PLANT-A/AREA-5/VALVE-5,Inspect packing and external leakage,condition_based,4,weeks,active
+PM-COMPRESSOR-C-126,C-126-TASK-01,C-126,PLANT-A/AREA-1/COMPRESSOR-6,Inspect oil level and separator condition,inspection,8,weeks,active
+PM-COMPRESSOR-C-126,C-126-TASK-02,C-126,PLANT-A/AREA-1/COMPRESSOR-6,Check discharge temperature and vibration,condition_based,8,weeks,active
+PM-FAN-F-127,F-127-TASK-01,F-127,PLANT-A/AREA-2/FAN-6,Inspect fan vibration and belt tension,inspection,12,weeks,active
+PM-FAN-F-127,F-127-TASK-02,F-127,PLANT-A/AREA-2/FAN-6,Inspect bearing temperature and lubrication,condition_based,12,weeks,active
+PM-HEAT-EXCHANGER-HX-128,HX-128-TASK-01,HX-128,PLANT-A/AREA-3/HEAT-EXCHANGER-6,Inspect temperature approach and pressure drop,inspection,4,weeks,active
+PM-HEAT-EXCHANGER-HX-128,HX-128-TASK-02,HX-128,PLANT-A/AREA-3/HEAT-EXCHANGER-6,Inspect for external leakage and corrosion,condition_based,4,weeks,active
+PM-PUMP-P-129,P-129-TASK-01,P-129,PLANT-A/AREA-4/PUMP-6,Inspect vibration and bearing temperature,inspection,8,weeks,active
+PM-PUMP-P-129,P-129-TASK-02,P-129,PLANT-A/AREA-4/PUMP-6,Inspect mechanical seal leakage,condition_based,8,weeks,active
+PM-MOTOR-M-130,M-130-TASK-01,M-130,PLANT-A/AREA-5/MOTOR-6,Clean cooling fins and inspect fan cover,inspection,12,weeks,active
+PM-MOTOR-M-130,M-130-TASK-02,M-130,PLANT-A/AREA-5/MOTOR-6,Check motor current and terminal condition,condition_based,12,weeks,active
+PM-CONVEYOR-CV-131,CV-131-TASK-01,CV-131,PLANT-A/AREA-1/CONVEYOR-7,Inspect belt tracking and edge wear,inspection,4,weeks,active
+PM-CONVEYOR-CV-131,CV-131-TASK-02,CV-131,PLANT-A/AREA-1/CONVEYOR-7,Inspect pulley bearings and guards,condition_based,4,weeks,active
+PM-VALVE-V-132,V-132-TASK-01,V-132,PLANT-A/AREA-2/VALVE-7,Stroke test valve and actuator,inspection,8,weeks,active
+PM-VALVE-V-132,V-132-TASK-02,V-132,PLANT-A/AREA-2/VALVE-7,Inspect packing and external leakage,condition_based,8,weeks,active
+PM-COMPRESSOR-C-133,C-133-TASK-01,C-133,PLANT-A/AREA-3/COMPRESSOR-7,Inspect oil level and separator condition,inspection,12,weeks,active
+PM-COMPRESSOR-C-133,C-133-TASK-02,C-133,PLANT-A/AREA-3/COMPRESSOR-7,Check discharge temperature and vibration,condition_based,12,weeks,active
+PM-FAN-F-134,F-134-TASK-01,F-134,PLANT-A/AREA-4/FAN-7,Inspect fan vibration and belt tension,inspection,4,weeks,active
+PM-FAN-F-134,F-134-TASK-02,F-134,PLANT-A/AREA-4/FAN-7,Inspect bearing temperature and lubrication,condition_based,4,weeks,active
+PM-HEAT-EXCHANGER-HX-135,HX-135-TASK-01,HX-135,PLANT-A/AREA-5/HEAT-EXCHANGER-7,Inspect temperature approach and pressure drop,inspection,8,weeks,active
+PM-HEAT-EXCHANGER-HX-135,HX-135-TASK-02,HX-135,PLANT-A/AREA-5/HEAT-EXCHANGER-7,Inspect for external leakage and corrosion,condition_based,8,weeks,active
+PM-PUMP-P-136,P-136-TASK-01,P-136,PLANT-A/AREA-1/PUMP-8,Inspect vibration and bearing temperature,inspection,12,weeks,active
+PM-PUMP-P-136,P-136-TASK-02,P-136,PLANT-A/AREA-1/PUMP-8,Inspect mechanical seal leakage,condition_based,12,weeks,active
+PM-MOTOR-M-137,M-137-TASK-01,M-137,PLANT-A/AREA-2/MOTOR-8,Clean cooling fins and inspect fan cover,inspection,4,weeks,active
+PM-MOTOR-M-137,M-137-TASK-02,M-137,PLANT-A/AREA-2/MOTOR-8,Check motor current and terminal condition,condition_based,4,weeks,active
+PM-CONVEYOR-CV-138,CV-138-TASK-01,CV-138,PLANT-A/AREA-3/CONVEYOR-8,Inspect belt tracking and edge wear,inspection,8,weeks,active
+PM-CONVEYOR-CV-138,CV-138-TASK-02,CV-138,PLANT-A/AREA-3/CONVEYOR-8,Inspect pulley bearings and guards,condition_based,8,weeks,active
+PM-VALVE-V-139,V-139-TASK-01,V-139,PLANT-A/AREA-4/VALVE-8,Stroke test valve and actuator,inspection,12,weeks,active
+PM-VALVE-V-139,V-139-TASK-02,V-139,PLANT-A/AREA-4/VALVE-8,Inspect packing and external leakage,condition_based,12,weeks,active
+PM-COMPRESSOR-C-140,C-140-TASK-01,C-140,PLANT-A/AREA-5/COMPRESSOR-8,Inspect oil level and separator condition,inspection,4,weeks,active
+PM-COMPRESSOR-C-140,C-140-TASK-02,C-140,PLANT-A/AREA-5/COMPRESSOR-8,Check discharge temperature and vibration,condition_based,4,weeks,active
+PM-FAN-F-141,F-141-TASK-01,F-141,PLANT-A/AREA-1/FAN-9,Inspect fan vibration and belt tension,inspection,8,weeks,active
+PM-FAN-F-141,F-141-TASK-02,F-141,PLANT-A/AREA-1/FAN-9,Inspect bearing temperature and lubrication,condition_based,8,weeks,active
+PM-HEAT-EXCHANGER-HX-142,HX-142-TASK-01,HX-142,PLANT-A/AREA-2/HEAT-EXCHANGER-9,Inspect temperature approach and pressure drop,inspection,12,weeks,active
+PM-HEAT-EXCHANGER-HX-142,HX-142-TASK-02,HX-142,PLANT-A/AREA-2/HEAT-EXCHANGER-9,Inspect for external leakage and corrosion,condition_based,12,weeks,active
+PM-PUMP-P-143,P-143-TASK-01,P-143,PLANT-A/AREA-3/PUMP-9,Inspect vibration and bearing temperature,inspection,4,weeks,active
+PM-PUMP-P-143,P-143-TASK-02,P-143,PLANT-A/AREA-3/PUMP-9,Inspect mechanical seal leakage,condition_based,4,weeks,active
+PM-MOTOR-M-144,M-144-TASK-01,M-144,PLANT-A/AREA-4/MOTOR-9,Clean cooling fins and inspect fan cover,inspection,8,weeks,active
+PM-MOTOR-M-144,M-144-TASK-02,M-144,PLANT-A/AREA-4/MOTOR-9,Check motor current and terminal condition,condition_based,8,weeks,active
+PM-CONVEYOR-CV-145,CV-145-TASK-01,CV-145,PLANT-A/AREA-5/CONVEYOR-9,Inspect belt tracking and edge wear,inspection,12,weeks,active
+PM-CONVEYOR-CV-145,CV-145-TASK-02,CV-145,PLANT-A/AREA-5/CONVEYOR-9,Inspect pulley bearings and guards,condition_based,12,weeks,active
+PM-VALVE-V-146,V-146-TASK-01,V-146,PLANT-A/AREA-1/VALVE-10,Stroke test valve and actuator,inspection,4,weeks,active
+PM-VALVE-V-146,V-146-TASK-02,V-146,PLANT-A/AREA-1/VALVE-10,Inspect packing and external leakage,condition_based,4,weeks,active
+PM-COMPRESSOR-C-147,C-147-TASK-01,C-147,PLANT-A/AREA-2/COMPRESSOR-10,Inspect oil level and separator condition,inspection,8,weeks,active
+PM-COMPRESSOR-C-147,C-147-TASK-02,C-147,PLANT-A/AREA-2/COMPRESSOR-10,Check discharge temperature and vibration,condition_based,8,weeks,active
+PM-FAN-F-148,F-148-TASK-01,F-148,PLANT-A/AREA-3/FAN-10,Inspect fan vibration and belt tension,inspection,12,weeks,active
+PM-FAN-F-148,F-148-TASK-02,F-148,PLANT-A/AREA-3/FAN-10,Inspect bearing temperature and lubrication,condition_based,12,weeks,active
+PM-HEAT-EXCHANGER-HX-149,HX-149-TASK-01,HX-149,PLANT-A/AREA-4/HEAT-EXCHANGER-10,Inspect temperature approach and pressure drop,inspection,4,weeks,active
+PM-HEAT-EXCHANGER-HX-149,HX-149-TASK-02,HX-149,PLANT-A/AREA-4/HEAT-EXCHANGER-10,Inspect for external leakage and corrosion,condition_based,4,weeks,active
+PM-PUMP-P-150,P-150-TASK-01,P-150,PLANT-A/AREA-5/PUMP-10,Inspect vibration and bearing temperature,inspection,8,weeks,active
+PM-PUMP-P-150,P-150-TASK-02,P-150,PLANT-A/AREA-5/PUMP-10,Inspect mechanical seal leakage,condition_based,8,weeks,active

@@ -1,51 +1,51 @@
-equipment_number,functional_location,description,parent_equipment_number,parent_functional_location,equipment_type,system,criticality,status,install_date
-P-101,PLANT-A/AREA-1/PUMP-1,Pump asset 01,,PLANT-A/AREA-1,pump,cooling-water,A,active,2017-01-01
-M-102,PLANT-A/AREA-2/MOTOR-1,Motor asset 02,,PLANT-A/AREA-2,motor,materials-handling,B,active,2018-04-06
-CV-103,PLANT-A/AREA-3/CONVEYOR-1,Conveyor asset 03,,PLANT-A/AREA-3,conveyor,materials-handling,C,active,2019-07-11
-V-104,PLANT-A/AREA-4/VALVE-1,Valve asset 04,,PLANT-A/AREA-4,valve,process-water,A,active,2020-10-16
-C-105,PLANT-A/AREA-5/COMPRESSOR-1,Compressor asset 05,,PLANT-A/AREA-5,compressor,instrument-air,B,active,2021-01-21
-F-106,PLANT-A/AREA-1/FAN-2,Fan asset 06,,PLANT-A/AREA-1,fan,ventilation,C,active,2022-04-02
-HX-107,PLANT-A/AREA-2/HEAT-EXCHANGER-2,Heat exchanger asset 07,,PLANT-A/AREA-2,heat_exchanger,process-cooling,A,active,2023-07-07
-P-108,PLANT-A/AREA-3/PUMP-2,Pump asset 08,,PLANT-A/AREA-3,pump,cooling-water,B,active,2017-10-12
-M-109,PLANT-A/AREA-4/MOTOR-2,Motor asset 09,,PLANT-A/AREA-4,motor,materials-handling,C,active,2018-01-17
-CV-110,PLANT-A/AREA-5/CONVEYOR-2,Conveyor asset 10,,PLANT-A/AREA-5,conveyor,materials-handling,A,active,2019-04-22
-V-111,PLANT-A/AREA-1/VALVE-3,Valve asset 11,,PLANT-A/AREA-1,valve,process-water,B,active,2020-07-03
-C-112,PLANT-A/AREA-2/COMPRESSOR-3,Compressor asset 12,,PLANT-A/AREA-2,compressor,instrument-air,C,active,2021-10-08
-F-113,PLANT-A/AREA-3/FAN-3,Fan asset 13,,PLANT-A/AREA-3,fan,ventilation,A,active,2022-01-13
-HX-114,PLANT-A/AREA-4/HEAT-EXCHANGER-3,Heat exchanger asset 14,,PLANT-A/AREA-4,heat_exchanger,process-cooling,B,active,2023-04-18
-P-115,PLANT-A/AREA-5/PUMP-3,Pump asset 15,,PLANT-A/AREA-5,pump,cooling-water,C,active,2017-07-23
-M-116,PLANT-A/AREA-1/MOTOR-4,Motor asset 16,,PLANT-A/AREA-1,motor,materials-handling,A,active,2018-10-04
-CV-117,PLANT-A/AREA-2/CONVEYOR-4,Conveyor asset 17,,PLANT-A/AREA-2,conveyor,materials-handling,B,active,2019-01-09
-V-118,PLANT-A/AREA-3/VALVE-4,Valve asset 18,,PLANT-A/AREA-3,valve,process-water,C,active,2020-04-14
-C-119,PLANT-A/AREA-4/COMPRESSOR-4,Compressor asset 19,,PLANT-A/AREA-4,compressor,instrument-air,A,active,2021-07-19
-F-120,PLANT-A/AREA-5/FAN-4,Fan asset 20,,PLANT-A/AREA-5,fan,ventilation,B,active,2022-10-24
-HX-121,PLANT-A/AREA-1/HEAT-EXCHANGER-5,Heat exchanger asset 21,,PLANT-A/AREA-1,heat_exchanger,process-cooling,C,active,2023-01-05
-P-122,PLANT-A/AREA-2/PUMP-5,Pump asset 22,,PLANT-A/AREA-2,pump,cooling-water,A,active,2017-04-10
-M-123,PLANT-A/AREA-3/MOTOR-5,Motor asset 23,,PLANT-A/AREA-3,motor,materials-handling,B,active,2018-07-15
-CV-124,PLANT-A/AREA-4/CONVEYOR-5,Conveyor asset 24,,PLANT-A/AREA-4,conveyor,materials-handling,C,active,2019-10-20
-V-125,PLANT-A/AREA-5/VALVE-5,Valve asset 25,,PLANT-A/AREA-5,valve,process-water,A,active,2020-01-01
-C-126,PLANT-A/AREA-1/COMPRESSOR-6,Compressor asset 26,,PLANT-A/AREA-1,compressor,instrument-air,B,active,2021-04-06
-F-127,PLANT-A/AREA-2/FAN-6,Fan asset 27,,PLANT-A/AREA-2,fan,ventilation,C,active,2022-07-11
-HX-128,PLANT-A/AREA-3/HEAT-EXCHANGER-6,Heat exchanger asset 28,,PLANT-A/AREA-3,heat_exchanger,process-cooling,A,active,2023-10-16
-P-129,PLANT-A/AREA-4/PUMP-6,Pump asset 29,,PLANT-A/AREA-4,pump,cooling-water,B,active,2017-01-21
-M-130,PLANT-A/AREA-5/MOTOR-6,Motor asset 30,,PLANT-A/AREA-5,motor,materials-handling,C,active,2018-04-02
-CV-131,PLANT-A/AREA-1/CONVEYOR-7,Conveyor asset 31,,PLANT-A/AREA-1,conveyor,materials-handling,A,active,2019-07-07
-V-132,PLANT-A/AREA-2/VALVE-7,Valve asset 32,,PLANT-A/AREA-2,valve,process-water,B,active,2020-10-12
-C-133,PLANT-A/AREA-3/COMPRESSOR-7,Compressor asset 33,,PLANT-A/AREA-3,compressor,instrument-air,C,active,2021-01-17
-F-134,PLANT-A/AREA-4/FAN-7,Fan asset 34,,PLANT-A/AREA-4,fan,ventilation,A,active,2022-04-22
-HX-135,PLANT-A/AREA-5/HEAT-EXCHANGER-7,Heat exchanger asset 35,,PLANT-A/AREA-5,heat_exchanger,process-cooling,B,active,2023-07-03
-P-136,PLANT-A/AREA-1/PUMP-8,Pump asset 36,,PLANT-A/AREA-1,pump,cooling-water,C,active,2017-10-08
-M-137,PLANT-A/AREA-2/MOTOR-8,Motor asset 37,,PLANT-A/AREA-2,motor,materials-handling,A,active,2018-01-13
-CV-138,PLANT-A/AREA-3/CONVEYOR-8,Conveyor asset 38,,PLANT-A/AREA-3,conveyor,materials-handling,B,active,2019-04-18
-V-139,PLANT-A/AREA-4/VALVE-8,Valve asset 39,,PLANT-A/AREA-4,valve,process-water,C,active,2020-07-23
-C-140,PLANT-A/AREA-5/COMPRESSOR-8,Compressor asset 40,,PLANT-A/AREA-5,compressor,instrument-air,A,active,2021-10-04
-F-141,PLANT-A/AREA-1/FAN-9,Fan asset 41,,PLANT-A/AREA-1,fan,ventilation,B,active,2022-01-09
-HX-142,PLANT-A/AREA-2/HEAT-EXCHANGER-9,Heat exchanger asset 42,,PLANT-A/AREA-2,heat_exchanger,process-cooling,C,active,2023-04-14
-P-143,PLANT-A/AREA-3/PUMP-9,Pump asset 43,,PLANT-A/AREA-3,pump,cooling-water,A,active,2017-07-19
-M-144,PLANT-A/AREA-4/MOTOR-9,Motor asset 44,,PLANT-A/AREA-4,motor,materials-handling,B,active,2018-10-24
-CV-145,PLANT-A/AREA-5/CONVEYOR-9,Conveyor asset 45,,PLANT-A/AREA-5,conveyor,materials-handling,C,active,2019-01-05
-V-146,PLANT-A/AREA-1/VALVE-10,Valve asset 46,,PLANT-A/AREA-1,valve,process-water,A,active,2020-04-10
-C-147,PLANT-A/AREA-2/COMPRESSOR-10,Compressor asset 47,,PLANT-A/AREA-2,compressor,instrument-air,B,active,2021-07-15
-F-148,PLANT-A/AREA-3/FAN-10,Fan asset 48,,PLANT-A/AREA-3,fan,ventilation,C,active,2022-10-20
-HX-149,PLANT-A/AREA-4/HEAT-EXCHANGER-10,Heat exchanger asset 49,,PLANT-A/AREA-4,heat_exchanger,process-cooling,A,active,2023-01-01
-P-150,PLANT-A/AREA-5/PUMP-10,Pump asset 50,,PLANT-A/AREA-5,pump,cooling-water,B,active,2017-04-06
+equipment_number,functional_location,description,parent_functional_location,equipment_type,system,criticality,status,install_date
+P-101,PLANT-A/AREA-1/PUMP-1,Pump asset 01,PLANT-A/AREA-1,pump,cooling-water,A,active,2017-01-01
+M-102,PLANT-A/AREA-2/MOTOR-1,Motor asset 02,PLANT-A/AREA-2,motor,materials-handling,B,active,2018-04-06
+CV-103,PLANT-A/AREA-3/CONVEYOR-1,Conveyor asset 03,PLANT-A/AREA-3,conveyor,materials-handling,C,active,2019-07-11
+V-104,PLANT-A/AREA-4/VALVE-1,Valve asset 04,PLANT-A/AREA-4,valve,process-water,A,active,2020-10-16
+C-105,PLANT-A/AREA-5/COMPRESSOR-1,Compressor asset 05,PLANT-A/AREA-5,compressor,instrument-air,B,active,2021-01-21
+F-106,PLANT-A/AREA-1/FAN-2,Fan asset 06,PLANT-A/AREA-1,fan,ventilation,C,active,2022-04-02
+HX-107,PLANT-A/AREA-2/HEAT-EXCHANGER-2,Heat exchanger asset 07,PLANT-A/AREA-2,heat_exchanger,process-cooling,A,active,2023-07-07
+P-108,PLANT-A/AREA-3/PUMP-2,Pump asset 08,PLANT-A/AREA-3,pump,cooling-water,B,active,2017-10-12
+M-109,PLANT-A/AREA-4/MOTOR-2,Motor asset 09,PLANT-A/AREA-4,motor,materials-handling,C,active,2018-01-17
+CV-110,PLANT-A/AREA-5/CONVEYOR-2,Conveyor asset 10,PLANT-A/AREA-5,conveyor,materials-handling,A,active,2019-04-22
+V-111,PLANT-A/AREA-1/VALVE-3,Valve asset 11,PLANT-A/AREA-1,valve,process-water,B,active,2020-07-03
+C-112,PLANT-A/AREA-2/COMPRESSOR-3,Compressor asset 12,PLANT-A/AREA-2,compressor,instrument-air,C,active,2021-10-08
+F-113,PLANT-A/AREA-3/FAN-3,Fan asset 13,PLANT-A/AREA-3,fan,ventilation,A,active,2022-01-13
+HX-114,PLANT-A/AREA-4/HEAT-EXCHANGER-3,Heat exchanger asset 14,PLANT-A/AREA-4,heat_exchanger,process-cooling,B,active,2023-04-18
+P-115,PLANT-A/AREA-5/PUMP-3,Pump asset 15,PLANT-A/AREA-5,pump,cooling-water,C,active,2017-07-23
+M-116,PLANT-A/AREA-1/MOTOR-4,Motor asset 16,PLANT-A/AREA-1,motor,materials-handling,A,active,2018-10-04
+CV-117,PLANT-A/AREA-2/CONVEYOR-4,Conveyor asset 17,PLANT-A/AREA-2,conveyor,materials-handling,B,active,2019-01-09
+V-118,PLANT-A/AREA-3/VALVE-4,Valve asset 18,PLANT-A/AREA-3,valve,process-water,C,active,2020-04-14
+C-119,PLANT-A/AREA-4/COMPRESSOR-4,Compressor asset 19,PLANT-A/AREA-4,compressor,instrument-air,A,active,2021-07-19
+F-120,PLANT-A/AREA-5/FAN-4,Fan asset 20,PLANT-A/AREA-5,fan,ventilation,B,active,2022-10-24
+HX-121,PLANT-A/AREA-1/HEAT-EXCHANGER-5,Heat exchanger asset 21,PLANT-A/AREA-1,heat_exchanger,process-cooling,C,active,2023-01-05
+P-122,PLANT-A/AREA-2/PUMP-5,Pump asset 22,PLANT-A/AREA-2,pump,cooling-water,A,active,2017-04-10
+M-123,PLANT-A/AREA-3/MOTOR-5,Motor asset 23,PLANT-A/AREA-3,motor,materials-handling,B,active,2018-07-15
+CV-124,PLANT-A/AREA-4/CONVEYOR-5,Conveyor asset 24,PLANT-A/AREA-4,conveyor,materials-handling,C,active,2019-10-20
+V-125,PLANT-A/AREA-5/VALVE-5,Valve asset 25,PLANT-A/AREA-5,valve,process-water,A,active,2020-01-01
+C-126,PLANT-A/AREA-1/COMPRESSOR-6,Compressor asset 26,PLANT-A/AREA-1,compressor,instrument-air,B,active,2021-04-06
+F-127,PLANT-A/AREA-2/FAN-6,Fan asset 27,PLANT-A/AREA-2,fan,ventilation,C,active,2022-07-11
+HX-128,PLANT-A/AREA-3/HEAT-EXCHANGER-6,Heat exchanger asset 28,PLANT-A/AREA-3,heat_exchanger,process-cooling,A,active,2023-10-16
+P-129,PLANT-A/AREA-4/PUMP-6,Pump asset 29,PLANT-A/AREA-4,pump,cooling-water,B,active,2017-01-21
+M-130,PLANT-A/AREA-5/MOTOR-6,Motor asset 30,PLANT-A/AREA-5,motor,materials-handling,C,active,2018-04-02
+CV-131,PLANT-A/AREA-1/CONVEYOR-7,Conveyor asset 31,PLANT-A/AREA-1,conveyor,materials-handling,A,active,2019-07-07
+V-132,PLANT-A/AREA-2/VALVE-7,Valve asset 32,PLANT-A/AREA-2,valve,process-water,B,active,2020-10-12
+C-133,PLANT-A/AREA-3/COMPRESSOR-7,Compressor asset 33,PLANT-A/AREA-3,compressor,instrument-air,C,active,2021-01-17
+F-134,PLANT-A/AREA-4/FAN-7,Fan asset 34,PLANT-A/AREA-4,fan,ventilation,A,active,2022-04-22
+HX-135,PLANT-A/AREA-5/HEAT-EXCHANGER-7,Heat exchanger asset 35,PLANT-A/AREA-5,heat_exchanger,process-cooling,B,active,2023-07-03
+P-136,PLANT-A/AREA-1/PUMP-8,Pump asset 36,PLANT-A/AREA-1,pump,cooling-water,C,active,2017-10-08
+M-137,PLANT-A/AREA-2/MOTOR-8,Motor asset 37,PLANT-A/AREA-2,motor,materials-handling,A,active,2018-01-13
+CV-138,PLANT-A/AREA-3/CONVEYOR-8,Conveyor asset 38,PLANT-A/AREA-3,conveyor,materials-handling,B,active,2019-04-18
+V-139,PLANT-A/AREA-4/VALVE-8,Valve asset 39,PLANT-A/AREA-4,valve,process-water,C,active,2020-07-23
+C-140,PLANT-A/AREA-5/COMPRESSOR-8,Compressor asset 40,PLANT-A/AREA-5,compressor,instrument-air,A,active,2021-10-04
+F-141,PLANT-A/AREA-1/FAN-9,Fan asset 41,PLANT-A/AREA-1,fan,ventilation,B,active,2022-01-09
+HX-142,PLANT-A/AREA-2/HEAT-EXCHANGER-9,Heat exchanger asset 42,PLANT-A/AREA-2,heat_exchanger,process-cooling,C,active,2023-04-14
+P-143,PLANT-A/AREA-3/PUMP-9,Pump asset 43,PLANT-A/AREA-3,pump,cooling-water,A,active,2017-07-19
+M-144,PLANT-A/AREA-4/MOTOR-9,Motor asset 44,PLANT-A/AREA-4,motor,materials-handling,B,active,2018-10-24
+CV-145,PLANT-A/AREA-5/CONVEYOR-9,Conveyor asset 45,PLANT-A/AREA-5,conveyor,materials-handling,C,active,2019-01-05
+V-146,PLANT-A/AREA-1/VALVE-10,Valve asset 46,PLANT-A/AREA-1,valve,process-water,A,active,2020-04-10
+C-147,PLANT-A/AREA-2/COMPRESSOR-10,Compressor asset 47,PLANT-A/AREA-2,compressor,instrument-air,B,active,2021-07-15
+F-148,PLANT-A/AREA-3/FAN-10,Fan asset 48,PLANT-A/AREA-3,fan,ventilation,C,active,2022-10-20
+HX-149,PLANT-A/AREA-4/HEAT-EXCHANGER-10,Heat exchanger asset 49,PLANT-A/AREA-4,heat_exchanger,process-cooling,A,active,2023-01-01
+P-150,PLANT-A/AREA-5/PUMP-10,Pump asset 50,PLANT-A/AREA-5,pump,cooling-water,B,active,2017-04-06

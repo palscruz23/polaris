@@ -50,11 +50,6 @@ class Equipment(Base):
         nullable=True,
     )
 
-    parent_equipment_number: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-    )
-
     parent_functional_location: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,

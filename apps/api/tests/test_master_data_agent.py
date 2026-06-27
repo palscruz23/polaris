@@ -32,7 +32,6 @@ class StubEquipmentSearchTool:
                     system="process_water",
                     criticality="A",
                     status="active",
-                    parent_equipment_number=None,
                     parent_functional_location="PLANT-A/AREA-1",
                 )
             ],

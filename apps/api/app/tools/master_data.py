@@ -26,7 +26,6 @@ class EquipmentRecord:
     system: str | None
     criticality: str | None
     status: str
-    parent_equipment_number: str | None
     parent_functional_location: str | None
 
 
@@ -98,7 +97,6 @@ class EquipmentSearchTool:
                     system=item.system,
                     criticality=item.criticality,
                     status=item.status,
-                    parent_equipment_number=item.parent_equipment_number,
                     parent_functional_location=(
                         item.parent_functional_location
                     ),

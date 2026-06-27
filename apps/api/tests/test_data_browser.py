@@ -125,6 +125,28 @@ def test_work_order_failure_modes_include_joined_display_columns() -> None:
     ]
 
 
+def test_maintenance_strategies_include_joined_location_display_columns() -> None:
+    table = data_browser._table_by_name("maintenance_strategies")
+
+    assert table is not None
+    assert data_browser._display_columns_for_table(table) == [
+        "strategy_number",
+        "task_number",
+        "equipment_number",
+        "functional_location",
+        "task_description",
+        "strategy_type",
+        "frequency_value",
+        "frequency_unit",
+        "status",
+        "equipment_id",
+        "import_batch_id",
+        "created_at",
+        "updated_at",
+        "id",
+    ]
+
+
 def test_display_columns_move_primary_id_to_last_column() -> None:
     table = Table(
         "sample_table",
