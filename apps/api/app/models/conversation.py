@@ -6,6 +6,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    ForeignKey,
     Integer,
     Text,
     func,
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from app.models.agent_run import AgentRun
     from app.models.conversation_memory_revision import ConversationMemoryRevision
     from app.models.message import Message
+    from app.models.user import User
 
 
 class Conversation(Base):
@@ -40,6 +42,13 @@ class Conversation(Base):
     title: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
+    )
+
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
 
     memory_markdown: Mapped[str] = mapped_column(
@@ -120,3 +129,5 @@ class Conversation(Base):
         cascade="all, delete-orphan",
         order_by="AgentRun.started_at",
     )
+
+    user: Mapped["User | None"] = relationship(back_populates="conversations")

@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import FeedbackSurvey from "../../FeedbackSurvey";
 
 type Message = {
   id: string;
@@ -114,9 +116,20 @@ type AvailableModel = {
   is_enabled: boolean;
 };
 
+type AuthUser = {
+  id: string;
+  email: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  auth_provider: string;
+  created_at: string;
+};
+
 const CONVERSATION_STORAGE_KEY = "open-reliability-conversation-id";
 const MODEL_STORAGE_KEY = "open-reliability-model-id";
+const FEEDBACK_STORAGE_KEY = "open-reliability-poc-feedback-status";
 const FALLBACK_MODEL_ID = "deepseek/deepseek-v4-flash";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const TITLE_STOP_WORDS = new Set([
   "a",
   "about",
@@ -209,6 +222,25 @@ function StopIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <rect height="10" rx="1.5" width="10" x="7" y="7" />
+    </svg>
+  );
+}
+
+function MessageCircleIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5H7l-4 2 1.2-4.1A8.5 8.5 0 1 1 21 11.5Z" />
+      <path d="M8 11h8M8 15h5" />
+    </svg>
+  );
+}
+
+function SignOutIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="m16 17 5-5-5-5" />
+      <path d="M21 12H9" />
     </svg>
   );
 }
@@ -583,7 +615,25 @@ function titleFromMessage(content: string) {
   return `${title.slice(0, 57).trimEnd()}...`;
 }
 
+async function errorMessageFromResponse(response: Response) {
+  try {
+    const data = await response.json();
+    const detail = data?.detail;
+    if (typeof detail === "string") {
+      return detail;
+    }
+    if (Array.isArray(detail) && detail.length > 0) {
+      return "The Reliability Agent request was invalid.";
+    }
+  } catch {
+    // Fall back to a status-based message below.
+  }
+
+  return `The Reliability Agent request failed with status ${response.status}.`;
+}
+
 export default function AgentWorkflowChat() {
+  const router = useRouter();
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [attachment, setAttachment] = useState("");
@@ -598,27 +648,112 @@ export default function AgentWorkflowChat() {
   const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
   const [selectedModelId, setSelectedModelId] = useState(FALLBACK_MODEL_ID);
   const [modelError, setModelError] = useState("");
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [authIsLoading, setAuthIsLoading] = useState(true);
+  const [feedbackIsOpen, setFeedbackIsOpen] = useState(false);
+  const [feedbackCanPrompt, setFeedbackCanPrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController>(null);
   const latestMessageId = messages[messages.length - 1]?.id;
 
-  useEffect(() => {
-    const requestController = new AbortController();
-    const savedConversationId = window.localStorage.getItem(
-      CONVERSATION_STORAGE_KEY,
-    );
-
-    refreshConversations(requestController.signal);
-    loadAvailableModels(requestController.signal);
-
-    if (savedConversationId) {
-      loadConversation(savedConversationId, requestController.signal);
+  const loadCurrentUser = useCallback(async (signal?: AbortSignal) => {
+    if (!API_URL) {
+      setAuthIsLoading(false);
+      return null;
     }
 
+    try {
+      const response = await fetch(`${API_URL}/auth/me`, {
+        credentials: "include",
+        signal,
+      });
+
+      if (response.status === 401) {
+        router.replace("/login?next=/chat-with-reliability");
+        return null;
+      }
+
+      if (!response.ok) {
+        throw new Error("Auth status could not be loaded.");
+      }
+
+      const user: AuthUser = await response.json();
+      setCurrentUser(user);
+      return user;
+    } catch {
+      if (!signal?.aborted) {
+        router.replace("/login?next=/chat-with-reliability");
+      }
+      return null;
+    } finally {
+      if (!signal?.aborted) {
+        setAuthIsLoading(false);
+      }
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const requestController = new AbortController();
+
+    async function bootstrapAuthenticatedChat() {
+      const user = await loadCurrentUser(requestController.signal);
+      if (!user) {
+        return;
+      }
+
+      const savedConversationId = window.localStorage.getItem(
+        CONVERSATION_STORAGE_KEY,
+      );
+      const feedbackStatus = window.localStorage.getItem(FEEDBACK_STORAGE_KEY);
+      setFeedbackCanPrompt(!feedbackStatus);
+
+      refreshConversations(requestController.signal);
+      loadAvailableModels(requestController.signal);
+
+      if (savedConversationId) {
+        loadConversation(savedConversationId, requestController.signal);
+      }
+    }
+
+    bootstrapAuthenticatedChat();
+
     return () => requestController.abort();
-  }, []);
+  }, [loadCurrentUser]);
+
+  function openFeedbackSurvey() {
+    setFeedbackIsOpen(true);
+  }
+
+  function closeFeedbackSurvey() {
+    setFeedbackIsOpen(false);
+  }
+
+  function dismissFeedbackSurvey() {
+    window.localStorage.setItem(FEEDBACK_STORAGE_KEY, "dismissed");
+    setFeedbackCanPrompt(false);
+    setFeedbackIsOpen(false);
+  }
+
+  function markFeedbackSubmitted() {
+    window.localStorage.setItem(FEEDBACK_STORAGE_KEY, "submitted");
+    setFeedbackCanPrompt(false);
+    setFeedbackIsOpen(false);
+  }
+
+  function maybePromptForFeedback(nextMessages: Message[]) {
+    if (!feedbackCanPrompt) {
+      return;
+    }
+
+    const assistantMessageCount = nextMessages.filter(
+      (message) => message.role === "assistant",
+    ).length;
+    if (assistantMessageCount >= 2) {
+      setFeedbackIsOpen(true);
+    }
+  }
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -685,9 +820,10 @@ export default function AgentWorkflowChat() {
         conversationId ??
         (await createConversation(requestController.signal, trimmedMessage));
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/conversations/${activeConversationId}/messages/stream`,
+        `${API_URL}/conversations/${activeConversationId}/messages/stream`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -699,8 +835,13 @@ export default function AgentWorkflowChat() {
         },
       );
 
+      if (response.status === 401) {
+        router.replace("/login?next=/chat-with-reliability");
+        throw new Error("Please sign in to continue.");
+      }
+
       if (!response.ok) {
-        throw new Error("The Reliability Agent request failed.");
+        throw new Error(await errorMessageFromResponse(response));
       }
 
       if (!response.body) {
@@ -744,26 +885,30 @@ export default function AgentWorkflowChat() {
       }
 
       const data = completedExchange;
-      setMessages((currentMessages) => [
-        ...currentMessages.map((message) =>
-          message.id === temporaryMessageId
-            ? {
-                id: data.user_message.id,
-                role: data.user_message.role,
-                content: data.user_message.content,
-                metadata: data.user_message.metadata,
-              }
-            : message,
-        ),
-        {
-          id: data.assistant_message.id,
-          role: data.assistant_message.role,
-          content: data.assistant_message.content,
-          metadata: data.assistant_message.metadata,
-        },
-      ]);
+      setMessages((currentMessages) => {
+        const nextMessages = [
+          ...currentMessages.map((message) =>
+            message.id === temporaryMessageId
+              ? {
+                  id: data.user_message.id,
+                  role: data.user_message.role,
+                  content: data.user_message.content,
+                  metadata: data.user_message.metadata,
+                }
+              : message,
+          ),
+          {
+            id: data.assistant_message.id,
+            role: data.assistant_message.role,
+            content: data.assistant_message.content,
+            metadata: data.assistant_message.metadata,
+          },
+        ];
+        maybePromptForFeedback(nextMessages);
+        return nextMessages;
+      });
       refreshConversations();
-    } catch {
+    } catch (error) {
       setMessages((currentMessages) => [
         ...currentMessages,
         {
@@ -771,7 +916,9 @@ export default function AgentWorkflowChat() {
           role: "assistant",
           content: requestController.signal.aborted
             ? "Response stopped."
-            : "I could not contact the Reliability Agent. Check that the backend is running.",
+            : error instanceof Error
+              ? error.message
+              : "I could not contact the Reliability Agent. Check that the backend is running.",
         },
       ]);
     } finally {
@@ -787,9 +934,10 @@ export default function AgentWorkflowChat() {
   ): Promise<string> {
     const title = titleFromMessage(firstMessage);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/conversations`,
+      `${API_URL}/conversations`,
       {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -826,8 +974,8 @@ export default function AgentWorkflowChat() {
   async function refreshConversations(signal?: AbortSignal) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/conversations`,
-        { signal },
+        `${API_URL}/conversations`,
+        { credentials: "include", signal },
       );
 
       if (!response.ok) {
@@ -847,7 +995,7 @@ export default function AgentWorkflowChat() {
   async function loadAvailableModels(signal?: AbortSignal) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/models`,
+        `${API_URL}/models`,
         { signal },
       );
 
@@ -884,8 +1032,8 @@ export default function AgentWorkflowChat() {
   async function loadConversation(id: string, signal?: AbortSignal) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/conversations/${id}`,
-        { signal },
+        `${API_URL}/conversations/${id}`,
+        { credentials: "include", signal },
       );
 
       if (!response.ok) {
@@ -927,9 +1075,47 @@ export default function AgentWorkflowChat() {
     composerInputRef.current?.focus();
   }
 
+  async function signOut() {
+    requestControllerRef.current?.abort();
+    try {
+      if (API_URL) {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+      }
+    } catch {
+      // Continue with local sign-out even if the API is unavailable.
+    }
+    window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+    router.replace("/");
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     submitMessage(draft);
+  }
+
+  if (authIsLoading) {
+    return (
+      <main className="auth-loading-shell">
+        <div className="auth-loading-panel">
+          <Image
+            alt="Polaris"
+            className="auth-loading-title"
+            height={149}
+            priority
+            src="/brand/polaris-word.png"
+            width={1285}
+          />
+          <p>Checking your session...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!currentUser) {
+    return null;
   }
 
   return (
@@ -950,6 +1136,25 @@ export default function AgentWorkflowChat() {
           src="/brand/polaris-word.png"
           width={1285}
         />
+        <div className="agent-chat-header-actions">
+          <button
+            className="agent-chat-feedback"
+            onClick={openFeedbackSurvey}
+            type="button"
+          >
+            <MessageCircleIcon />
+            <span>Feedback</span>
+          </button>
+          <button
+            className="agent-chat-sign-out"
+            onClick={signOut}
+            title={`Signed in as ${currentUser.email}`}
+            type="button"
+          >
+            <SignOutIcon />
+            <span>Sign out</span>
+          </button>
+        </div>
       </header>
 
       <button
@@ -1179,6 +1384,13 @@ export default function AgentWorkflowChat() {
           engineering judgement.
         </p>
       </footer>
+      <FeedbackSurvey
+        conversationId={conversationId}
+        isOpen={feedbackIsOpen}
+        onClose={closeFeedbackSurvey}
+        onDismiss={dismissFeedbackSurvey}
+        onSubmitted={markFeedbackSubmitted}
+      />
     </main>
   );
 }

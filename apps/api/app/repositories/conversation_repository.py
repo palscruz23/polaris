@@ -12,8 +12,12 @@ class ConversationRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, title: str | None = None) -> Conversation:
-        conversation = Conversation(title=title)
+    def create(
+        self,
+        title: str | None = None,
+        user_id: uuid.UUID | None = None,
+    ) -> Conversation:
+        conversation = Conversation(title=title, user_id=user_id)
 
         self.session.add(conversation)
         self.session.commit()
@@ -24,21 +28,30 @@ class ConversationRepository:
     def get_by_id(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
     ) -> Conversation | None:
         statement = (
             select(Conversation)
             .where(Conversation.id == conversation_id)
             .options(selectinload(Conversation.messages))
         )
+        if user_id is not None:
+            statement = statement.where(Conversation.user_id == user_id)
 
         return self.session.scalar(statement)
 
-    def list_recent(self, limit: int = 30) -> list[Conversation]:
+    def list_recent(
+        self,
+        limit: int = 30,
+        user_id: uuid.UUID | None = None,
+    ) -> list[Conversation]:
         statement = (
             select(Conversation)
             .order_by(Conversation.updated_at.desc())
             .limit(limit)
         )
+        if user_id is not None:
+            statement = statement.where(Conversation.user_id == user_id)
 
         return list(self.session.scalars(statement).all())
 

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import HomeAuthButton from "./HomeAuthButton";
+import HomeFeedbackButton from "./HomeFeedbackButton";
 
 type SpecialistAgent = {
   id: string;
@@ -146,6 +148,7 @@ export default function Home() {
             <Link href="/" className="brand-link text-lg font-semibold">
               <span>Open Reliability</span>
             </Link>
+            <HomeAuthButton />
           </nav>
 
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
@@ -182,7 +185,7 @@ export default function Home() {
                   Open Reliability&apos;s workspace powered by Polaris, an AI Reliability Agent that guides engineers through data-driven analysis, maintenance strategy optimisation, and reliability decision-making.
                 </p>
                 <p>
-                  Polaris serves as your North Star for reliability, helping teams uncover chronic issues, prioritize improvement opportunities, and improve asset performance.
+                  Polaris serves as your North Star for Reliability, helping teams uncover chronic issues, prioritize improvement opportunities, and improve asset performance.
                 </p>
               </div>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -341,6 +344,14 @@ export default function Home() {
                 >
                   {link.label}
                 </a>
+                {link.label === "Report an issue" ? (
+                  <>
+                    <span className="home-footer-separator" aria-hidden="true">
+                      ·
+                    </span>
+                    <HomeFeedbackButton />
+                  </>
+                ) : null}
               </span>
             ))}
           </nav>

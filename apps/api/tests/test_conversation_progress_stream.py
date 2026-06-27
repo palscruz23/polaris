@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from fastapi.testclient import TestClient
 
 from app.domain.progress import report_progress
+from app.dependencies.auth import get_current_user
 from app.main import app
 from app.routes import conversations
 
@@ -16,6 +17,19 @@ class FakeSessionContext:
 
     def __exit__(self, *args: object) -> None:
         del args
+
+
+class FakeConversationRepository:
+    def __init__(self, session: object):
+        del session
+
+    def get_by_id(
+        self,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
+    ) -> object:
+        del conversation_id, user_id
+        return object()
 
 
 class ProgressService:
@@ -79,6 +93,11 @@ def test_stream_message_returns_progress_before_completed_exchange(
         "ConversationChatService",
         ProgressService,
     )
+    monkeypatch.setattr(
+        conversations,
+        "ConversationRepository",
+        FakeConversationRepository,
+    )
     selected_models: list[str | None] = []
 
     def build_provider(model_id: str | None = None) -> object:
@@ -92,14 +111,20 @@ def test_stream_message_returns_progress_before_completed_exchange(
     )
     conversation_id = uuid.uuid4()
 
-    with TestClient(app) as client:
-        response = client.post(
-            f"/conversations/{conversation_id}/messages/stream",
-            json={
-                "content": "Review the strategy for P-101.",
-                "model": "anthropic/claude-sonnet-4.6",
-            },
-        )
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
+        id=uuid.uuid4()
+    )
+    try:
+        with TestClient(app) as client:
+            response = client.post(
+                f"/conversations/{conversation_id}/messages/stream",
+                json={
+                    "content": "Review the strategy for P-101.",
+                    "model": "anthropic/claude-sonnet-4.6",
+                },
+            )
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
 
     events = [
         json.loads(line)

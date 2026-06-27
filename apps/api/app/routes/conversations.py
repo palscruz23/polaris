@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal, get_database_session
+from app.dependencies.auth import CurrentUser
 from app.domain.progress import OrchestrationProgress
 from app.exceptions import (
     ChatServiceError,
@@ -46,10 +47,11 @@ DatabaseSession = Annotated[
 def create_conversation(
     request: ConversationCreate,
     session: DatabaseSession,
+    user: CurrentUser,
 ) -> ConversationResponse:
     repository = ConversationRepository(session)
 
-    return repository.create(title=request.title)
+    return repository.create(title=request.title, user_id=user.id)
 
 
 @router.get(
@@ -58,10 +60,11 @@ def create_conversation(
 )
 def list_conversations(
     session: DatabaseSession,
+    user: CurrentUser,
 ) -> list[ConversationSummaryResponse]:
     repository = ConversationRepository(session)
 
-    return repository.list_recent()
+    return repository.list_recent(user_id=user.id)
 
 
 @router.get(
@@ -71,9 +74,10 @@ def list_conversations(
 def get_conversation(
     conversation_id: uuid.UUID,
     session: DatabaseSession,
+    user: CurrentUser,
 ) -> ConversationResponse:
     repository = ConversationRepository(session)
-    conversation = repository.get_by_id(conversation_id)
+    conversation = repository.get_by_id(conversation_id, user_id=user.id)
 
     if conversation is None:
         raise HTTPException(
@@ -93,7 +97,15 @@ def create_message(
     conversation_id: uuid.UUID,
     request: MessageCreate,
     session: DatabaseSession,
+    user: CurrentUser,
 ) -> MessageExchangeResponse:
+    repository = ConversationRepository(session)
+    if repository.get_by_id(conversation_id, user_id=user.id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found.",
+        )
+
     try:
         provider = get_chat_provider(request.model)
     except ValueError as error:
@@ -152,7 +164,16 @@ def create_message(
 def stream_message(
     conversation_id: uuid.UUID,
     request: MessageCreate,
+    session: DatabaseSession,
+    user: CurrentUser,
 ) -> StreamingResponse:
+    repository = ConversationRepository(session)
+    if repository.get_by_id(conversation_id, user_id=user.id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found.",
+        )
+
     try:
         provider = get_chat_provider(request.model)
     except ValueError as error:
