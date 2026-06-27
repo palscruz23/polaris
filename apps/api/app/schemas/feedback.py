@@ -58,3 +58,7 @@ class FeedbackResponse(BaseModel):
     comment: str | None
     source: str
     created_at: datetime
+
+
+class FeedbackStatus(BaseModel):
+    has_feedback: bool

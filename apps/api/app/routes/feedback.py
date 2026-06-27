@@ -7,11 +7,26 @@ from app.database import get_database_session
 from app.dependencies.auth import CurrentUser
 from app.models.feedback_response import FeedbackResponse as FeedbackResponseModel
 from app.repositories.conversation_repository import ConversationRepository
-from app.schemas.feedback import FeedbackCreate, FeedbackResponse
+from app.schemas.feedback import FeedbackCreate, FeedbackResponse, FeedbackStatus
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
 DatabaseSession = Annotated[Session, Depends(get_database_session)]
+
+
+@router.get("/status", response_model=FeedbackStatus)
+def get_feedback_status(
+    session: DatabaseSession,
+    user: CurrentUser,
+) -> FeedbackStatus:
+    has_feedback = (
+        session.query(FeedbackResponseModel.id)
+        .filter(FeedbackResponseModel.user_id == user.id)
+        .first()
+        is not None
+    )
+
+    return FeedbackStatus(has_feedback=has_feedback)
 
 
 @router.post(

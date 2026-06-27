@@ -86,6 +86,10 @@ type MessageExchangeApiResponse = {
   memory_update_status: string;
 };
 
+type FeedbackStatusApiResponse = {
+  has_feedback: boolean;
+};
+
 type ProgressStreamEvent = {
   type: "progress";
   stage: string;
@@ -707,7 +711,26 @@ export default function AgentWorkflowChat() {
         CONVERSATION_STORAGE_KEY,
       );
       const feedbackStatus = window.localStorage.getItem(FEEDBACK_STORAGE_KEY);
-      setFeedbackCanPrompt(!feedbackStatus);
+      let hasSavedFeedback = false;
+
+      try {
+        const feedbackResponse = await fetch(`${API_URL}/feedback/status`, {
+          credentials: "include",
+          signal: requestController.signal,
+        });
+
+        if (feedbackResponse.ok) {
+          const savedFeedback: FeedbackStatusApiResponse =
+            await feedbackResponse.json();
+          hasSavedFeedback = savedFeedback.has_feedback;
+        }
+      } catch {
+        if (requestController.signal.aborted) {
+          return;
+        }
+      }
+
+      setFeedbackCanPrompt(!feedbackStatus && !hasSavedFeedback);
 
       refreshConversations(requestController.signal);
       loadAvailableModels(requestController.signal);
