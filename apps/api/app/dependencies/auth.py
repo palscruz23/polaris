@@ -31,3 +31,32 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def user_is_admin(
+    user: User,
+    admin_emails: tuple[str, ...] | None = None,
+) -> bool:
+    configured_admin_emails = (
+        settings.admin_emails
+        if admin_emails is None
+        else admin_emails
+    )
+
+    if not configured_admin_emails:
+        return False
+
+    return user.email.strip().lower() in configured_admin_emails
+
+
+def get_current_admin_user(user: CurrentUser) -> User:
+    if not user_is_admin(user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required.",
+        )
+
+    return user
+
+
+CurrentAdminUser = Annotated[User, Depends(get_current_admin_user)]

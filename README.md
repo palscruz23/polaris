@@ -7,10 +7,6 @@ Open Reliability's workspace powered by Polaris, an AI Reliability Agent that gu
 
 Polaris Agent can select and execute registered specialist capabilities through a bounded sequential multi-call loop. Master Data, Defect Elimination, and Maintenance Strategy are the active registered specialists; Reliability Improvement remains future-development code.
 
-<p align="center">
-  <a href="https://ask-polaris.vercel.app/">Link to Polaris Portal</a>
-</p>
-
 ## Sample Demo
 
 ![Polaris Demo](polaris-demo.gif)

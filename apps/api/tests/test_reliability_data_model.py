@@ -13,6 +13,10 @@ from app.models import (
 def test_reliability_data_model_tables_are_registered() -> None:
     expected_tables = {
         "equipment",
+        "eval_case_results",
+        "eval_cases",
+        "eval_runs",
+        "eval_suites",
         "failure_modes",
         "import_batches",
         "import_validation_results",

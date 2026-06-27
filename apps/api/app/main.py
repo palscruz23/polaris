@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import build_cors_origins, settings
+from app.routes.admin import router as admin_router
 from app.routes.auth import router as auth_router
 from app.routes.conversations import router as conversations_router
 from app.routes.data_browser import router as data_browser_router
@@ -22,6 +23,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(admin_router)
 app.include_router(conversations_router)
 app.include_router(data_browser_router)
 app.include_router(defect_elimination_router)

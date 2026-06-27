@@ -2,6 +2,7 @@ from app.models.agent_run import AgentRun
 from app.models.conversation import Conversation
 from app.models.conversation_memory_revision import ConversationMemoryRevision
 from app.models.equipment import Equipment
+from app.models.evaluation import EvalCase, EvalCaseResult, EvalRun, EvalSuite
 from app.models.feedback_response import FeedbackResponse
 from app.models.failure_mode import FailureMode
 from app.models.import_batch import ImportBatch
@@ -19,6 +20,10 @@ __all__ = [
     "AgentRun",
     "ConversationMemoryRevision",
     "Equipment",
+    "EvalCase",
+    "EvalCaseResult",
+    "EvalRun",
+    "EvalSuite",
     "FeedbackResponse",
     "FailureMode",
     "ImportBatch",

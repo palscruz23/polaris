@@ -30,6 +30,7 @@ class Settings:
     microsoft_oauth_client_secret: str | None
     microsoft_oauth_tenant: str
     microsoft_oauth_redirect_uri: str | None
+    admin_emails: tuple[str, ...]
 
 
 def normalize_optional_url(value: str | None) -> str | None:
@@ -64,6 +65,18 @@ def _env_int(name: str, default: int) -> int:
         return default
 
     return int(value)
+
+
+def _env_csv(name: str) -> tuple[str, ...]:
+    value = os.getenv(name)
+    if not value:
+        return ()
+
+    return tuple(
+        item.strip().lower()
+        for item in value.split(",")
+        if item.strip()
+    )
 
 
 def load_settings() -> Settings:
@@ -117,6 +130,7 @@ def load_settings() -> Settings:
         microsoft_oauth_redirect_uri=normalize_optional_url(
             os.getenv("MICROSOFT_OAUTH_REDIRECT_URI")
         ),
+        admin_emails=_env_csv("ADMIN_EMAILS"),
     )
 
 
