@@ -11,6 +11,7 @@ from app.models.maintenance_strategy import MaintenanceStrategy
 from app.models.message import Message
 from app.models.model_call import ModelCall
 from app.models.user import User
+from app.models.user_login_event import UserLoginEvent
 from app.models.user_session import UserSession
 from app.models.work_order import WorkOrder
 from app.models.work_order_failure_mode import WorkOrderFailureMode
@@ -32,6 +33,7 @@ __all__ = [
     "Message",
     "ModelCall",
     "User",
+    "UserLoginEvent",
     "UserSession",
     "WorkOrder",
     "WorkOrderFailureMode",

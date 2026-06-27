@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models.user import User
+from app.models.user_login_event import UserLoginEvent
 from app.models.user_session import UserSession
 
 STATE_COOKIE_NAME = "polaris_oauth_state"
@@ -269,7 +270,9 @@ def create_user_session(session: Session, user: User) -> tuple[UserSession, str]
         session_token_hash=hash_session_token(token),
         expires_at=session_expires_at(),
     )
+    login_event = UserLoginEvent(user_id=user.id)
     session.add(user_session)
+    session.add(login_event)
     session.commit()
     session.refresh(user_session)
 

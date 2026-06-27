@@ -9,7 +9,7 @@ from app.config import settings
 from app.database import get_database_session
 from app.dependencies.auth import CurrentAdminUser
 from app.models.evaluation import EvalCaseResult, EvalRun
-from app.models.user_session import UserSession
+from app.models.user_login_event import UserLoginEvent
 from app.schemas.admin import (
     AdminEvalCaseResultResponse,
     AdminEvaluationDashboardResponse,
@@ -88,18 +88,18 @@ def get_users_dashboard(
     del user
     login_events = list(
         session.scalars(
-            select(UserSession)
-            .order_by(UserSession.created_at.desc())
+            select(UserLoginEvent)
+            .order_by(UserLoginEvent.created_at.desc())
             .limit(100)
         ).all()
     )
     login_counts = session.execute(
         select(
-            UserSession.user_id,
-            func.count(UserSession.id).label("login_count"),
-            func.max(UserSession.created_at).label("latest_login_at"),
+            UserLoginEvent.user_id,
+            func.count(UserLoginEvent.id).label("login_count"),
+            func.max(UserLoginEvent.created_at).label("latest_login_at"),
         )
-        .group_by(UserSession.user_id)
+        .group_by(UserLoginEvent.user_id)
         .order_by(desc("latest_login_at"))
         .limit(100)
     ).all()

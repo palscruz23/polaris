@@ -10,6 +10,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.conversation import Conversation
+    from app.models.user_login_event import UserLoginEvent
     from app.models.user_session import UserSession
 
 
@@ -59,6 +60,12 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
         order_by="UserSession.created_at",
+    )
+
+    login_events: Mapped[list["UserLoginEvent"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="UserLoginEvent.created_at",
     )
 
     conversations: Mapped[list["Conversation"]] = relationship(
