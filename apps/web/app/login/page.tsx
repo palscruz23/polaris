@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { fetchWithTimeout } from "../fetchWithTimeout";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const DEFAULT_NEXT_PATH = "/chat-with-reliability";
 
@@ -61,7 +63,7 @@ export default function LoginPage() {
       }
 
       try {
-        const response = await fetch(`${API_URL}/auth/me`, {
+        const response = await fetchWithTimeout(`${API_URL}/auth/me`, {
           credentials: "include",
           signal: requestController.signal,
         });

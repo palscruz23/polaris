@@ -7,6 +7,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import FeedbackSurvey from "../../FeedbackSurvey";
+import { fetchWithTimeout } from "../../fetchWithTimeout";
 
 type Message = {
   id: string;
@@ -669,7 +670,7 @@ export default function AgentWorkflowChat() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/auth/me`, {
+      const response = await fetchWithTimeout(`${API_URL}/auth/me`, {
         credentials: "include",
         signal,
       });

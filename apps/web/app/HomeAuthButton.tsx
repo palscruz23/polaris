@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { fetchWithTimeout } from "./fetchWithTimeout";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type AuthState = "checking" | "signed-in" | "signed-out";
@@ -32,7 +34,7 @@ export default function HomeAuthButton() {
       }
 
       try {
-        const response = await fetch(`${API_URL}/auth/me`, {
+        const response = await fetchWithTimeout(`${API_URL}/auth/me`, {
           credentials: "include",
           signal: requestController.signal,
         });

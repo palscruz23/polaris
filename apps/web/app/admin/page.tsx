@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { fetchWithTimeout } from "../fetchWithTimeout";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type AdminState = "checking" | "signed-out" | "authorized" | "forbidden" | "error";
@@ -171,10 +173,13 @@ export default function AdminPage() {
 
     setRunIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/admin/evaluations/runs/${runId}`, {
-        credentials: "include",
-        signal,
-      });
+      const response = await fetchWithTimeout(
+        `${API_URL}/admin/evaluations/runs/${runId}`,
+        {
+          credentials: "include",
+          signal,
+        },
+      );
       if (!response.ok) {
         throw new Error("Could not load evaluation run details.");
       }
@@ -198,7 +203,7 @@ export default function AdminPage() {
       }
 
       try {
-        const authResponse = await fetch(`${API_URL}/auth/me`, {
+        const authResponse = await fetchWithTimeout(`${API_URL}/auth/me`, {
           credentials: "include",
           signal: requestController.signal,
         });
@@ -211,11 +216,11 @@ export default function AdminPage() {
         }
 
         const [evaluationResponse, usersResponse] = await Promise.all([
-          fetch(`${API_URL}/admin/evaluations`, {
+          fetchWithTimeout(`${API_URL}/admin/evaluations`, {
             credentials: "include",
             signal: requestController.signal,
           }),
-          fetch(`${API_URL}/admin/users`, {
+          fetchWithTimeout(`${API_URL}/admin/users`, {
             credentials: "include",
             signal: requestController.signal,
           }),
