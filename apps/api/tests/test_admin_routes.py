@@ -35,6 +35,14 @@ def test_user_is_admin_checks_configured_email_allowlist() -> None:
     assert user_is_admin(user, ("other@example.com",)) is False
 
 
+def test_admin_browser_path_redirects_to_frontend() -> None:
+    with TestClient(app) as client:
+        response = client.get("/admin", follow_redirects=False)
+
+    assert response.status_code == 307
+    assert response.headers["location"] == "http://localhost:3000/admin"
+
+
 class FakeScalarResult:
     def __init__(self, items: list[object]):
         self.items = items
