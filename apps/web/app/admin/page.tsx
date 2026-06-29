@@ -66,7 +66,7 @@ type EvalRunDetail = EvalRunSummary & {
 type EvalSuiteDashboard = {
   suite_name: string;
   runs: EvalRunSummary[];
-  latest_run: EvalRunDetail | null;
+  latest_run: EvalRunSummary | null;
 };
 
 type AdminDashboard = {
@@ -75,6 +75,10 @@ type AdminDashboard = {
   runs: EvalRunSummary[];
   latest_run: EvalRunDetail | null;
   suites: EvalSuiteDashboard[];
+};
+
+type AdminDashboardPayload = Omit<AdminDashboard, "suites"> & {
+  suites?: EvalSuiteDashboard[];
 };
 
 type LoginEvent = {
@@ -131,6 +135,55 @@ function jsonPreview(value: unknown) {
   }
 
   return JSON.stringify(value, null, 2);
+}
+
+function normalizeEvaluationDashboard(
+  payload: AdminDashboardPayload,
+): AdminDashboard {
+  const suites =
+    payload.suites && payload.suites.length > 0
+      ? payload.suites
+      : buildSuiteDashboards(payload.runs, payload.latest_run);
+
+  return {
+    ...payload,
+    suites,
+  };
+}
+
+function buildSuiteDashboards(
+  runs: EvalRunSummary[],
+  latestRun: EvalRunDetail | null,
+): EvalSuiteDashboard[] {
+  const suiteOrder = ["smoke", "prod"];
+  const grouped = new Map<string, EvalRunSummary[]>(
+    suiteOrder.map((suiteName) => [suiteName, []]),
+  );
+
+  runs.forEach((run) => {
+    const suiteRuns = grouped.get(run.suite_name) ?? [];
+    suiteRuns.push(run);
+    grouped.set(run.suite_name, suiteRuns);
+  });
+
+  const suiteNames = [
+    ...suiteOrder,
+    ...Array.from(grouped.keys())
+      .filter((suiteName) => !suiteOrder.includes(suiteName))
+      .sort(),
+  ];
+
+  return suiteNames.map((suiteName) => {
+    const suiteRuns = grouped.get(suiteName) ?? [];
+    return {
+      suite_name: suiteName,
+      runs: suiteRuns,
+      latest_run:
+        latestRun?.suite_name === suiteName
+          ? latestRun
+          : suiteRuns[0] ?? null,
+    };
+  });
 }
 
 type EvalCheck = EvalCaseResult["checks"][number];
@@ -322,16 +375,25 @@ export default function AdminPage() {
           throw new Error("Could not load the admin dashboard.");
         }
 
-        const evaluationPayload: AdminDashboard = await evaluationResponse.json();
+        const evaluationPayload = normalizeEvaluationDashboard(
+          await evaluationResponse.json(),
+        );
         const usersPayload: UsersDashboard = await usersResponse.json();
         const defaultSuite =
-          evaluationPayload.suites.find((suite) => suite.latest_run) ?? null;
-        const defaultRun = defaultSuite?.latest_run ?? evaluationPayload.latest_run;
+          evaluationPayload.suites.find(
+            (suite) =>
+              suite.latest_run?.id === evaluationPayload.latest_run?.id,
+          ) ??
+          evaluationPayload.suites.find((suite) => suite.latest_run) ??
+          null;
+        const defaultRun = evaluationPayload.latest_run;
         setDashboard(evaluationPayload);
         setUsersDashboard(usersPayload);
         setSelectedRun(defaultRun);
         setSelectedRunId(defaultRun?.id ?? null);
-        setSelectedSuiteName(defaultSuite?.suite_name ?? defaultRun?.suite_name ?? "smoke");
+        setSelectedSuiteName(
+          defaultSuite?.suite_name ?? defaultRun?.suite_name ?? "smoke",
+        );
         setSelectedCaseId(defaultRun?.results[0]?.id ?? null);
         setState("authorized");
       } catch (error) {
