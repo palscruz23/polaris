@@ -50,11 +50,18 @@ class AdminEvalRunDetailResponse(AdminEvalRunSummaryResponse):
     results: list[AdminEvalCaseResultResponse]
 
 
+class AdminEvalSuiteDashboardResponse(BaseModel):
+    suite_name: str
+    runs: list[AdminEvalRunSummaryResponse]
+    latest_run: AdminEvalRunDetailResponse | None
+
+
 class AdminEvaluationDashboardResponse(BaseModel):
     viewer: AuthUserResponse
     admin_emails_configured: bool
     runs: list[AdminEvalRunSummaryResponse]
     latest_run: AdminEvalRunDetailResponse | None
+    suites: list[AdminEvalSuiteDashboardResponse]
 
 
 class AdminLoginEventResponse(BaseModel):

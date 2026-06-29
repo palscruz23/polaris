@@ -2,18 +2,10 @@ import argparse
 import subprocess
 
 from app.database import SessionLocal
-from app.evaluations.smoke_cases import (
-    SMOKE_CASES,
-    SMOKE_SUITE_DESCRIPTION,
-    SMOKE_SUITE_NAME,
-)
+from app.evaluations.smoke_cases import SMOKE_SUITE_NAME
+from app.evaluations.suites import BUILT_IN_SUITES
 from app.providers.factory import get_chat_provider
 from app.services.evaluation_service import EvaluationService
-
-
-BUILT_IN_SUITES = {
-    SMOKE_SUITE_NAME: (SMOKE_SUITE_DESCRIPTION, SMOKE_CASES),
-}
 
 
 def main() -> None:
@@ -78,7 +70,7 @@ def main() -> None:
 
         summary = service.run_suite(
             suite_name=args.suite,
-            git_commit=_current_git_commit(),
+            git_commit=current_git_commit(),
             dataset_version=args.dataset_version,
             run_metadata=_run_metadata(
                 batch_id=args.batch_id,
@@ -96,7 +88,7 @@ def main() -> None:
         print(f"Aggregate score: {summary.aggregate_score:.2%}")
 
 
-def _current_git_commit() -> str | None:
+def current_git_commit() -> str | None:
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -135,7 +127,6 @@ def _run_metadata(
         metadata[normalized_key] = value.strip()
 
     return metadata
-
 
 if __name__ == "__main__":
     main()

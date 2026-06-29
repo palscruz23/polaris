@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { fetchWithTimeout } from "../fetchWithTimeout";
@@ -62,11 +63,18 @@ type EvalRunDetail = EvalRunSummary & {
   results: EvalCaseResult[];
 };
 
+type EvalSuiteDashboard = {
+  suite_name: string;
+  runs: EvalRunSummary[];
+  latest_run: EvalRunDetail | null;
+};
+
 type AdminDashboard = {
   viewer: AuthUser;
   admin_emails_configured: boolean;
   runs: EvalRunSummary[];
   latest_run: EvalRunDetail | null;
+  suites: EvalSuiteDashboard[];
 };
 
 type LoginEvent = {
@@ -125,6 +133,67 @@ function jsonPreview(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
 
+type EvalCheck = EvalCaseResult["checks"][number];
+
+type EvalCheckGroup = {
+  checks: EvalCheck[];
+  id: string;
+  title: string;
+};
+
+function groupedChecks(checks: EvalCheck[]) {
+  const groups: EvalCheckGroup[] = [];
+  const toolCallGroups = new Map<string, EvalCheckGroup>();
+
+  checks.forEach((check) => {
+    const toolCallMatch = check.name.match(/^routing\.tool_call_(\d+)(?:\..+)?$/);
+
+    if (!toolCallMatch) {
+      groups.push({
+        checks: [check],
+        id: check.name,
+        title: check.name,
+      });
+      return;
+    }
+
+    const toolCallIndex = toolCallMatch[1];
+    const groupId = `routing.tool_call_${toolCallIndex}`;
+    let group = toolCallGroups.get(groupId);
+
+    if (!group) {
+      group = {
+        checks: [],
+        id: groupId,
+        title: `Tool call ${toolCallIndex}`,
+      };
+      toolCallGroups.set(groupId, group);
+      groups.push(group);
+    }
+
+    group.checks.push(check);
+  });
+
+  return groups;
+}
+
+function AdminDisclosure({
+  children,
+  defaultOpen = true,
+  title,
+}: {
+  children: ReactNode;
+  defaultOpen?: boolean;
+  title: string;
+}) {
+  return (
+    <details className="admin-disclosure" open={defaultOpen}>
+      <summary>{title}</summary>
+      <div className="admin-disclosure-body">{children}</div>
+    </details>
+  );
+}
+
 function startOAuth(provider: "google" | "microsoft") {
   if (!API_URL) {
     return;
@@ -140,6 +209,7 @@ export default function AdminPage() {
   const [usersDashboard, setUsersDashboard] = useState<UsersDashboard | null>(null);
   const [selectedRun, setSelectedRun] = useState<EvalRunDetail | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [selectedSuiteName, setSelectedSuiteName] = useState<string>("smoke");
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [runIsLoading, setRunIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -162,6 +232,7 @@ export default function AdminPage() {
     setUsersDashboard(null);
     setSelectedRun(null);
     setSelectedRunId(null);
+    setSelectedSuiteName("smoke");
     setSelectedCaseId(null);
     setState("signed-out");
   }
@@ -186,11 +257,28 @@ export default function AdminPage() {
       const run: EvalRunDetail = await response.json();
       setSelectedRun(run);
       setSelectedRunId(run.id);
+      setSelectedSuiteName(run.suite_name);
       setSelectedCaseId(run.results[0]?.id ?? null);
     } finally {
       setRunIsLoading(false);
     }
   }, []);
+
+  const selectSuite = useCallback(
+    async (suite: EvalSuiteDashboard) => {
+      setSelectedSuiteName(suite.suite_name);
+
+      if (!suite.latest_run) {
+        setSelectedRun(null);
+        setSelectedRunId(null);
+        setSelectedCaseId(null);
+        return;
+      }
+
+      await loadRun(suite.latest_run.id);
+    },
+    [loadRun],
+  );
 
   useEffect(() => {
     const requestController = new AbortController();
@@ -236,11 +324,15 @@ export default function AdminPage() {
 
         const evaluationPayload: AdminDashboard = await evaluationResponse.json();
         const usersPayload: UsersDashboard = await usersResponse.json();
+        const defaultSuite =
+          evaluationPayload.suites.find((suite) => suite.latest_run) ?? null;
+        const defaultRun = defaultSuite?.latest_run ?? evaluationPayload.latest_run;
         setDashboard(evaluationPayload);
         setUsersDashboard(usersPayload);
-        setSelectedRun(evaluationPayload.latest_run);
-        setSelectedRunId(evaluationPayload.latest_run?.id ?? null);
-        setSelectedCaseId(evaluationPayload.latest_run?.results[0]?.id ?? null);
+        setSelectedRun(defaultRun);
+        setSelectedRunId(defaultRun?.id ?? null);
+        setSelectedSuiteName(defaultSuite?.suite_name ?? defaultRun?.suite_name ?? "smoke");
+        setSelectedCaseId(defaultRun?.results[0]?.id ?? null);
         setState("authorized");
       } catch (error) {
         if (!requestController.signal.aborted) {
@@ -400,10 +492,12 @@ export default function AdminPage() {
           dashboard={dashboard}
           failedChecks={failedChecks}
           loadRun={loadRun}
+          onSelectSuite={selectSuite}
           runIsLoading={runIsLoading}
           selectedCaseId={selectedCaseId}
           selectedRun={selectedRun}
           selectedRunId={selectedRunId}
+          selectedSuiteName={selectedSuiteName}
           setSelectedCaseId={setSelectedCaseId}
         />
       )}
@@ -483,10 +577,12 @@ function EvaluationTab({
   dashboard,
   failedChecks,
   loadRun,
+  onSelectSuite,
   runIsLoading,
   selectedCaseId,
   selectedRun,
   selectedRunId,
+  selectedSuiteName,
   setSelectedCaseId,
 }: {
   dashboard: AdminDashboard | null;
@@ -495,18 +591,46 @@ function EvaluationTab({
     check: EvalCaseResult["checks"][number];
   }>;
   loadRun: (runId: string) => Promise<void>;
+  onSelectSuite: (suite: EvalSuiteDashboard) => Promise<void>;
   runIsLoading: boolean;
   selectedCaseId: string | null;
   selectedRun: EvalRunDetail | null;
   selectedRunId: string | null;
+  selectedSuiteName: string;
   setSelectedCaseId: (caseId: string) => void;
 }) {
   const selectedCase = selectedRun?.results.find(
     (result) => result.id === selectedCaseId,
   ) ?? selectedRun?.results[0] ?? null;
+  const selectedSuite = dashboard?.suites.find(
+    (suite) => suite.suite_name === selectedSuiteName,
+  ) ?? dashboard?.suites[0] ?? null;
+  const visibleRuns = selectedSuite?.runs ?? dashboard?.runs ?? [];
 
   return (
     <>
+      <section className="admin-suite-grid" aria-label="Evaluation suites">
+        {(dashboard?.suites ?? []).map((suite) => (
+          <button
+            aria-pressed={selectedSuiteName === suite.suite_name}
+            className="admin-suite-card"
+            key={suite.suite_name}
+            onClick={() => {
+              void onSelectSuite(suite);
+            }}
+            type="button"
+          >
+            <span>{suite.suite_name === "prod" ? "Prod test" : "Smoke test"}</span>
+            <strong>{formatPercent(suite.latest_run?.aggregate_score ?? null)}</strong>
+            <small>
+              {suite.latest_run
+                ? `${suite.latest_run.passed_count}/${suite.latest_run.case_count} passed`
+                : "No runs yet"}
+            </small>
+          </button>
+        ))}
+      </section>
+
       <section className="admin-metrics-grid" aria-label="Selected evaluation summary">
         <article className="admin-metric">
           <span>Selected score</span>
@@ -521,8 +645,8 @@ function EvaluationTab({
           <strong>{selectedRun?.failed_count ?? 0}</strong>
         </article>
         <article className="admin-metric">
-          <span>Runs stored</span>
-          <strong>{dashboard?.runs.length ?? 0}</strong>
+          <span>Suite runs</span>
+          <strong>{visibleRuns.length}</strong>
         </article>
       </section>
 
@@ -530,9 +654,11 @@ function EvaluationTab({
         <section className="admin-empty-state">
           <h2>No evaluation runs yet</h2>
           <p>
-            Run the smoke suite from the API app to populate this dashboard.
+            Run the selected suite from the API app to populate this dashboard.
           </p>
-          <code>.venv/bin/python -m app.cli.run_evaluation --suite smoke</code>
+          <code>
+            .venv/bin/python -m app.cli.run_evaluation --suite {selectedSuiteName}
+          </code>
         </section>
       ) : (
         <div className="admin-dashboard-grid">
@@ -606,7 +732,7 @@ function EvaluationTab({
             </div>
           </section>
 
-          <section className="admin-panel">
+          <section className="admin-panel admin-troubleshooting-panel">
             <div className="admin-panel-heading">
               <div>
                 <p className="admin-kicker">Troubleshooting</p>
@@ -617,65 +743,92 @@ function EvaluationTab({
               <p className="admin-muted">Select a test to inspect its result.</p>
             ) : (
               <div className="admin-test-detail">
-                <div className="admin-test-summary">
-                  <span className={`admin-status admin-status-${selectedCase.status}`}>
-                    {statusLabel(selectedCase.status)}
-                  </span>
-                  <strong>{formatPercent(selectedCase.score)}</strong>
-                </div>
-                <p className="admin-muted">{selectedCase.prompt}</p>
-                <dl className="admin-run-facts admin-run-facts-single">
-                  <div>
-                    <dt>Agent run</dt>
-                    <dd>{shortId(selectedCase.agent_run_id)}</dd>
+                <AdminDisclosure title="Case context">
+                  <div className="admin-test-summary">
+                    <span className={`admin-status admin-status-${selectedCase.status}`}>
+                      {statusLabel(selectedCase.status)}
+                    </span>
+                    <strong>{formatPercent(selectedCase.score)}</strong>
                   </div>
-                  <div>
-                    <dt>Conversation</dt>
-                    <dd>{shortId(selectedCase.conversation_id)}</dd>
+                  <p className="admin-muted">{selectedCase.prompt}</p>
+                  <dl className="admin-run-facts admin-run-facts-single">
+                    <div>
+                      <dt>Agent run</dt>
+                      <dd>{shortId(selectedCase.agent_run_id)}</dd>
+                    </div>
+                    <div>
+                      <dt>Conversation</dt>
+                      <dd>{shortId(selectedCase.conversation_id)}</dd>
+                    </div>
+                    <div>
+                      <dt>Failure category</dt>
+                      <dd>{selectedCase.failure_category ?? "None"}</dd>
+                    </div>
+                  </dl>
+                </AdminDisclosure>
+                <AdminDisclosure title="Evaluation checks">
+                  <div className="admin-failed-checks">
+                    {groupedChecks(selectedCase.checks).map((group) => {
+                      const groupPassed = group.checks.every((check) => check.passed);
+
+                      return (
+                        <article
+                          className={
+                            groupPassed
+                              ? "admin-check-card"
+                              : "admin-failed-check"
+                          }
+                          key={group.id}
+                        >
+                          <div className="admin-check-heading">
+                            <h3>{group.title}</h3>
+                            <span>{groupPassed ? "passed" : "failed"}</span>
+                          </div>
+                          <div className="admin-check-sections">
+                            {group.checks.map((check) => (
+                              <details
+                                className="admin-check-section"
+                                key={check.name}
+                                open={!check.passed}
+                              >
+                                <summary>
+                                  <strong>{check.name}</strong>
+                                  <span>{check.passed ? "passed" : "failed"}</span>
+                                </summary>
+                                <p>{check.category}</p>
+                                <pre>{jsonPreview(check.details)}</pre>
+                              </details>
+                            ))}
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
-                  <div>
-                    <dt>Failure category</dt>
-                    <dd>{selectedCase.failure_category ?? "None"}</dd>
-                  </div>
-                </dl>
-                <div className="admin-failed-checks">
-                  {selectedCase.checks.map((check) => (
-                    <article
-                      className={
-                        check.passed
-                          ? "admin-check-card"
-                          : "admin-failed-check"
-                      }
-                      key={check.name}
-                    >
-                      <h3>{check.name}</h3>
-                      <p>{check.category}</p>
-                      <span>{check.passed ? "passed" : "failed"}</span>
-                      <pre>{jsonPreview(check.details)}</pre>
-                    </article>
-                  ))}
-                </div>
-                <div className="admin-json-panel">
-                  <h3>Trace</h3>
-                  <pre>{jsonPreview(selectedCase.trace)}</pre>
-                </div>
-                <div className="admin-json-panel">
-                  <h3>Assistant answer</h3>
-                  <pre>{selectedCase.assistant_answer || "None"}</pre>
-                </div>
-                {failedChecks.length > 0 ? (
+                </AdminDisclosure>
+                <AdminDisclosure defaultOpen={false} title="Trace">
                   <div className="admin-json-panel">
-                    <h3>Run failed-check index</h3>
-                    <pre>
-                      {jsonPreview(
-                        failedChecks.map(({ caseName, check }) => ({
-                          caseName,
-                          check: check.name,
-                          category: check.category,
-                        })),
-                      )}
-                    </pre>
+                    <pre>{jsonPreview(selectedCase.trace)}</pre>
                   </div>
+                </AdminDisclosure>
+                <AdminDisclosure defaultOpen={false} title="Assistant answer">
+                  <div className="admin-json-panel">
+                    <pre>{selectedCase.assistant_answer || "None"}</pre>
+                  </div>
+                </AdminDisclosure>
+                {failedChecks.length > 0 ? (
+                  <AdminDisclosure defaultOpen={false} title="Run failed-check index">
+                    <div className="admin-json-panel">
+                      <pre>
+                        {jsonPreview(
+                          failedChecks.map(({ caseName, check }) => ({
+                            caseName,
+                            check: check.name,
+                            category: check.category,
+                          })),
+                        )}
+                      </pre>
+                    </div>
+                  </AdminDisclosure>
                 ) : null}
               </div>
             )}
@@ -706,7 +859,7 @@ function EvaluationTab({
               </tr>
             </thead>
             <tbody>
-              {dashboard?.runs.map((run) => (
+              {visibleRuns.map((run) => (
                 <tr
                   className={
                     selectedRunId === run.id

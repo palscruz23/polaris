@@ -53,9 +53,13 @@ class FakeScalarResult:
 
 class FakeSession:
     def scalars(self, _statement: object) -> FakeScalarResult:
-        suite = SimpleNamespace(
+        smoke_suite = SimpleNamespace(
             id=uuid.uuid4(),
             name="smoke",
+        )
+        prod_suite = SimpleNamespace(
+            id=uuid.uuid4(),
+            name="prod",
         )
         eval_case = SimpleNamespace(
             id=uuid.uuid4(),
@@ -79,10 +83,10 @@ class FakeSession:
             agent_run_id=uuid.uuid4(),
             created_at=datetime.now(UTC),
         )
-        run = SimpleNamespace(
+        smoke_run = SimpleNamespace(
             id=uuid.uuid4(),
-            suite_id=suite.id,
-            suite=suite,
+            suite_id=smoke_suite.id,
+            suite=smoke_suite,
             provider="test",
             model="test-model",
             status="completed",
@@ -99,8 +103,28 @@ class FakeSession:
             completed_at=datetime.now(UTC),
             results=[result],
         )
+        prod_run = SimpleNamespace(
+            id=uuid.uuid4(),
+            suite_id=prod_suite.id,
+            suite=prod_suite,
+            provider="test",
+            model="test-model",
+            status="completed",
+            case_count=1,
+            passed_count=0,
+            failed_count=1,
+            aggregate_score=0.5,
+            git_commit="abc123",
+            dataset_version="test",
+            run_metadata={"source": "test", "run_purpose": "nightly"},
+            error_type=None,
+            error_message=None,
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            results=[],
+        )
 
-        return FakeScalarResult([run])
+        return FakeScalarResult([smoke_run, prod_run])
 
     def execute(self, _statement: object):
         user_id = uuid.uuid4()
@@ -162,6 +186,12 @@ def test_admin_evaluations_endpoint_returns_dashboard() -> None:
     body = response.json()
     assert body["runs"][0]["suite_name"] == "smoke"
     assert body["runs"][0]["run_metadata"] == {"source": "test"}
+    assert [suite["suite_name"] for suite in body["suites"]] == [
+        "smoke",
+        "prod",
+    ]
+    assert body["suites"][0]["latest_run"]["suite_name"] == "smoke"
+    assert body["suites"][1]["latest_run"]["suite_name"] == "prod"
     assert body["latest_run"]["results"][0]["case_name"] == (
         "equipment_master_search"
     )

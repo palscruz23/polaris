@@ -14,6 +14,7 @@ from app.schemas.admin import (
     AdminEvalCaseResultResponse,
     AdminEvaluationDashboardResponse,
     AdminEvalRunDetailResponse,
+    AdminEvalSuiteDashboardResponse,
     AdminEvalRunSummaryResponse,
     AdminLoginEventResponse,
     AdminUserLoginSummaryResponse,
@@ -36,6 +37,7 @@ def get_evaluation_dashboard(
 ) -> AdminEvaluationDashboardResponse:
     runs = _latest_eval_runs(session)
     latest_run = runs[0] if runs else None
+    suite_groups = _suite_dashboard_groups(runs)
 
     return AdminEvaluationDashboardResponse(
         viewer=AuthUserResponse.model_validate(user),
@@ -46,6 +48,7 @@ def get_evaluation_dashboard(
             if latest_run is not None
             else None
         ),
+        suites=suite_groups,
     )
 
 
@@ -196,3 +199,30 @@ def _run_detail(run: EvalRun) -> AdminEvalRunDetailResponse:
             if result.case is not None
         ],
     )
+
+
+def _suite_dashboard_groups(
+    runs: list[EvalRun],
+) -> list[AdminEvalSuiteDashboardResponse]:
+    suite_order = ["smoke", "prod"]
+    grouped: dict[str, list[EvalRun]] = {name: [] for name in suite_order}
+    for run in runs:
+        grouped.setdefault(run.suite.name, []).append(run)
+
+    suite_names = [
+        *suite_order,
+        *sorted(name for name in grouped if name not in suite_order),
+    ]
+
+    return [
+        AdminEvalSuiteDashboardResponse(
+            suite_name=suite_name,
+            runs=[_run_summary(run) for run in grouped[suite_name]],
+            latest_run=(
+                _run_detail(grouped[suite_name][0])
+                if grouped[suite_name]
+                else None
+            ),
+        )
+        for suite_name in suite_names
+    ]

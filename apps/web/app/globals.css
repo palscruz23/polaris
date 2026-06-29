@@ -2842,6 +2842,55 @@ a {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.admin-suite-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-suite-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 16px 42px rgba(22, 49, 77, 0.08);
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 0.35rem;
+  min-height: 6rem;
+  padding: 1rem;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.admin-suite-card[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 16px 42px rgba(24, 88, 155, 0.14);
+}
+
+.admin-suite-card:hover,
+.admin-suite-card:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.admin-suite-card span,
+.admin-suite-card small {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 720;
+}
+
+.admin-suite-card strong {
+  color: var(--heading);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
 .admin-metric {
   display: grid;
   gap: 0.35rem;
@@ -2873,6 +2922,33 @@ a {
   align-content: stretch;
   height: min(66vh, 54rem);
   min-height: 34rem;
+}
+
+.admin-panel.admin-troubleshooting-panel {
+  align-content: start;
+  block-size: min(66vh, 54rem);
+  grid-template-rows: auto minmax(0, 1fr);
+  min-block-size: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-color: var(--accent) #eef4fb;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+}
+
+.admin-panel.admin-troubleshooting-panel::-webkit-scrollbar {
+  width: 0.85rem;
+}
+
+.admin-panel.admin-troubleshooting-panel::-webkit-scrollbar-track {
+  background: #eef4fb;
+  border-left: 1px solid var(--border);
+}
+
+.admin-panel.admin-troubleshooting-panel::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border: 3px solid #eef4fb;
+  border-radius: 999px;
 }
 
 .admin-users-stack {
@@ -2971,6 +3047,45 @@ a {
   min-width: 0;
   overflow: hidden;
   padding: 0.85rem;
+}
+
+.admin-disclosure {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-disclosure:not([open]) .admin-disclosure-body {
+  display: none;
+}
+
+.admin-disclosure summary {
+  color: var(--heading);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 760;
+  list-style-position: inside;
+  padding: 0.8rem 0.9rem;
+}
+
+.admin-disclosure summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.admin-disclosure-body {
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 0.85rem;
+}
+
+.admin-disclosure .admin-json-panel {
+  border: 0;
+  padding: 0;
 }
 
 .admin-json-panel h3 {
@@ -3090,11 +3205,54 @@ a {
   padding: 0.9rem;
 }
 
+.admin-check-heading,
+.admin-check-section summary {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
 .admin-check-card h3 {
   color: var(--heading);
   font-size: 0.9rem;
   font-weight: 760;
   overflow-wrap: anywhere;
+}
+
+.admin-check-sections {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admin-check-section {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-check-section summary {
+  color: var(--heading);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 760;
+  list-style-position: inside;
+  padding: 0.6rem 0.7rem;
+}
+
+.admin-check-section summary strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-check-section p {
+  padding: 0 0.7rem 0.55rem;
+}
+
+.admin-check-section pre {
+  margin: 0 0.7rem 0.7rem;
 }
 
 .admin-check-card p {
@@ -3110,13 +3268,28 @@ a {
 }
 
 .admin-test-detail {
+  align-content: start;
   display: grid;
   gap: 0.9rem;
-  height: 100%;
+  grid-auto-rows: max-content;
+  height: auto;
   max-height: none;
+  min-height: 0;
   min-width: 0;
-  overflow-y: auto;
+  overflow: visible;
   padding-right: 0.25rem;
+}
+
+.admin-troubleshooting-panel .admin-json-panel pre,
+.admin-troubleshooting-panel .admin-failed-check pre,
+.admin-troubleshooting-panel .admin-check-card pre {
+  background: #ffffff;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: visible;
+  overflow-wrap: normal;
+  white-space: pre;
+  word-break: normal;
 }
 
 .admin-test-summary {
@@ -3271,10 +3444,15 @@ a {
   }
 
   .admin-metrics-grid,
+  .admin-suite-grid,
   .admin-dashboard-grid,
   .admin-users-stack,
   .admin-run-facts {
     grid-template-columns: 1fr;
+  }
+
+  .admin-panel.admin-troubleshooting-panel {
+    block-size: 70vh;
   }
 
   .admin-case-row {

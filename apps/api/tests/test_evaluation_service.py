@@ -16,6 +16,8 @@ from app.domain.orchestration import (
     AgentToolResult,
     SubToolCall,
 )
+from app.evaluations.prod_cases import PROD_CASES, PROD_SUITE_NAME
+from app.evaluations.suites import BUILT_IN_SUITES, NIGHTLY_SUITE_NAMES
 from app.models.evaluation import EvalCaseResult, EvalRun
 from app.providers.base import ChatProvider
 from app.services.evaluation_service import (
@@ -163,6 +165,12 @@ def test_score_eval_case_checks_route_intent_tools_answer_and_trace() -> None:
     assert scoring["scores"]["routing"] == 1.0
     assert scoring["scores"]["intent"] == 1.0
     assert scoring["scores"]["tools"] == 1.0
+
+
+def test_built_in_suites_include_smoke_and_prod() -> None:
+    assert PROD_SUITE_NAME in BUILT_IN_SUITES
+    assert PROD_SUITE_NAME in NIGHTLY_SUITE_NAMES
+    assert len(PROD_CASES) >= 1
 
 
 def test_evaluation_service_persists_whole_workflow_result() -> None:
