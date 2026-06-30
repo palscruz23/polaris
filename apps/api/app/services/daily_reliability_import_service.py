@@ -171,7 +171,7 @@ def _read_csv(
 
     try:
         with path.open(newline="", encoding="utf-8") as file:
-            reader = csv.DictReader(file)
+            reader = csv.DictReader(file, strict=True)
             if reader.fieldnames is None:
                 raise DailyReliabilityImportError(
                     f"CSV file has no header row: {path}"

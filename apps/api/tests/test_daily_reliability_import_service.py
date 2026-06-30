@@ -250,6 +250,25 @@ def test_daily_import_wraps_invalid_utf8_as_import_error(tmp_path: Path) -> None
     assert "Unable to read CSV file" in str(exc_info.value)
 
 
+def test_daily_import_wraps_malformed_csv_quoting_as_import_error(
+    tmp_path: Path,
+) -> None:
+    session = _sqlite_session(tmp_path)
+    work_orders_csv = tmp_path / "work_orders.csv"
+    links_csv = tmp_path / "work_order_failure_modes.csv"
+    work_orders_csv.write_text(
+        'order_number,short_text\nWO-1,"unterminated\n',
+        encoding="utf-8",
+    )
+    links_csv.write_text(LINK_HEADER, encoding="utf-8")
+
+    with pytest.raises(DailyReliabilityImportError) as exc_info:
+        DailyReliabilityImportService(session).import_files(work_orders_csv, links_csv)
+
+    assert str(work_orders_csv) in str(exc_info.value)
+    assert "Unable to read CSV file" in str(exc_info.value)
+
+
 @pytest.mark.parametrize(
     ("maintenance_activity_type", "source", "confidence", "error_match"),
     [
