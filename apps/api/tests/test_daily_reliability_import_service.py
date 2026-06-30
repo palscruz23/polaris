@@ -154,10 +154,15 @@ def test_daily_import_is_idempotent_for_duplicate_rows_in_one_batch(
         encoding="utf-8",
     )
 
-    DailyReliabilityImportService(session).import_files(work_orders_csv, links_csv)
+    summary = DailyReliabilityImportService(session).import_files(
+        work_orders_csv,
+        links_csv,
+    )
 
     work_orders = session.scalars(select(WorkOrder)).all()
     links = session.scalars(select(WorkOrderFailureMode)).all()
+    assert summary.work_order_count == 1
+    assert summary.work_order_failure_mode_count == 1
     assert len(work_orders) == 1
     assert work_orders[0].status == "closed"
     assert work_orders[0].short_text == "Updated seal repair"
@@ -229,6 +234,20 @@ def test_daily_import_rejects_malformed_rows_with_extra_columns(
 
     with pytest.raises(DailyReliabilityImportError, match="too many columns"):
         DailyReliabilityImportService(session).import_files(work_orders_csv, links_csv)
+
+
+def test_daily_import_wraps_invalid_utf8_as_import_error(tmp_path: Path) -> None:
+    session = _sqlite_session(tmp_path)
+    work_orders_csv = tmp_path / "work_orders.csv"
+    links_csv = tmp_path / "work_order_failure_modes.csv"
+    work_orders_csv.write_bytes(b"\xff\xfe\xfa")
+    links_csv.write_text(LINK_HEADER, encoding="utf-8")
+
+    with pytest.raises(DailyReliabilityImportError) as exc_info:
+        DailyReliabilityImportService(session).import_files(work_orders_csv, links_csv)
+
+    assert str(work_orders_csv) in str(exc_info.value)
+    assert "Unable to read CSV file" in str(exc_info.value)
 
 
 @pytest.mark.parametrize(

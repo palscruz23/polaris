@@ -65,7 +65,7 @@ class DailyReliabilityImportService:
         link_count = self._upsert_links(link_rows, work_orders_by_number)
         self.session.commit()
         return DailyReliabilityImportSummary(
-            work_order_count=len(work_order_rows),
+            work_order_count=len(work_orders_by_number),
             work_order_failure_mode_count=link_count,
         )
 
@@ -168,30 +168,41 @@ def _read_csv(
 ) -> list[dict[str, str]]:
     if not path.exists():
         raise DailyReliabilityImportError(f"CSV file does not exist: {path}")
-    with path.open(newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        if reader.fieldnames is None:
-            raise DailyReliabilityImportError(f"CSV file has no header row: {path}")
-        fieldnames = set(reader.fieldnames)
-        missing_headers = sorted(required_headers - fieldnames)
-        if missing_headers:
-            raise DailyReliabilityImportError(
-                f"Missing required headers in {path}: {', '.join(missing_headers)}"
-            )
-        rows = []
-        for line_number, row in enumerate(reader, start=2):
-            if None in row:
+
+    try:
+        with path.open(newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            if reader.fieldnames is None:
                 raise DailyReliabilityImportError(
-                    f"Malformed CSV row in {path} at line {line_number}: "
-                    "too many columns"
+                    f"CSV file has no header row: {path}"
                 )
-            rows.append(
-                {
-                    key: value.strip() if value is not None else ""
-                    for key, value in row.items()
-                }
-            )
-        return rows
+            fieldnames = set(reader.fieldnames)
+            missing_headers = sorted(required_headers - fieldnames)
+            if missing_headers:
+                raise DailyReliabilityImportError(
+                    f"Missing required headers in {path}: "
+                    f"{', '.join(missing_headers)}"
+                )
+            rows = []
+            for line_number, row in enumerate(reader, start=2):
+                if None in row:
+                    raise DailyReliabilityImportError(
+                        f"Malformed CSV row in {path} at line {line_number}: "
+                        "too many columns"
+                    )
+                rows.append(
+                    {
+                        key: value.strip() if value is not None else ""
+                        for key, value in row.items()
+                    }
+                )
+            return rows
+    except DailyReliabilityImportError:
+        raise
+    except (OSError, UnicodeDecodeError, csv.Error) as exc:
+        raise DailyReliabilityImportError(
+            f"Unable to read CSV file {path}: {exc}"
+        ) from exc
 
 
 def _resolve_equipment(session: Session, row: dict[str, str]) -> Equipment | None:
