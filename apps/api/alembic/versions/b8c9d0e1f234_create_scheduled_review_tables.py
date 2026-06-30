@@ -22,7 +22,12 @@ def upgrade() -> None:
         "scheduled_review_runs",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("template_id", sa.Text(), nullable=False),
-        sa.Column("status", sa.Text(), nullable=False),
+        sa.Column(
+            "status",
+            sa.Text(),
+            server_default=sa.text("'running'"),
+            nullable=False,
+        ),
         sa.Column("window_start_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("window_end_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
@@ -45,6 +50,10 @@ def upgrade() -> None:
             "template_id IN ('breakdown_strategy_gap', "
             "'bad_actor_watchlist', 'maintenance_strategy_health_check')",
             name="ck_scheduled_review_runs_template_id",
+        ),
+        sa.CheckConstraint(
+            "window_start_at < window_end_at",
+            name="ck_scheduled_review_runs_window_start_before_end",
         ),
         sa.CheckConstraint(
             "status IN ('running', 'succeeded', 'partially_succeeded', "
@@ -78,7 +87,12 @@ def upgrade() -> None:
         sa.Column("scheduled_review_run_id", sa.UUID(), nullable=False),
         sa.Column("provider", sa.Text(), nullable=False),
         sa.Column("destination_label", sa.Text(), nullable=True),
-        sa.Column("status", sa.Text(), nullable=False),
+        sa.Column(
+            "status",
+            sa.Text(),
+            server_default=sa.text("'pending'"),
+            nullable=False,
+        ),
         sa.Column("sent_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("provider_response_json", sa.JSON(), nullable=True),
         sa.Column("error_message", sa.Text(), nullable=True),
