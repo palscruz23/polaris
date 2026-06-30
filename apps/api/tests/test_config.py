@@ -27,3 +27,24 @@ def test_build_cors_origins_does_not_duplicate_local_frontend() -> None:
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
+
+
+def test_polaris_watch_settings_load_from_environment(monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://u:p@host/db")
+    monkeypatch.setenv(
+        "SCHEDULED_REVIEW_TEAMS_WEBHOOK_URL",
+        "https://example.test/teams",
+    )
+    monkeypatch.setenv(
+        "SCHEDULED_REVIEW_TEAMS_DESTINATION_LABEL",
+        "Reliability Standup",
+    )
+    monkeypatch.setenv("SCHEDULED_REVIEW_DEFAULT_TIMEZONE", "Australia/Perth")
+
+    from app.config import load_settings
+
+    loaded = load_settings()
+
+    assert loaded.scheduled_review_teams_webhook_url == "https://example.test/teams"
+    assert loaded.scheduled_review_teams_destination_label == "Reliability Standup"
+    assert loaded.scheduled_review_default_timezone == "Australia/Perth"

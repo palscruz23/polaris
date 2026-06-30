@@ -30,6 +30,9 @@ class Settings:
     microsoft_oauth_client_secret: str | None
     microsoft_oauth_tenant: str
     microsoft_oauth_redirect_uri: str | None
+    scheduled_review_teams_webhook_url: str | None
+    scheduled_review_teams_destination_label: str
+    scheduled_review_default_timezone: str
     admin_emails: tuple[str, ...]
 
 
@@ -129,6 +132,17 @@ def load_settings() -> Settings:
         ),
         microsoft_oauth_redirect_uri=normalize_optional_url(
             os.getenv("MICROSOFT_OAUTH_REDIRECT_URI")
+        ),
+        scheduled_review_teams_webhook_url=normalize_optional_url(
+            os.getenv("SCHEDULED_REVIEW_TEAMS_WEBHOOK_URL")
+        ),
+        scheduled_review_teams_destination_label=os.getenv(
+            "SCHEDULED_REVIEW_TEAMS_DESTINATION_LABEL",
+            "Reliability Team",
+        ),
+        scheduled_review_default_timezone=os.getenv(
+            "SCHEDULED_REVIEW_DEFAULT_TIMEZONE",
+            "Australia/Sydney",
         ),
         admin_emails=_env_csv("ADMIN_EMAILS"),
     )
