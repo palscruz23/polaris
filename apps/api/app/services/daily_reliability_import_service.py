@@ -263,11 +263,16 @@ def _parse_decimal(value: str | None) -> Decimal | None:
     if value is None:
         return None
     try:
-        return Decimal(value)
+        parsed = Decimal(value)
     except InvalidOperation as exc:
         raise DailyReliabilityImportError(
             f"Invalid decimal value: {value}"
         ) from exc
+    if not parsed.is_finite():
+        raise DailyReliabilityImportError(
+            f"Invalid decimal value: {value}; expected a finite number"
+        )
+    return parsed
 
 
 def _parse_confidence(value: str | None) -> Decimal | None:

@@ -256,6 +256,7 @@ def test_daily_import_wraps_invalid_utf8_as_import_error(tmp_path: Path) -> None
         ("invalid_activity", "import", "0.900", "Invalid maintenance_activity_type"),
         ("corrective", "spreadsheet", "0.900", "Invalid source"),
         ("corrective", "import", "1.100", "Invalid confidence"),
+        ("corrective", "import", "NaN", "Invalid decimal"),
     ],
 )
 def test_daily_import_rejects_values_that_violate_model_constraints(
