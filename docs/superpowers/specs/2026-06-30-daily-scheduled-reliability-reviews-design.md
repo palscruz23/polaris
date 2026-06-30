@@ -1,18 +1,18 @@
-# Daily Scheduled Reliability Reviews Design
+# Polaris Watch Design
 
 ## Problem
 
 Polaris can review work orders and maintenance strategies on demand, but it
 does not yet push routine reliability findings to the maintenance team. The
-first scheduled workflow should review fresh work-order data daily and send
-focused findings to Microsoft Teams without requiring a full workflow builder
-or in-app scheduler.
+first scheduled workflow feature, Polaris Watch, should review fresh work-order
+data daily and send focused findings to Microsoft Teams without requiring a
+full workflow builder or in-app scheduler.
 
 ## Goals
 
 - Import updated work-order and work-order failure-mode data into Postgres on a
   daily schedule.
-- Run three predefined daily reliability review templates independently.
+- Run three predefined Polaris Watch templates independently each day.
 - Send one Microsoft Teams message per review template.
 - Persist enough import, review, report, and delivery state for auditability and
   future UI scheduler work.
@@ -29,7 +29,7 @@ or in-app scheduler.
 
 ## Chosen Approach
 
-Use four separate GitHub Actions cron workflows:
+Polaris Watch uses four separate GitHub Actions cron workflows:
 
 1. Daily reliability data import.
 2. Daily breakdown strategy gap review.
@@ -44,7 +44,7 @@ This approach matches the existing backend CLI pattern used by nightly
 evaluations while avoiding the infrastructure cost of an in-app scheduler for
 the first release.
 
-## Predefined Daily Templates
+## Predefined Polaris Watch Templates
 
 ### Breakdown Strategy Gap Review
 
