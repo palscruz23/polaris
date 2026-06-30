@@ -92,7 +92,9 @@ def load_settings() -> Settings:
             "OPENROUTER_BASE_URL",
             "https://openrouter.ai/api/v1",
         ),
-        openrouter_site_url=os.getenv("OPENROUTER_SITE_URL"),
+        openrouter_site_url=normalize_optional_url(
+            os.getenv("OPENROUTER_SITE_URL")
+        ),
         openrouter_app_name=os.getenv(
             "OPENROUTER_APP_NAME",
             "Open Reliability",

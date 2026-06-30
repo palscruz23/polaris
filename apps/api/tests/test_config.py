@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("DATABASE_URL", "sqlite:////tmp/polaris-watch-task2-test.db")
+
 from app.config import build_cors_origins, normalize_optional_url
 
 
@@ -31,6 +35,7 @@ def test_build_cors_origins_does_not_duplicate_local_frontend() -> None:
 
 def test_polaris_watch_settings_load_from_environment(monkeypatch) -> None:
     monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://u:p@host/db")
+    monkeypatch.setenv("OPENROUTER_SITE_URL", "https://open-reliability.vercel.app/")
     monkeypatch.setenv(
         "SCHEDULED_REVIEW_TEAMS_WEBHOOK_URL",
         "https://example.test/teams",
@@ -45,6 +50,7 @@ def test_polaris_watch_settings_load_from_environment(monkeypatch) -> None:
 
     loaded = load_settings()
 
+    assert loaded.openrouter_site_url == "https://open-reliability.vercel.app"
     assert loaded.scheduled_review_teams_webhook_url == "https://example.test/teams"
     assert loaded.scheduled_review_teams_destination_label == "Reliability Standup"
     assert loaded.scheduled_review_default_timezone == "Australia/Perth"
