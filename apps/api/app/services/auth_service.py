@@ -75,7 +75,9 @@ def safe_redirect_path(value: str | None) -> str | None:
 def frontend_redirect_url(path: str | None) -> str:
     safe_path = safe_redirect_path(path)
     if safe_path is None:
-        raise OAuthRedirectError("OAuth redirect path is invalid.")
+        if path:
+            raise OAuthRedirectError("OAuth redirect path is invalid.")
+        safe_path = "/"
 
     frontend_origin = settings.frontend_url
     if frontend_origin is None:

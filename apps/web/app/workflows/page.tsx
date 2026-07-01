@@ -110,7 +110,7 @@ export default function WorkflowsPage() {
               <span>Open Reliability</span>
             </Link>
             <div className="workflow-header-actions">
-              <Link className="button button-secondary" href="/chat-with-reliability">
+              <Link className="button button-secondary" href="/ask-polaris">
                 Ask Polaris
               </Link>
               <Link className="button button-secondary" href="/">

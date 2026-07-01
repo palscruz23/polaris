@@ -80,9 +80,13 @@ class ConversationChatService:
         self,
         conversation_id: uuid.UUID,
         content: str,
+        user_id: uuid.UUID | None = None,
         progress: ProgressCallback | None = None,
     ) -> tuple[Message, Message, str]:
-        conversation = self.conversations.get_for_update(conversation_id)
+        conversation = self.conversations.get_for_update(
+            conversation_id,
+            user_id=user_id,
+        )
 
         if conversation is None:
             raise ConversationNotFoundError
@@ -134,7 +138,8 @@ class ConversationChatService:
                     conversation.memory_markdown
                 )
                 locked_conversation = self.conversations.get_for_update(
-                    conversation_id
+                    conversation_id,
+                    user_id=user_id,
                 )
 
                 if locked_conversation is None:
@@ -187,10 +192,13 @@ class ConversationChatService:
                     total_latency_ms=self._elapsed_ms(run_started_at),
                     error=error,
                 )
-            self._clear_processing(conversation_id)
+            self._clear_processing(conversation_id, user_id=user_id)
             raise
 
-        locked_conversation = self.conversations.get_for_update(conversation_id)
+        locked_conversation = self.conversations.get_for_update(
+            conversation_id,
+            user_id=user_id,
+        )
 
         if locked_conversation is None:
             raise ConversationNotFoundError
@@ -224,10 +232,11 @@ class ConversationChatService:
                 tool_call_count=len(agent_response.tool_calls),
                 tool_metadata=tool_metadata,
             )
-        self._clear_processing(conversation_id)
+        self._clear_processing(conversation_id, user_id=user_id)
 
         memory_status = self._update_memory(
             conversation_id=conversation_id,
+            user_id=user_id,
             previous_memory=locked_conversation.memory_markdown,
             user_message=content,
             assistant_message=assistant_content,
@@ -331,8 +340,12 @@ class ConversationChatService:
     def _clear_processing(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
     ) -> None:
-        conversation = self.conversations.get_for_update(conversation_id)
+        conversation = self.conversations.get_for_update(
+            conversation_id,
+            user_id=user_id,
+        )
 
         if conversation is not None:
             self.conversations.end_processing(conversation)
@@ -340,12 +353,16 @@ class ConversationChatService:
     def _update_memory(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID | None,
         previous_memory: str,
         user_message: str,
         assistant_message: str,
         through_sequence_number: int,
     ) -> str:
-        conversation = self.conversations.get_for_update(conversation_id)
+        conversation = self.conversations.get_for_update(
+            conversation_id,
+            user_id=user_id,
+        )
 
         if conversation is None:
             raise ConversationNotFoundError
@@ -359,7 +376,10 @@ class ConversationChatService:
                 assistant_message=assistant_message,
             )
         except ChatServiceError as error:
-            conversation = self.conversations.get_for_update(conversation_id)
+            conversation = self.conversations.get_for_update(
+                conversation_id,
+                user_id=user_id,
+            )
 
             if conversation is not None:
                 self.conversations.mark_memory_update_failed(
@@ -369,7 +389,10 @@ class ConversationChatService:
 
             return "failed"
 
-        conversation = self.conversations.get_for_update(conversation_id)
+        conversation = self.conversations.get_for_update(
+            conversation_id,
+            user_id=user_id,
+        )
 
         if conversation is None:
             raise ConversationNotFoundError

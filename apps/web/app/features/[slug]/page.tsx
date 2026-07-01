@@ -53,7 +53,7 @@ export default async function FeaturePage({
   }
 
   if (slug === "reliability-agent-team") {
-    redirect("/chat-with-reliability");
+    redirect("/ask-polaris");
   }
 
   return (

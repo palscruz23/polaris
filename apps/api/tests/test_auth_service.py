@@ -68,9 +68,7 @@ class FakeAuthSession:
 
 def test_safe_redirect_path_allows_only_internal_paths() -> None:
     assert safe_redirect_path("/") == "/"
-    assert safe_redirect_path("/chat-with-reliability") == (
-        "/chat-with-reliability"
-    )
+    assert safe_redirect_path("/ask-polaris") == "/ask-polaris"
     assert safe_redirect_path("https://example.com") is None
     assert safe_redirect_path("//example.com") is None
 

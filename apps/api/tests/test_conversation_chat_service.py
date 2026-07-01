@@ -1,6 +1,9 @@
 import math
+import uuid
 from collections.abc import Sequence
 
+import pytest
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.database import engine
@@ -12,6 +15,7 @@ from app.domain.orchestration import (
     AgentToolExchange,
     AgentToolResult,
 )
+from app.exceptions import ConversationNotFoundError
 from app.providers.base import ChatProvider
 from app.repositories.conversation_repository import ConversationRepository
 from app.services.conversation_chat_service import ConversationChatService
@@ -106,13 +110,22 @@ class MetadataOrchestrator:
         )
 
 
-def test_conversation_service_persists_follow_up_context_and_memory() -> None:
-    connection = engine.connect()
+def _database_session_or_skip() -> tuple[object, object, Session]:
+    try:
+        connection = engine.connect()
+    except OperationalError as error:
+        pytest.skip(f"Postgres is unavailable: {error}")
+
     transaction = connection.begin()
     session = Session(
         bind=connection,
         join_transaction_mode="create_savepoint",
     )
+    return connection, transaction, session
+
+
+def test_conversation_service_persists_follow_up_context_and_memory() -> None:
+    connection, transaction, session = _database_session_or_skip()
 
     try:
         provider = RecordingProvider()
@@ -160,12 +173,7 @@ def test_conversation_service_persists_follow_up_context_and_memory() -> None:
 
 
 def test_conversation_service_sets_summary_title_from_first_message() -> None:
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(
-        bind=connection,
-        join_transaction_mode="create_savepoint",
-    )
+    connection, transaction, session = _database_session_or_skip()
 
     try:
         provider = RecordingProvider()
@@ -187,13 +195,39 @@ def test_conversation_service_sets_summary_title_from_first_message() -> None:
         connection.close()
 
 
+def test_conversation_service_rejects_conversation_owned_by_another_user() -> None:
+    class RejectingConversationRepository:
+        def __init__(self) -> None:
+            self.received_user_id: uuid.UUID | None = None
+
+        def get_for_update(
+            self,
+            conversation_id: uuid.UUID,
+            user_id: uuid.UUID | None = None,
+        ) -> None:
+            del conversation_id
+            self.received_user_id = user_id
+            return None
+
+    provider = RecordingProvider()
+    user_id = uuid.uuid4()
+    repository = RejectingConversationRepository()
+    service = ConversationChatService(object(), provider)  # type: ignore[arg-type]
+    service.conversations = repository  # type: ignore[assignment]
+
+    with pytest.raises(ConversationNotFoundError):
+        service.respond(
+            uuid.uuid4(),
+            "Review P-101 failures.",
+            user_id=user_id,
+        )
+
+    assert repository.received_user_id == user_id
+    assert provider.calls == []
+
+
 def test_conversation_service_persists_agent_tool_metadata() -> None:
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(
-        bind=connection,
-        join_transaction_mode="create_savepoint",
-    )
+    connection, transaction, session = _database_session_or_skip()
 
     try:
         provider = RecordingProvider()

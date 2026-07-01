@@ -58,12 +58,15 @@ class ConversationRepository:
     def get_for_update(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
     ) -> Conversation | None:
         statement = (
             select(Conversation)
             .where(Conversation.id == conversation_id)
             .with_for_update()
         )
+        if user_id is not None:
+            statement = statement.where(Conversation.user_id == user_id)
 
         return self.session.scalar(statement)
 

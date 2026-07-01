@@ -1,6 +1,5 @@
-import AgentWorkflowChat from "../features/[slug]/AgentWorkflowChat";
+import { redirect } from "next/navigation";
 
-
-export default function ChatWithReliabilityPage() {
-  return <AgentWorkflowChat />;
+export default function ChatWithReliabilityRedirect() {
+  redirect("/ask-polaris");
 }

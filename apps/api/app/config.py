@@ -117,7 +117,7 @@ def load_settings() -> Settings:
         ).strip().lower(),
         auth_redirect_after_login=os.getenv(
             "AUTH_REDIRECT_AFTER_LOGIN",
-            "http://localhost:3000/chat-with-reliability",
+            "http://localhost:3000/",
         ),
         google_oauth_client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
         google_oauth_client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { fetchWithTimeout } from "../fetchWithTimeout";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const DEFAULT_NEXT_PATH = "/chat-with-reliability";
+const DEFAULT_NEXT_PATH = "/";
 
 function getSafeNextPath() {
   if (typeof window === "undefined") {

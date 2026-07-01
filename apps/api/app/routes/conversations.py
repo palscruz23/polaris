@@ -128,6 +128,7 @@ def create_message(
         user_message, assistant_message, memory_status = service.respond(
             conversation_id=conversation_id,
             content=request.content,
+            user_id=user.id,
         )
     except ConversationNotFoundError as error:
         raise HTTPException(
@@ -208,6 +209,7 @@ def stream_message(
                 user_message, assistant_message, memory_status = service.respond(
                     conversation_id=conversation_id,
                     content=request.content,
+                    user_id=user.id,
                     progress=publish_progress,
                 )
                 exchange = MessageExchangeResponse(

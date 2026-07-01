@@ -676,7 +676,7 @@ export default function AgentWorkflowChat() {
       });
 
       if (response.status === 401) {
-        router.replace("/login?next=/chat-with-reliability");
+        router.replace("/login?next=/ask-polaris");
         return null;
       }
 
@@ -689,7 +689,7 @@ export default function AgentWorkflowChat() {
       return user;
     } catch {
       if (!signal?.aborted) {
-        router.replace("/login?next=/chat-with-reliability");
+        router.replace("/login?next=/ask-polaris");
       }
       return null;
     } finally {
@@ -860,7 +860,7 @@ export default function AgentWorkflowChat() {
       );
 
       if (response.status === 401) {
-        router.replace("/login?next=/chat-with-reliability");
+        router.replace("/login?next=/ask-polaris");
         throw new Error("Please sign in to continue.");
       }
 

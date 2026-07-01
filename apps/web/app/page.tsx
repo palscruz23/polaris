@@ -161,7 +161,7 @@ export default function Home() {
               <Link
                 aria-label="Chat with Polaris"
                 className="hero-title-lockup"
-                href="/chat-with-reliability"
+                href="/ask-polaris"
               >
                 <Image
                   alt=""
@@ -193,7 +193,7 @@ export default function Home() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   className="button button-primary"
-                  href="/chat-with-reliability"
+                  href="/ask-polaris"
                 >
                   Ask Polaris
                 </Link>

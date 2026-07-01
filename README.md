@@ -180,11 +180,42 @@ OPENROUTER_APP_NAME=Polaris
 FRONTEND_URL=http://localhost:3000
 
 DATABASE_URL=postgresql+psycopg://user:password@host:5432/open_reliability
+
+AUTH_SECRET=replace-with-a-long-random-secret
+AUTH_SESSION_COOKIE_NAME=polaris_session
+AUTH_SESSION_DAYS=14
+AUTH_COOKIE_SECURE=false
+AUTH_COOKIE_SAMESITE=lax
+AUTH_REDIRECT_AFTER_LOGIN=http://localhost:3000/
+ADMIN_EMAILS=admin@example.com
+
+GOOGLE_OAUTH_CLIENT_ID=your-google-client-id
+GOOGLE_OAUTH_CLIENT_SECRET=your-google-client-secret
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+MICROSOFT_OAUTH_CLIENT_ID=your-microsoft-client-id
+MICROSOFT_OAUTH_CLIENT_SECRET=your-microsoft-client-secret
+MICROSOFT_OAUTH_TENANT=common
+MICROSOFT_OAUTH_REDIRECT_URI=http://localhost:8000/auth/microsoft/callback
 ```
 
 The OpenRouter key is used only by the backend. Never place it in
 `apps/web/.env.local`, expose it through a `NEXT_PUBLIC_*` variable, or commit
 the real key to Git.
+
+For OAuth, create Google and Microsoft application credentials with the local
+callback URLs above. In production, the browser-facing callback URLs should use
+the Vercel site domain:
+
+```text
+https://open-reliability.com/auth/google/callback
+https://open-reliability.com/auth/microsoft/callback
+```
+
+Configure the production API with `FRONTEND_URL=https://open-reliability.com`,
+`AUTH_REDIRECT_AFTER_LOGIN=https://open-reliability.com/`,
+`AUTH_COOKIE_SECURE=true`, and `AUTH_COOKIE_SAMESITE=lax`. `ADMIN_EMAILS` is a
+comma-separated allowlist for the `/admin` dashboard.
 
 Restart or reload Uvicorn after changing `apps/api/.env`, because environment
 settings are loaded when the backend starts.
@@ -203,11 +234,21 @@ The frontend expects:
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
+In production on Vercel, point browser API calls at the website itself and let
+Next.js proxy API routes to Render:
+
+```text
+NEXT_PUBLIC_API_URL=https://open-reliability.com
+API_PROXY_ORIGIN=https://polaris-dis4.onrender.com
+```
+
 Open Polaris at:
 
 ```text
-http://localhost:3000/chat-with-reliability
+http://localhost:3000/ask-polaris
 ```
+
+The homepage is available at both `/` and `/polaris`.
 
 For production, configure `OPENROUTER_API_KEY` and `DATABASE_URL` through the
 hosting platform's encrypted backend secrets rather than a deployed `.env`

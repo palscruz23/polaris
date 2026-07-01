@@ -40,8 +40,10 @@ class ProgressService:
         self,
         conversation_id: uuid.UUID,
         content: str,
+        user_id: uuid.UUID,
         progress,
     ):
+        del user_id
         report_progress(
             progress,
             stage="reviewing_request",
