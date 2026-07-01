@@ -59,6 +59,7 @@ def create_feedback(
         improvement_priority=request.improvement_priority,
         future_feature_interest=list(request.future_feature_interest),
         comment=request.comment,
+        source="poc_survey",
     )
     session.add(feedback)
     session.commit()

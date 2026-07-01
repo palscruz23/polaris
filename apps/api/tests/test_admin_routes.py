@@ -11,6 +11,7 @@ from app.dependencies.auth import (
     user_is_admin,
 )
 from app.main import app
+from app.models.feedback_response import FeedbackResponse
 from app.models.user import User
 
 
@@ -161,6 +162,42 @@ class FakeUsersSession:
         ])
 
 
+class FakeFeedbackSession:
+    def __init__(self) -> None:
+        self.user_id = uuid.uuid4()
+        self.feedback = [
+            FeedbackResponse(
+                id=uuid.uuid4(),
+                user_id=self.user_id,
+                conversation_id=uuid.uuid4(),
+                usefulness_rating=5,
+                confidence_rating=4,
+                most_useful="repeat_failures",
+                improvement_priority="upload_import_workflow",
+                future_feature_interest=["upload_data", "knowledge_base"],
+                comment="The repeat failure summary helped prioritize work.",
+                source="poc_survey",
+                created_at=datetime(2026, 6, 30, 12, 0, tzinfo=UTC),
+            ),
+            FeedbackResponse(
+                id=uuid.uuid4(),
+                user_id=self.user_id,
+                conversation_id=None,
+                usefulness_rating=3,
+                confidence_rating=None,
+                most_useful="equipment_data_search",
+                improvement_priority="upload_import_workflow",
+                future_feature_interest=["upload_data"],
+                comment=None,
+                source="poc_survey",
+                created_at=datetime(2026, 6, 29, 12, 0, tzinfo=UTC),
+            ),
+        ]
+
+    def scalars(self, _statement: object) -> FakeScalarResult:
+        return FakeScalarResult(self.feedback)
+
+
 def test_admin_evaluations_endpoint_returns_dashboard() -> None:
     fake_admin = SimpleNamespace(
         id=uuid.uuid4(),
@@ -227,4 +264,62 @@ def test_admin_users_endpoint_hides_pii() -> None:
         "user_id",
         "login_count",
         "latest_login_at",
+    }
+
+
+def test_admin_feedback_endpoint_returns_dashboard() -> None:
+    fake_admin = SimpleNamespace(
+        id=uuid.uuid4(),
+        email="admin@example.com",
+        display_name="Admin",
+        avatar_url=None,
+        auth_provider="google",
+        created_at=datetime.now(UTC),
+    )
+    app.dependency_overrides[get_current_user] = lambda: fake_admin
+    app.dependency_overrides[get_current_admin_user] = lambda: fake_admin
+    app.dependency_overrides[get_database_session] = lambda: FakeFeedbackSession()
+
+    try:
+        with TestClient(app) as client:
+            response = client.get("/admin/feedback")
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+        app.dependency_overrides.pop(get_current_admin_user, None)
+        app.dependency_overrides.pop(get_database_session, None)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["summary"] == {
+        "total_responses": 2,
+        "average_usefulness_rating": 4.0,
+        "average_confidence_rating": 4.0,
+        "comment_count": 1,
+    }
+    assert body["most_useful_counts"] == [
+        {"option": "equipment_data_search", "count": 1},
+        {"option": "repeat_failures", "count": 1},
+    ]
+    assert body["improvement_priority_counts"] == [
+        {"option": "upload_import_workflow", "count": 2},
+    ]
+    assert body["future_feature_interest_counts"] == [
+        {"option": "upload_data", "count": 2},
+        {"option": "knowledge_base", "count": 1},
+    ]
+    assert body["responses"][0]["comment"] == (
+        "The repeat failure summary helped prioritize work."
+    )
+    assert set(body["responses"][0]) == {
+        "id",
+        "user_id",
+        "conversation_id",
+        "usefulness_rating",
+        "confidence_rating",
+        "most_useful",
+        "improvement_priority",
+        "future_feature_interest",
+        "comment",
+        "source",
+        "created_at",
     }

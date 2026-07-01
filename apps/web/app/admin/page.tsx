@@ -9,7 +9,7 @@ import { fetchWithTimeout } from "../fetchWithTimeout";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type AdminState = "checking" | "signed-out" | "authorized" | "forbidden" | "error";
-type AdminTab = "users" | "evaluations";
+type AdminTab = "users" | "feedback" | "evaluations";
 
 type AuthUser = {
   email: string;
@@ -98,6 +98,40 @@ type UsersDashboard = {
   user_login_counts: UserLoginSummary[];
 };
 
+type FeedbackSummary = {
+  total_responses: number;
+  average_usefulness_rating: number | null;
+  average_confidence_rating: number | null;
+  comment_count: number;
+};
+
+type FeedbackOptionCount = {
+  option: string;
+  count: number;
+};
+
+type FeedbackResponseItem = {
+  id: string;
+  user_id: string;
+  conversation_id: string | null;
+  usefulness_rating: number | null;
+  confidence_rating: number | null;
+  most_useful: string | null;
+  improvement_priority: string | null;
+  future_feature_interest: string[] | null;
+  comment: string | null;
+  source: string;
+  created_at: string;
+};
+
+type FeedbackDashboard = {
+  summary: FeedbackSummary;
+  most_useful_counts: FeedbackOptionCount[];
+  improvement_priority_counts: FeedbackOptionCount[];
+  future_feature_interest_counts: FeedbackOptionCount[];
+  responses: FeedbackResponseItem[];
+};
+
 function formatDate(value: string | null) {
   if (!value) {
     return "Not completed";
@@ -117,8 +151,24 @@ function formatPercent(value: number | null) {
   return `${Math.round(value * 100)}%`;
 }
 
+function formatRating(value: number | null) {
+  if (value === null || Number.isNaN(value)) {
+    return "n/a";
+  }
+
+  return value.toFixed(1);
+}
+
 function statusLabel(status: string) {
   return status.replace(/_/g, " ");
+}
+
+function optionLabel(value: string | null) {
+  if (!value) {
+    return "None";
+  }
+
+  return value.replace(/_/g, " ");
 }
 
 function shortId(value: string | null) {
@@ -260,6 +310,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>("users");
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [usersDashboard, setUsersDashboard] = useState<UsersDashboard | null>(null);
+  const [feedbackDashboard, setFeedbackDashboard] =
+    useState<FeedbackDashboard | null>(null);
   const [selectedRun, setSelectedRun] = useState<EvalRunDetail | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [selectedSuiteName, setSelectedSuiteName] = useState<string>("smoke");
@@ -283,6 +335,7 @@ export default function AdminPage() {
     window.dispatchEvent(new Event("polaris-auth-changed"));
     setDashboard(null);
     setUsersDashboard(null);
+    setFeedbackDashboard(null);
     setSelectedRun(null);
     setSelectedRunId(null);
     setSelectedSuiteName("smoke");
@@ -356,7 +409,8 @@ export default function AdminPage() {
           throw new Error("Could not check the current session.");
         }
 
-        const [evaluationResponse, usersResponse] = await Promise.all([
+        const [evaluationResponse, usersResponse, feedbackResponse] =
+          await Promise.all([
           fetchWithTimeout(`${API_URL}/admin/evaluations`, {
             credentials: "include",
             signal: requestController.signal,
@@ -365,13 +419,25 @@ export default function AdminPage() {
             credentials: "include",
             signal: requestController.signal,
           }),
+          fetchWithTimeout(`${API_URL}/admin/feedback`, {
+            credentials: "include",
+            signal: requestController.signal,
+          }),
         ]);
 
-        if (evaluationResponse.status === 403 || usersResponse.status === 403) {
+        if (
+          evaluationResponse.status === 403 ||
+          usersResponse.status === 403 ||
+          feedbackResponse.status === 403
+        ) {
           setState("forbidden");
           return;
         }
-        if (!evaluationResponse.ok || !usersResponse.ok) {
+        if (
+          !evaluationResponse.ok ||
+          !usersResponse.ok ||
+          !feedbackResponse.ok
+        ) {
           throw new Error("Could not load the admin dashboard.");
         }
 
@@ -379,6 +445,7 @@ export default function AdminPage() {
           await evaluationResponse.json(),
         );
         const usersPayload: UsersDashboard = await usersResponse.json();
+        const feedbackPayload: FeedbackDashboard = await feedbackResponse.json();
         const defaultSuite =
           evaluationPayload.suites.find(
             (suite) =>
@@ -389,6 +456,7 @@ export default function AdminPage() {
         const defaultRun = evaluationPayload.latest_run;
         setDashboard(evaluationPayload);
         setUsersDashboard(usersPayload);
+        setFeedbackDashboard(feedbackPayload);
         setSelectedRun(defaultRun);
         setSelectedRunId(defaultRun?.id ?? null);
         setSelectedSuiteName(
@@ -538,6 +606,14 @@ export default function AdminPage() {
           Users
         </button>
         <button
+          aria-pressed={activeTab === "feedback"}
+          className="admin-tab"
+          onClick={() => setActiveTab("feedback")}
+          type="button"
+        >
+          Feedback
+        </button>
+        <button
           aria-pressed={activeTab === "evaluations"}
           className="admin-tab"
           onClick={() => setActiveTab("evaluations")}
@@ -549,6 +625,8 @@ export default function AdminPage() {
 
       {activeTab === "users" ? (
         <UsersTab usersDashboard={usersDashboard} />
+      ) : activeTab === "feedback" ? (
+        <FeedbackTab feedbackDashboard={feedbackDashboard} />
       ) : (
         <EvaluationTab
           dashboard={dashboard}
@@ -632,6 +710,149 @@ function UsersTab({
         </div>
       </section>
     </div>
+  );
+}
+
+function FeedbackTab({
+  feedbackDashboard,
+}: {
+  feedbackDashboard: FeedbackDashboard | null;
+}) {
+  const summary = feedbackDashboard?.summary;
+  const responses = feedbackDashboard?.responses ?? [];
+
+  return (
+    <div className="admin-feedback-stack">
+      <section className="admin-metrics-grid" aria-label="Feedback summary">
+        <article className="admin-metric">
+          <span>Responses</span>
+          <strong>{summary?.total_responses ?? 0}</strong>
+        </article>
+        <article className="admin-metric">
+          <span>Usefulness</span>
+          <strong>{formatRating(summary?.average_usefulness_rating ?? null)}</strong>
+        </article>
+        <article className="admin-metric">
+          <span>Confidence</span>
+          <strong>{formatRating(summary?.average_confidence_rating ?? null)}</strong>
+        </article>
+        <article className="admin-metric">
+          <span>Comments</span>
+          <strong>{summary?.comment_count ?? 0}</strong>
+        </article>
+      </section>
+
+      <section className="admin-feedback-grid" aria-label="Feedback option counts">
+        <FeedbackOptionPanel
+          options={feedbackDashboard?.most_useful_counts ?? []}
+          title="Most useful"
+        />
+        <FeedbackOptionPanel
+          options={feedbackDashboard?.improvement_priority_counts ?? []}
+          title="Improvement priorities"
+        />
+        <FeedbackOptionPanel
+          options={feedbackDashboard?.future_feature_interest_counts ?? []}
+          title="Future interest"
+        />
+      </section>
+
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <div>
+            <p className="admin-kicker">Feedback</p>
+            <h2>Recent responses</h2>
+          </div>
+        </div>
+        {responses.length === 0 ? (
+          <p className="admin-muted">No feedback responses have been saved yet.</p>
+        ) : (
+          <div className="admin-feedback-list">
+            {responses.map((response) => (
+              <article className="admin-feedback-response" key={response.id}>
+                <div className="admin-feedback-response-heading">
+                  <div>
+                    <h3>{optionLabel(response.improvement_priority)}</h3>
+                    <p>{formatDate(response.created_at)}</p>
+                  </div>
+                  <div className="admin-feedback-ratings">
+                    <span>Use {response.usefulness_rating ?? "n/a"}</span>
+                    <span>Conf {response.confidence_rating ?? "n/a"}</span>
+                  </div>
+                </div>
+                <dl className="admin-run-facts admin-feedback-facts">
+                  <div>
+                    <dt>User</dt>
+                    <dd>{shortId(response.user_id)}</dd>
+                  </div>
+                  <div>
+                    <dt>Conversation</dt>
+                    <dd>{shortId(response.conversation_id)}</dd>
+                  </div>
+                  <div>
+                    <dt>Most useful</dt>
+                    <dd>{optionLabel(response.most_useful)}</dd>
+                  </div>
+                  <div>
+                    <dt>Interest</dt>
+                    <dd>
+                      {(response.future_feature_interest ?? [])
+                        .map(optionLabel)
+                        .join(", ") || "None"}
+                    </dd>
+                  </div>
+                </dl>
+                {response.comment ? (
+                  <p className="admin-feedback-comment">{response.comment}</p>
+                ) : (
+                  <p className="admin-muted">No comment provided.</p>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function FeedbackOptionPanel({
+  options,
+  title,
+}: {
+  options: FeedbackOptionCount[];
+  title: string;
+}) {
+  const total = options.reduce((sum, option) => sum + option.count, 0);
+
+  return (
+    <section className="admin-panel admin-feedback-option-panel">
+      <div className="admin-panel-heading">
+        <div>
+          <p className="admin-kicker">Feedback</p>
+          <h2>{title}</h2>
+        </div>
+      </div>
+      {options.length === 0 ? (
+        <p className="admin-muted">No responses yet.</p>
+      ) : (
+        <div className="admin-feedback-options">
+          {options.map((option) => (
+            <div className="admin-feedback-option-row" key={option.option}>
+              <span>{optionLabel(option.option)}</span>
+              <strong>{option.count}</strong>
+              <div
+                aria-hidden="true"
+                className="admin-feedback-bar"
+                style={{
+                  inlineSize: `${Math.round((option.count / total) * 100)}%`,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

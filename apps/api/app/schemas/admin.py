@@ -79,3 +79,37 @@ class AdminUserLoginSummaryResponse(BaseModel):
 class AdminUsersDashboardResponse(BaseModel):
     logins: list[AdminLoginEventResponse]
     user_login_counts: list[AdminUserLoginSummaryResponse]
+
+
+class AdminFeedbackSummaryResponse(BaseModel):
+    total_responses: int
+    average_usefulness_rating: float | None
+    average_confidence_rating: float | None
+    comment_count: int
+
+
+class AdminFeedbackOptionCountResponse(BaseModel):
+    option: str
+    count: int
+
+
+class AdminFeedbackResponseItem(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    conversation_id: uuid.UUID | None
+    usefulness_rating: int | None
+    confidence_rating: int | None
+    most_useful: str | None
+    improvement_priority: str | None
+    future_feature_interest: list[str] | None
+    comment: str | None
+    source: str
+    created_at: datetime
+
+
+class AdminFeedbackDashboardResponse(BaseModel):
+    summary: AdminFeedbackSummaryResponse
+    most_useful_counts: list[AdminFeedbackOptionCountResponse]
+    improvement_priority_counts: list[AdminFeedbackOptionCountResponse]
+    future_feature_interest_counts: list[AdminFeedbackOptionCountResponse]
+    responses: list[AdminFeedbackResponseItem]

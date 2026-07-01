@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 import uuid
 from typing import Annotated
 
@@ -9,6 +10,7 @@ from app.config import settings
 from app.database import get_database_session
 from app.dependencies.auth import CurrentAdminUser
 from app.models.evaluation import EvalCaseResult, EvalRun
+from app.models.feedback_response import FeedbackResponse
 from app.models.user_login_event import UserLoginEvent
 from app.schemas.admin import (
     AdminEvalCaseResultResponse,
@@ -16,6 +18,10 @@ from app.schemas.admin import (
     AdminEvalRunDetailResponse,
     AdminEvalSuiteDashboardResponse,
     AdminEvalRunSummaryResponse,
+    AdminFeedbackDashboardResponse,
+    AdminFeedbackOptionCountResponse,
+    AdminFeedbackResponseItem,
+    AdminFeedbackSummaryResponse,
     AdminLoginEventResponse,
     AdminUserLoginSummaryResponse,
     AdminUsersDashboardResponse,
@@ -127,6 +133,55 @@ def get_users_dashboard(
     )
 
 
+@router.get(
+    "/feedback",
+    response_model=AdminFeedbackDashboardResponse,
+)
+def get_feedback_dashboard(
+    session: DatabaseSession,
+    user: CurrentAdminUser,
+) -> AdminFeedbackDashboardResponse:
+    del user
+    responses = list(
+        session.scalars(
+            select(FeedbackResponse)
+            .order_by(FeedbackResponse.created_at.desc())
+            .limit(100)
+        ).all()
+    )
+
+    return AdminFeedbackDashboardResponse(
+        summary=_feedback_summary(responses),
+        most_useful_counts=_option_counts(
+            response.most_useful for response in responses
+        ),
+        improvement_priority_counts=_option_counts(
+            response.improvement_priority for response in responses
+        ),
+        future_feature_interest_counts=_option_counts(
+            option
+            for response in responses
+            for option in (response.future_feature_interest or [])
+        ),
+        responses=[
+            AdminFeedbackResponseItem(
+                id=response.id,
+                user_id=response.user_id,
+                conversation_id=response.conversation_id,
+                usefulness_rating=response.usefulness_rating,
+                confidence_rating=response.confidence_rating,
+                most_useful=response.most_useful,
+                improvement_priority=response.improvement_priority,
+                future_feature_interest=response.future_feature_interest,
+                comment=response.comment,
+                source=response.source,
+                created_at=response.created_at,
+            )
+            for response in responses
+        ],
+    )
+
+
 def _latest_eval_runs(
     session: Session,
     limit: int = 20,
@@ -143,6 +198,52 @@ def _latest_eval_runs(
             .limit(limit)
         ).all()
     )
+
+
+def _feedback_summary(
+    responses: list[FeedbackResponse],
+) -> AdminFeedbackSummaryResponse:
+    usefulness_ratings = [
+        response.usefulness_rating
+        for response in responses
+        if response.usefulness_rating is not None
+    ]
+    confidence_ratings = [
+        response.confidence_rating
+        for response in responses
+        if response.confidence_rating is not None
+    ]
+
+    return AdminFeedbackSummaryResponse(
+        total_responses=len(responses),
+        average_usefulness_rating=_average(usefulness_ratings),
+        average_confidence_rating=_average(confidence_ratings),
+        comment_count=sum(1 for response in responses if response.comment),
+    )
+
+
+def _average(values: list[int]) -> float | None:
+    if not values:
+        return None
+    return round(sum(values) / len(values), 2)
+
+
+def _option_counts(
+    values: Iterable[object],
+) -> list[AdminFeedbackOptionCountResponse]:
+    counts: dict[str, int] = {}
+    for value in values:
+        if not value:
+            continue
+        counts[str(value)] = counts.get(str(value), 0) + 1
+
+    return [
+        AdminFeedbackOptionCountResponse(option=option, count=count)
+        for option, count in sorted(
+            counts.items(),
+            key=lambda item: (-item[1], item[0]),
+        )
+    ]
 
 
 def _run_summary(run: EvalRun) -> AdminEvalRunSummaryResponse:
