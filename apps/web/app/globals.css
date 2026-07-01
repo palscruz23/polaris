@@ -753,8 +753,25 @@ a {
 
 .workflow-page-header {
   background:
-    linear-gradient(135deg, rgba(20, 184, 166, 0.08), transparent 34rem),
-    linear-gradient(180deg, #ffffff, #f8fbff);
+    linear-gradient(135deg, rgba(20, 184, 166, 0.18), transparent 34rem),
+    linear-gradient(180deg, #071b3d, #0f2f5f);
+  color: #ffffff;
+}
+
+.workflow-page-header .brand-link,
+.workflow-page-header .workflow-page-heading h1 {
+  color: #ffffff;
+}
+
+.workflow-page-header .panel-label,
+.workflow-page-header .workflow-page-heading p {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.workflow-page-header .button-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
 }
 
 .workflow-header-actions {
@@ -869,7 +886,25 @@ a {
 }
 
 .data-page-header {
-  background: var(--surface);
+  background:
+    linear-gradient(135deg, rgba(20, 184, 166, 0.18), transparent 34rem),
+    linear-gradient(180deg, #071b3d, #0f2f5f);
+  color: #ffffff;
+}
+
+.data-page-header .brand-link,
+.data-page-header .data-page-heading h1 {
+  color: #ffffff;
+}
+
+.data-page-header .data-page-heading p {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.data-page-header .button-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
 }
 
 .data-page-heading h1 {

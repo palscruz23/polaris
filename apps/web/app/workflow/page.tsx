@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function WorkflowsRedirect() {
+export default function WorkflowRedirect() {
   redirect("/polaris-watch");
 }

@@ -26,8 +26,8 @@ const nextConfig: NextConfig = {
         destination: `${apiProxyOrigin}/models/:path*`,
       },
       {
-        source: "/data-browser/:path*",
-        destination: `${apiProxyOrigin}/data-browser/:path*`,
+        source: "/data/:path*",
+        destination: `${apiProxyOrigin}/data/:path*`,
       },
       {
         source: "/defect-elimination/:path*",
