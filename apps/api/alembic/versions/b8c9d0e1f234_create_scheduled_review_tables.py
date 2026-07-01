@@ -1,7 +1,7 @@
 """create scheduled review tables
 
 Revision ID: b8c9d0e1f234
-Revises: e6f7a8b9c012
+Revises: 8d2f4a6b7c90
 Create Date: 2026-06-30 00:00:00.000000
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 revision: str = "b8c9d0e1f234"
-down_revision: Union[str, Sequence[str], None] = "e6f7a8b9c012"
+down_revision: Union[str, Sequence[str], None] = "8d2f4a6b7c90"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
