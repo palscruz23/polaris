@@ -3,6 +3,10 @@
   <img src="apps/web/public/brand/polaris-comp1.png" alt="Polaris" width="340" />
 </p>
 
+<p align="center">
+  <a href="https://open-reliability.com/polaris">https://open-reliability.com/polaris</a>
+</p>
+
 Open Reliability's workspace powered by Polaris, an AI Reliability Agent that guides engineers through data-driven analysis, maintenance strategy optimisation, and reliability decision-making.
 
 Polaris Agent can select and execute registered specialist capabilities through a bounded sequential multi-call loop. Master Data, Defect Elimination, and Maintenance Strategy are the active registered specialists; Reliability Improvement remains future-development code.
