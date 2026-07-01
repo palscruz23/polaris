@@ -182,6 +182,25 @@ def test_defect_elimination_agent_runs_focused_failure_mode_bad_actor_path() -> 
     ]
 
 
+def test_defect_elimination_agent_filters_work_orders_by_finished_window() -> None:
+    asset = Equipment(equipment_number="PUMP-001", equipment_type="pump")
+    session = FakeSession()
+    session.added.extend(
+        [
+            _work_order("WO-1", asset, "corrective", "2026-06-29", 2),
+            _work_order("WO-2", asset, "corrective", "2026-06-01", 2),
+        ]
+    )
+    agent = DefectEliminationAgent(session)  # type: ignore[arg-type]
+
+    findings = agent.analyze(
+        window_start_at=datetime.fromisoformat("2026-06-28T00:00:00+00:00"),
+        window_end_at=datetime.fromisoformat("2026-06-30T00:00:00+00:00"),
+    )
+
+    assert findings.summary.total_work_orders == 1
+
+
 def test_bad_actor_analysis_ranks_shortest_mtbf_first() -> None:
     high_frequency_asset = Equipment(
         equipment_number="PUMP-001",
