@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Literal
 
 from sqlalchemy import select
@@ -35,6 +36,12 @@ DefectEliminationIntent = Literal[
 ]
 
 
+def _ensure_comparable_datetime(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value
+
+
 class DefectEliminationAgent:
     """Specialist agent for repeat failure and bad actor investigations."""
 
@@ -62,6 +69,8 @@ class DefectEliminationAgent:
         bad_actor_limit: int = 10,
         repeat_failure_limit: int = 10,
         minimum_repeat_occurrences: int = 2,
+        window_start_at: datetime | None = None,
+        window_end_at: datetime | None = None,
         progress: ProgressCallback | None = None,
     ) -> DefectEliminationFindings:
         return self.analyze(
@@ -69,6 +78,8 @@ class DefectEliminationAgent:
             bad_actor_limit=bad_actor_limit,
             repeat_failure_limit=repeat_failure_limit,
             minimum_repeat_occurrences=minimum_repeat_occurrences,
+            window_start_at=window_start_at,
+            window_end_at=window_end_at,
             progress=progress,
         )
 
@@ -79,10 +90,17 @@ class DefectEliminationAgent:
         bad_actor_limit: int = 10,
         repeat_failure_limit: int = 10,
         minimum_repeat_occurrences: int = 2,
+        window_start_at: datetime | None = None,
+        window_end_at: datetime | None = None,
         progress: ProgressCallback | None = None,
     ) -> DefectEliminationFindings:
         work_orders = self._load_work_orders()
         work_orders = self._filter_work_orders(work_orders, equipment_numbers)
+        work_orders = self._filter_work_orders_by_window(
+            work_orders,
+            window_start_at,
+            window_end_at,
+        )
         report_progress(
             progress,
             stage="tool_started",
@@ -208,6 +226,38 @@ class DefectEliminationAgent:
             if work_order.equipment is not None
             and work_order.equipment.equipment_number in requested
         ]
+
+    @staticmethod
+    def _filter_work_orders_by_window(
+        work_orders: list[WorkOrder],
+        window_start_at: datetime | None,
+        window_end_at: datetime | None,
+    ) -> list[WorkOrder]:
+        if window_start_at is None and window_end_at is None:
+            return work_orders
+
+        normalized_start = (
+            _ensure_comparable_datetime(window_start_at)
+            if window_start_at is not None
+            else None
+        )
+        normalized_end = (
+            _ensure_comparable_datetime(window_end_at)
+            if window_end_at is not None
+            else None
+        )
+        filtered = []
+        for work_order in work_orders:
+            occurred_at = work_order.finished_at or work_order.created_at_source
+            if occurred_at is None:
+                continue
+            occurred_at = _ensure_comparable_datetime(occurred_at)
+            if normalized_start is not None and occurred_at < normalized_start:
+                continue
+            if normalized_end is not None and occurred_at >= normalized_end:
+                continue
+            filtered.append(work_order)
+        return filtered
 
     def _rank_bad_actors(
         self,
