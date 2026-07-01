@@ -1,8 +1,8 @@
-import uuid
 from datetime import datetime
+import uuid
 from typing import Literal
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, JSON, Text, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, JSON, Text, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -33,6 +33,10 @@ class ScheduledReviewRun(Base):
             name="ck_scheduled_review_runs_template_id",
         ),
         CheckConstraint(
+            "window_start_at < window_end_at",
+            name="ck_scheduled_review_runs_window_start_before_end",
+        ),
+        CheckConstraint(
             "status IN ('running', 'succeeded', 'partially_succeeded', "
             "'failed')",
             name="ck_scheduled_review_runs_status",
@@ -53,6 +57,7 @@ class ScheduledReviewRun(Base):
         Text,
         nullable=False,
         default="running",
+        server_default=text("'running'"),
     )
     window_start_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -122,6 +127,7 @@ class ScheduledReviewDelivery(Base):
         Text,
         nullable=False,
         default="pending",
+        server_default=text("'pending'"),
     )
     sent_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
