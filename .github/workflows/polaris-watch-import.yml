@@ -1,0 +1,27 @@
+name: Polaris Watch Import
+
+on:
+  schedule:
+    - cron: "5 14 * * *"
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.txt
+      - run: python -m alembic upgrade head
+      - run: >
+          python -m app.cli.import_daily_reliability_data
+          --work-orders-csv sample_data/reliability/work_orders.csv
+          --work-order-failure-modes-csv sample_data/reliability/work_order_failure_modes.csv
