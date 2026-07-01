@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-export default function HomeWorkflowsButton() {
+export default function HomePolarisWatchButton() {
   return (
     <Link className="button button-secondary" href="/workflows">
-      Workflows
+      See Polaris Watch
     </Link>
   );
 }

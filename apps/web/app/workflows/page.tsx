@@ -8,7 +8,7 @@ import { fetchWithTimeout } from "../fetchWithTimeout";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type WorkflowDefinition = {
+type PolarisWatchReviewDefinition = {
   id: string;
   title: string;
   description: string;
@@ -17,9 +17,9 @@ type WorkflowDefinition = {
   status: "Active";
 };
 
-type WorkflowAuthState = "checking" | "signed-in" | "signed-out";
+type PolarisWatchAuthState = "checking" | "signed-in" | "signed-out";
 
-const activeWorkflows: readonly WorkflowDefinition[] = [
+const activePolarisWatchReviews: readonly PolarisWatchReviewDefinition[] = [
   {
     id: "breakdown-strategy-gap",
     title: "Breakdown Strategy Gap Review",
@@ -49,9 +49,10 @@ const activeWorkflows: readonly WorkflowDefinition[] = [
   },
 ];
 
-export default function WorkflowsPage() {
+export default function PolarisWatchPage() {
   const router = useRouter();
-  const [authState, setAuthState] = useState<WorkflowAuthState>("checking");
+  const [authState, setAuthState] =
+    useState<PolarisWatchAuthState>("checking");
 
   useEffect(() => {
     const requestController = new AbortController();
@@ -120,11 +121,10 @@ export default function WorkflowsPage() {
           </nav>
 
           <div className="workflow-page-heading">
-            <p className="panel-label">Workflow control</p>
-            <h1>Active workflows</h1>
+            <p className="panel-label">Scheduled review watch</p>
+            <h1>Polaris Watch</h1>
             <p>
-              Scheduled reliability reviews currently configured for Polaris
-              Watch.
+              Active scheduled reliability reviews monitored by Polaris Watch.
             </p>
           </div>
         </div>
@@ -132,18 +132,18 @@ export default function WorkflowsPage() {
 
       <section className="mx-auto max-w-7xl px-6 py-8 md:px-8">
         <div className="workflow-card-grid">
-          {activeWorkflows.map((workflow) => (
-            <article className="workflow-card" key={workflow.id}>
+          {activePolarisWatchReviews.map((review) => (
+            <article className="workflow-card" key={review.id}>
               <div className="workflow-card-topline">
-                <span className="workflow-status">{workflow.status}</span>
-                <span>{workflow.cadence}</span>
+                <span className="workflow-status">{review.status}</span>
+                <span>{review.cadence}</span>
               </div>
-              <h2>{workflow.title}</h2>
-              <p>{workflow.description}</p>
+              <h2>{review.title}</h2>
+              <p>{review.description}</p>
               <dl className="workflow-card-details">
                 <div>
                   <dt>Delivery</dt>
-                  <dd>{workflow.delivery}</dd>
+                  <dd>{review.delivery}</dd>
                 </div>
                 <div>
                   <dt>Last run</dt>
