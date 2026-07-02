@@ -251,6 +251,17 @@ a {
   color: #082f7a;
 }
 
+.button-watch {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+  box-shadow: 0 16px 34px rgba(217, 119, 6, 0.22);
+  color: white;
+}
+
+.button-watch:hover {
+  background: linear-gradient(180deg, #fbbf24, #b45309);
+  box-shadow: 0 20px 42px rgba(217, 119, 6, 0.3);
+}
+
 .home-footer {
   background:
     linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 42%),
@@ -1393,6 +1404,7 @@ a {
 }
 
 .agent-chat-sign-out,
+.agent-chat-data,
 .agent-chat-feedback {
   align-items: center;
   background: rgba(248, 251, 255, 0.08);
@@ -1407,6 +1419,7 @@ a {
   gap: 0.5rem;
   min-height: 2.35rem;
   padding: 0 0.8rem;
+  text-decoration: none;
 }
 
 .agent-chat-feedback {
@@ -1416,6 +1429,8 @@ a {
 
 .agent-chat-sign-out:hover,
 .agent-chat-sign-out:focus-visible,
+.agent-chat-data:hover,
+.agent-chat-data:focus-visible,
 .agent-chat-feedback:hover,
 .agent-chat-feedback:focus-visible {
   background: rgba(248, 251, 255, 0.14);
@@ -1428,11 +1443,13 @@ a {
 }
 
 .agent-chat-sign-out:focus-visible,
+.agent-chat-data:focus-visible,
 .agent-chat-feedback:focus-visible {
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.56);
 }
 
 .agent-chat-sign-out svg,
+.agent-chat-data svg,
 .agent-chat-feedback svg {
   fill: none;
   height: 1rem;
@@ -3944,6 +3961,7 @@ a {
   .agent-chat-brand,
   .agent-chat-status,
   .agent-chat-sign-out span,
+  .agent-chat-data span,
   .agent-chat-feedback span {
     display: none;
   }
@@ -3954,6 +3972,7 @@ a {
   }
 
   .agent-chat-sign-out,
+  .agent-chat-data,
   .agent-chat-feedback {
     align-items: center;
     justify-content: center;
@@ -3963,6 +3982,7 @@ a {
   }
 
   .agent-chat-sign-out svg,
+  .agent-chat-data svg,
   .agent-chat-feedback svg {
     height: 0.95rem;
     width: 0.95rem;

@@ -240,6 +240,16 @@ function MessageCircleIcon() {
   );
 }
 
+function TableIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <rect height="14" rx="2" width="16" x="4" y="5" />
+      <path d="M4 10h16" />
+      <path d="M9 5v14" />
+    </svg>
+  );
+}
+
 function SignOutIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -1162,14 +1172,6 @@ export default function AgentWorkflowChat() {
         />
         <div className="agent-chat-header-actions">
           <button
-            className="agent-chat-feedback"
-            onClick={openFeedbackSurvey}
-            type="button"
-          >
-            <MessageCircleIcon />
-            <span>Feedback</span>
-          </button>
-          <button
             className="agent-chat-sign-out"
             onClick={signOut}
             title={`Signed in as ${currentUser.email}`}
@@ -1177,6 +1179,18 @@ export default function AgentWorkflowChat() {
           >
             <SignOutIcon />
             <span>Sign out</span>
+          </button>
+          <Link className="agent-chat-data" href="/view-existing-data">
+            <TableIcon />
+            <span>View synthetic data</span>
+          </Link>
+          <button
+            className="agent-chat-feedback"
+            onClick={openFeedbackSurvey}
+            type="button"
+          >
+            <MessageCircleIcon />
+            <span>Feedback</span>
           </button>
         </div>
       </header>
